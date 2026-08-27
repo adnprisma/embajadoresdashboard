@@ -7,10 +7,17 @@
 
 :root {
   /* --- Tipografía --------------------------------------------------
-     PENDIENTE DE DECISIÓN DE MARCA. El kit Prisma no define familias.
-     Sustituir aquí y en next/font (src/app/layout.tsx). */
-  --font-display: /* [TIPOGRAFÍA PRINCIPAL] */ ui-sans-serif, system-ui, sans-serif;
-  --font-body:    /* [TIPOGRAFÍA SECUNDARIA] */ ui-sans-serif, system-ui, sans-serif;
+     --font-body: IBM Plex Sans (next/font/google — pesos 400/500/600,
+     subset latin, display swap; cargada en src/app/layout.tsx, expuesta
+     como var(--font-ibm-plex-sans)). Decisión de marca resuelta.
+
+     --font-display: TAMBIÉN IBM Plex Sans por ahora — es un marcador
+     temporal, NO la decisión final. Cuando se confirme la licencia de
+     la tipografía propia de marca, sustituye SOLO el valor de la
+     siguiente línea (--font-display) por la fuente definitiva. No
+     toques --font-body al hacerlo: son decisiones independientes. */
+  --font-display: var(--font-ibm-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-body:    var(--font-ibm-plex-sans), ui-sans-serif, system-ui, sans-serif;
   --font-numeric: var(--font-body);
   /* Los numerales tabulares son obligatorios en tablas y KPIs:
      font-variant-numeric: tabular-nums; */

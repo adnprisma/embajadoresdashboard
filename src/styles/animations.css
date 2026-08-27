@@ -1,0 +1,35 @@
+/* ---------------------------------------------------------------
+   Animaciones de interfaz (no de ilustraciones — ver DESIGN_SYSTEM.md §6).
+   Cada entrada aquí corresponde a una fila de la tabla de movimiento de
+   DESIGN_SYSTEM.md §6. Se agregan conforme los bloques las necesitan, no
+   todas de una vez.
+   --------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes overlay-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes drawer-slide-in {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  /* Drawer móvil: 280ms ease-out (DESIGN_SYSTEM.md §6). */
+  .animate-overlay-fade-in {
+    animation: overlay-fade-in 280ms ease-out;
+  }
+
+  .animate-drawer-slide-in {
+    animation: drawer-slide-in 280ms ease-out;
+  }
+}
