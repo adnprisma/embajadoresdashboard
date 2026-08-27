@@ -1,0 +1,93 @@
+/* ---------------------------------------------------------------
+   Prisma — tokens de diseño
+   ÚNICO archivo donde vive un valor de color, tipografía o forma.
+   Ningún componente debe escribir un hexadecimal.
+   Ver context/DESIGN_SYSTEM.md para las reglas de uso.
+   --------------------------------------------------------------- */
+
+:root {
+  /* --- Tipografía --------------------------------------------------
+     PENDIENTE DE DECISIÓN DE MARCA. El kit Prisma no define familias.
+     Sustituir aquí y en next/font (src/app/layout.tsx). */
+  --font-display: /* [TIPOGRAFÍA PRINCIPAL] */ ui-sans-serif, system-ui, sans-serif;
+  --font-body:    /* [TIPOGRAFÍA SECUNDARIA] */ ui-sans-serif, system-ui, sans-serif;
+  --font-numeric: var(--font-body);
+  /* Los numerales tabulares son obligatorios en tablas y KPIs:
+     font-variant-numeric: tabular-nums; */
+
+  /* --- Marca (aprobados, no modificar) ----------------------------- */
+  --carbon: #1A1A1A;
+  --coral:  #FF5A36;
+  --beige:  #F5EEE7;
+  --white:  #FFFFFF;
+
+  /* --- Superficies -------------------------------------------------- */
+  --bg-base:      var(--beige);
+  --bg-surface:   var(--white);
+  --bg-sunken:    #EFE7DE;              /* derivado del beige */
+  --bg-inverse:   var(--carbon);
+
+  /* --- Texto (derivado del carbón por opacidad) --------------------- */
+  --text-primary:  var(--carbon);
+  --text-secondary: rgb(26 26 26 / 0.72);
+  --text-muted:     rgb(26 26 26 / 0.55);   /* mínimo legible: no bajar de aquí */
+  --text-on-coral:  var(--carbon);          /* NUNCA blanco en texto pequeño */
+  --text-on-dark:   var(--beige);
+
+  /* --- Bordes ------------------------------------------------------- */
+  --border-subtle: rgb(26 26 26 / 0.10);
+  --border-strong: rgb(26 26 26 / 0.24);
+  --border-accent: var(--coral);
+
+  /* --- Acento ------------------------------------------------------- */
+  --accent:        var(--coral);
+  --accent-soft:   rgb(255 90 54 / 0.12);   /* fondos de badge y fila activa */
+  --accent-text:   #C93B1C;                 /* PROPUESTA: coral legible como texto */
+
+  /* --- Estados funcionales (PROPUESTA — requieren aprobación) ------- */
+  --state-positive:      #2F7A55;
+  --state-positive-soft: rgb(47 122 85 / 0.12);
+  --state-pending:       #B8791F;
+  --state-pending-soft:  rgb(184 121 31 / 0.12);
+  --state-progress:      #3A6B8F;
+  --state-progress-soft: rgb(58 107 143 / 0.12);
+  --state-negative:      #B3382A;
+  --state-negative-soft: rgb(179 56 42 / 0.12);
+
+  /* --- Forma -------------------------------------------------------- */
+  --radius-card:   12px;
+  --radius-control: 8px;
+  --radius-pill:   999px;
+  --shadow-card:   0 1px 3px rgb(26 26 26 / 0.06);
+  --shadow-raised: 0 4px 12px rgb(26 26 26 / 0.08);
+
+  /* --- Espacio ------------------------------------------------------ */
+  --space-card-padding: 20px;
+  --space-card-gap:     16px;
+  --space-section-gap:  32px;
+  --content-max-width:  1100px;
+
+  /* --- Foco (nunca eliminar el anillo sin sustituto) ---------------- */
+  --focus-ring: 0 0 0 2px var(--bg-base), 0 0 0 4px var(--coral);
+}
+
+/* No hay modo oscuro aprobado para Prisma.
+   No agregues un bloque prefers-color-scheme sin decisión de marca. */
+
+*:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+.numeric,
+table td,
+[data-numeric] {
+  font-variant-numeric: tabular-nums;
+}

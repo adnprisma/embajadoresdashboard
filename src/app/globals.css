@@ -1,0 +1,51 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+
+/* ---------------------------------------------------------------
+   Puente Tailwind ↔ tokens.css.
+   tokens.css sigue siendo la ÚNICA fuente de valores (CLAUDE.md §3).
+   Aquí solo se registran los colores como utilidades de Tailwind
+   (bg-carbon, text-coral, border-border-subtle, ...) para no escribir
+   var(--token) a mano en cada clase.
+
+   Radio, sombra y tipografía NO se registran aquí: tokens.css ya usa
+   los mismos nombres que Tailwind esperaría (--radius-card, --shadow-card,
+   --font-display), y registrarlos de nuevo con el mismo nombre bajo :root
+   crearía una variable auto-referenciada inválida. Para esos, usa la
+   sintaxis de valor arbitrario directamente, ej: rounded-[var(--radius-card)],
+   shadow-[var(--shadow-card)], font-[var(--font-display)].
+   --------------------------------------------------------------- */
+@theme inline {
+  --color-carbon: var(--carbon);
+  --color-coral: var(--coral);
+  --color-beige: var(--beige);
+  --color-white: var(--white);
+
+  --color-bg-base: var(--bg-base);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-sunken: var(--bg-sunken);
+  --color-bg-inverse: var(--bg-inverse);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-on-coral: var(--text-on-coral);
+  --color-text-on-dark: var(--text-on-dark);
+
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+  --color-border-accent: var(--border-accent);
+
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-text: var(--accent-text);
+
+  --color-state-positive: var(--state-positive);
+  --color-state-positive-soft: var(--state-positive-soft);
+  --color-state-pending: var(--state-pending);
+  --color-state-pending-soft: var(--state-pending-soft);
+  --color-state-progress: var(--state-progress);
+  --color-state-progress-soft: var(--state-progress-soft);
+  --color-state-negative: var(--state-negative);
+  --color-state-negative-soft: var(--state-negative-soft);
+}
