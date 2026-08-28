@@ -10,7 +10,7 @@ export default function Error({
   reset: () => void;
 }) {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-3 bg-bg-base px-4 text-center">
+    <main id="main-content" className="flex min-h-screen flex-col items-center justify-center gap-3 bg-bg-base px-4 text-center">
       <Illustration name="planear" size="lg" className="mb-2" />
       <h1 className="text-2xl font-semibold text-text-primary">
         {copy.appError.title}

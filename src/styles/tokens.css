@@ -42,7 +42,12 @@
   --text-on-dark:   var(--beige);
 
   /* --- Bordes ------------------------------------------------------- */
-  --border-subtle: rgb(26 26 26 / 0.10);
+  /* 0.10 daba 1.22:1 sobre beige / 1.23:1 sobre blanco — muy por debajo
+     del mínimo de 3:1 para bordes de control (CLAUDE.md §4). Es el borde
+     real de <input>/<select>/<textarea> en 14 archivos. 0.48 es el primer
+     valor práctico con margen real sobre el umbral: 3.05:1 sobre beige,
+     3.15:1 sobre blanco (fórmula WCAG 2.1, calculado — no estimado). */
+  --border-subtle: rgb(26 26 26 / 0.48);
   --border-strong: rgb(26 26 26 / 0.24);
   --border-accent: var(--coral);
 

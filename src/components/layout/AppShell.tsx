@@ -34,7 +34,10 @@ export function AppShell({
       <Sidebar profile={profile} />
       <div className="flex min-w-0 flex-1 flex-col">
         <MobileTopbar onOpenMenu={() => setDrawerOpen(true)} />
-        <main className="mx-auto w-full max-w-[var(--content-max-width)] flex-1 px-4 py-6 lg:px-8">
+        <main
+          id="main-content"
+          className="mx-auto w-full max-w-[var(--content-max-width)] flex-1 px-4 py-6 lg:px-8"
+        >
           {children}
         </main>
         <AppFooter />

@@ -93,6 +93,7 @@ export const copy = {
   },
 
   shell: {
+    skipLink: "Saltar al contenido",
     loadingScreen: {
       title: "Preparando tu panel",
       description: "Esto toma solo un momento.",
