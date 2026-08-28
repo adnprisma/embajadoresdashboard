@@ -34,12 +34,18 @@ export function SidebarContent({ profile }: { profile: SidebarProfile }) {
                   rel={isExternal ? "noopener noreferrer" : undefined}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex items-center gap-3 rounded-[var(--radius-control)] border-l-2 px-3 py-2 text-sm transition-colors",
+                    "relative flex items-center gap-3 rounded-[var(--radius-control)] px-3 py-2 text-sm transition-colors",
                     active
-                      ? "border-accent bg-accent-soft font-medium text-text-primary"
-                      : "border-transparent text-text-muted hover:bg-bg-sunken hover:text-text-primary",
+                      ? "bg-accent-soft font-medium text-text-primary"
+                      : "text-text-muted hover:bg-bg-sunken hover:text-text-primary",
                   )}
                 >
+                  {active ? (
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-y-1 left-0 w-[3px] rounded-full bg-accent"
+                    />
+                  ) : null}
                   <Icon aria-hidden="true" className="h-[18px] w-[18px] shrink-0" strokeWidth={1.5} />
                   <span className="truncate">{item.label}</span>
                   {isExternal ? (

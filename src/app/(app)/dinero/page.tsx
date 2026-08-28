@@ -1,8 +1,11 @@
-import { PageHeader } from "@/components/common/PageHeader";
-import { copy } from "@/config/copy";
+import { Suspense } from "react";
+import { DineroView } from "./DineroView";
 
+// useSearchParams (para ?estado=) exige un límite de Suspense en build.
 export default function DineroPage() {
   return (
-    <PageHeader title={copy.shell.nav.money} description={copy.common.placeholderPageDescription} />
+    <Suspense fallback={null}>
+      <DineroView />
+    </Suspense>
   );
 }

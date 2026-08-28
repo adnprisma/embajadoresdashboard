@@ -8,20 +8,17 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { copy } from "@/config/copy";
 import { createClient } from "@/lib/supabase/client";
+import { getDisplayName } from "@/lib/utils/display-name";
 
 export type SidebarProfile = {
   fullName: string;
   email: string;
 };
 
-function getInitial(profile: SidebarProfile) {
-  const source = profile.fullName.trim() || profile.email;
-  return source.charAt(0).toUpperCase();
-}
-
 export function UserMenu({ profile }: { profile: SidebarProfile }) {
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
+  const displayName = getDisplayName(profile.fullName, profile.email);
 
   const handleSignOut = async () => {
     setSigningOut(true);
@@ -50,11 +47,11 @@ export function UserMenu({ profile }: { profile: SidebarProfile }) {
               aria-hidden="true"
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-soft text-sm font-semibold text-text-primary"
             >
-              {getInitial(profile)}
+              {displayName.charAt(0).toUpperCase()}
             </span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-medium text-text-primary">
-                {profile.fullName || profile.email}
+                {displayName}
               </span>
               <span className="block truncate text-xs text-text-muted">{profile.email}</span>
             </span>

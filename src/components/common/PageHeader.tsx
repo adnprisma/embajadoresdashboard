@@ -14,8 +14,8 @@ export function PageHeader({
 }) {
   return (
     <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <h1 className="text-2xl font-semibold text-text-primary">{title}</h1>
+      <div className="min-w-0">
+        <h1 className="line-clamp-2 break-words text-2xl font-semibold text-text-primary">{title}</h1>
         {description ? <p className="mt-1 text-sm text-text-secondary">{description}</p> : null}
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}

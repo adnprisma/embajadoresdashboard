@@ -3,7 +3,7 @@
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import type { TooltipContentProps } from "recharts";
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { MoneyValue } from "@/components/common/MoneyValue";
 import { copy } from "@/config/copy";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -38,9 +38,14 @@ function ChartTooltip({ active, payload }: TooltipContentProps) {
   );
 }
 
-// Barras en coral: es el único elemento gráfico de la pantalla que lo usa
-// (dashboard/page.tsx mantiene las StatCard en tonos neutros/de estado a
-// propósito, para que el coral no aparezca dos veces con peso).
+function isCurrentMonth(month: string) {
+  return month === format(new Date(), "yyyy-MM");
+}
+
+// Coral aparece UNA sola vez con peso en esta pantalla: la barra del mes en
+// curso. Las cinco anteriores van en --chart-muted (carbón al 25%) — son
+// contexto, no el foco. (dashboard/page.tsx mantiene las StatCard en tonos
+// neutros/de estado por la misma razón.)
 export function CommissionsChart({ data }: { data: CommissionsChartPoint[] }) {
   const reducedMotion = useReducedMotion();
 
@@ -48,7 +53,11 @@ export function CommissionsChart({ data }: { data: CommissionsChartPoint[] }) {
     <div>
       <div className="h-64 w-full" aria-hidden="true">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ left: 0, right: 0, top: 8, bottom: 0 }}>
+          <BarChart
+            data={data}
+            margin={{ left: 0, right: 0, top: 8, bottom: 0 }}
+            barCategoryGap="40%"
+          >
             <CartesianGrid vertical={false} stroke="var(--border-subtle)" />
             <XAxis
               dataKey="month"
@@ -70,12 +79,14 @@ export function CommissionsChart({ data }: { data: CommissionsChartPoint[] }) {
               content={(props) => <ChartTooltip {...props} />}
               cursor={{ fill: "var(--bg-sunken)" }}
             />
-            <Bar
-              dataKey="amount"
-              fill="var(--coral)"
-              radius={[4, 4, 0, 0]}
-              isAnimationActive={!reducedMotion}
-            />
+            <Bar dataKey="amount" barSize={24} radius={[4, 4, 0, 0]} isAnimationActive={!reducedMotion}>
+              {data.map((point) => (
+                <Cell
+                  key={point.month}
+                  fill={isCurrentMonth(point.month) ? "var(--coral)" : "var(--chart-muted)"}
+                />
+              ))}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>

@@ -1,8 +1,5 @@
-import { PageHeader } from "@/components/common/PageHeader";
-import { copy } from "@/config/copy";
+import { CalendarioView } from "./CalendarioView";
 
 export default function CalendarioPage() {
-  return (
-    <PageHeader title={copy.shell.nav.calendar} description={copy.common.placeholderPageDescription} />
-  );
+  return <CalendarioView />;
 }

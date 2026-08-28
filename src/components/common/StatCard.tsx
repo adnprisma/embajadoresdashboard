@@ -6,6 +6,7 @@ import { Skeleton } from "./Skeleton";
 
 export type StatCardAccent = "primary" | "success" | "warning" | "info" | "danger" | "neutral";
 export type StatCardFormat = "currency" | "percent" | "number" | "raw";
+export type StatCardSize = "default" | "compact";
 
 const ACCENT_TEXT_CLASSES: Record<StatCardAccent, string> = {
   primary: "text-accent",
@@ -24,6 +25,27 @@ const ACCENT_BG_CLASSES: Record<StatCardAccent, string> = {
   danger: "bg-state-negative-soft",
   neutral: "bg-bg-sunken",
 };
+
+// `compact` es para tarjetas que deben leerse como subordinadas de otras
+// (ej. los 4 mini-estados de comisión bajo los 4 KPI del dashboard): menos
+// padding, ícono e cifra más chicos. La etiqueta se queda igual — 12px ya
+// es el mínimo legible (DESIGN_SYSTEM.md §4).
+const SIZE_CLASSES = {
+  default: {
+    card: "gap-3 p-5",
+    iconWrapper: "h-10 w-10",
+    icon: "h-5 w-5",
+    value: "mt-0.5 text-xl",
+    chevron: "h-4 w-4",
+  },
+  compact: {
+    card: "gap-2.5 p-3",
+    iconWrapper: "h-8 w-8",
+    icon: "h-4 w-4",
+    value: "mt-0 text-base",
+    chevron: "h-3.5 w-3.5",
+  },
+} satisfies Record<StatCardSize, Record<string, string>>;
 
 // `format` solo aplica cuando `value` es number; si viene como string
 // (ej. el "#N" de ranking) se muestra tal cual.
@@ -54,6 +76,7 @@ export function StatCard({
   hint,
   href,
   loading = false,
+  size = "default",
 }: {
   label: string;
   value: string | number;
@@ -63,15 +86,18 @@ export function StatCard({
   hint?: string;
   href?: string;
   loading?: boolean;
+  size?: StatCardSize;
 }) {
+  const sizeClasses = SIZE_CLASSES[size];
+
   if (loading) {
     return (
       <div className="rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface p-5 shadow-[var(--shadow-card)]">
-        <div className="flex items-center gap-3">
-          <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+        <div className={cn("flex items-center", sizeClasses.card)}>
+          <Skeleton className={cn("shrink-0 rounded-full", sizeClasses.iconWrapper)} />
           <div className="flex-1 space-y-2">
             <Skeleton className="h-3 w-20" />
-            <Skeleton className="h-6 w-24" />
+            <Skeleton className={size === "compact" ? "h-4 w-16" : "h-6 w-24"} />
           </div>
         </div>
       </div>
@@ -79,26 +105,32 @@ export function StatCard({
   }
 
   const body = (
-    <div className="flex items-center gap-3 rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface p-5 shadow-[var(--shadow-card)]">
+    <div
+      className={cn(
+        "flex items-center rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface shadow-[var(--shadow-card)]",
+        sizeClasses.card,
+      )}
+    >
       <span
         className={cn(
-          "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
+          "flex shrink-0 items-center justify-center rounded-full",
+          sizeClasses.iconWrapper,
           ACCENT_BG_CLASSES[accent],
         )}
       >
-        <Icon aria-hidden="true" className={cn("h-5 w-5", ACCENT_TEXT_CLASSES[accent])} strokeWidth={1.5} />
+        <Icon aria-hidden="true" className={cn(sizeClasses.icon, ACCENT_TEXT_CLASSES[accent])} strokeWidth={1.5} />
       </span>
       <div className="min-w-0 flex-1">
         <p className="truncate text-xs font-medium uppercase tracking-[0.06em] text-text-muted">
           {label}
         </p>
-        <p className="numeric mt-0.5 truncate text-xl font-semibold text-text-primary">
+        <p className={cn("numeric truncate font-semibold text-text-primary", sizeClasses.value)}>
           {formatValue(value, format)}
         </p>
         {hint ? <p className="mt-0.5 truncate text-xs text-text-muted">{hint}</p> : null}
       </div>
       {href ? (
-        <ChevronRight aria-hidden="true" className="h-4 w-4 shrink-0 text-text-muted" />
+        <ChevronRight aria-hidden="true" className={cn("shrink-0 text-text-muted", sizeClasses.chevron)} />
       ) : null}
     </div>
   );

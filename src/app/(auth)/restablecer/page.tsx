@@ -38,7 +38,7 @@ export default async function RestablecerPage({
         </p>
         <Link
           href="/recuperar"
-          className="mt-4 text-sm text-accent-text underline-offset-2 hover:underline"
+          className="mt-4 text-sm font-medium text-text-primary underline-offset-2 hover:underline"
         >
           {copy.auth.restablecer.requestNewLink}
         </Link>

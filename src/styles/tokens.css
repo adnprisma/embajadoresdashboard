@@ -37,7 +37,7 @@
   /* --- Texto (derivado del carbón por opacidad) --------------------- */
   --text-primary:  var(--carbon);
   --text-secondary: rgb(26 26 26 / 0.72);
-  --text-muted:     rgb(26 26 26 / 0.55);   /* mínimo legible: no bajar de aquí */
+  --text-muted:     rgb(26 26 26 / 0.65);   /* 5.1:1 sobre beige, 5.4:1 sobre blanco — mínimo legible: no bajar de aquí */
   --text-on-coral:  var(--carbon);          /* NUNCA blanco en texto pequeño */
   --text-on-dark:   var(--beige);
 
@@ -49,7 +49,9 @@
   /* --- Acento ------------------------------------------------------- */
   --accent:        var(--coral);
   --accent-soft:   rgb(255 90 54 / 0.12);   /* fondos de badge y fila activa */
-  --accent-text:   #C93B1C;                 /* PROPUESTA: coral legible como texto */
+  /* No hay coral oscurecido para texto: #C93B1C da 4.39:1 sobre beige, no
+     alcanza 4.5:1. Propuesta descartada — ver DESIGN_SYSTEM.md §3. El
+     énfasis en texto se hace con carbón + peso tipográfico, no con color. */
 
   /* --- Estados funcionales (PROPUESTA — requieren aprobación) ------- */
   --state-positive:      #2F7A55;
@@ -60,6 +62,11 @@
   --state-progress-soft: rgb(58 107 143 / 0.12);
   --state-negative:      #B3382A;
   --state-negative-soft: rgb(179 56 42 / 0.12);
+
+  /* --- Gráficos ------------------------------------------------------ */
+  /* Serie no destacada (ej. meses anteriores en CommissionsChart) — el
+     único punto con peso de una serie usa --accent; el resto, esto. */
+  --chart-muted: rgb(26 26 26 / 0.25);
 
   /* --- Forma -------------------------------------------------------- */
   --radius-card:   12px;

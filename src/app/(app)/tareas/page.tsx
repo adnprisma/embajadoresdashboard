@@ -1,8 +1,5 @@
-import { PageHeader } from "@/components/common/PageHeader";
-import { copy } from "@/config/copy";
+import { TareasView } from "./TareasView";
 
 export default function TareasPage() {
-  return (
-    <PageHeader title={copy.shell.nav.tasks} description={copy.common.placeholderPageDescription} />
-  );
+  return <TareasView />;
 }

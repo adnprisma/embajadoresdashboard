@@ -165,6 +165,7 @@ export type Database = {
           mrr: number;
           position: number;
           closed_at: string | null;
+          notes: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -178,6 +179,7 @@ export type Database = {
           mrr?: number;
           position?: number;
           closed_at?: string | null;
+          notes?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -191,6 +193,7 @@ export type Database = {
           mrr?: number;
           position?: number;
           closed_at?: string | null;
+          notes?: string | null;
           created_at?: string;
           updated_at?: string;
         };

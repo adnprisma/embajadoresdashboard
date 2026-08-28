@@ -2,20 +2,25 @@
 -- Prisma dashboard — seed de tablas de referencia
 -- Ver context/ROADMAP.md §4.4.
 --
--- `accent` (pipeline_stages) y `tone` (ranks) usan los tokens de estado ya
--- aprobados en context/DESIGN_SYSTEM.md §2 (positive | pending | progress |
--- negative | neutral) en vez de colores nuevos — el kit Prisma no aprueba
--- una paleta multicolor por etapa. `icon` usa nombres de lucide-react.
--- Ambos son PROPUESTA de mapeo visual, a confirmar en el bloque 9.
+-- `accent` (pipeline_stages) — CONFIRMADO en el bloque 9. Codifica el
+-- DESENLACE de la etapa, no su identidad: la mayoría de las etapas van sin
+-- color ('neutral' — ausencia de acento, igual que en Badge/StatCard). Un
+-- acento de estado (pending/positive/negative) solo aparece donde hay algo
+-- que señalar: dinero ganado, pérdida terminal, o una etapa que requiere
+-- acción. Ver context/DESIGN_SYSTEM.md §2. `icon` usa nombres de lucide-react.
 -- `is_lost` es mi interpretación: solo 'churn' y 'discarded' se tratan como
 -- pérdida terminal; 'no_show' se deja fuera porque normalmente se reagenda.
+--
+-- `tone` (ranks, abajo) sigue siendo PROPUESTA sin confirmar — usa el
+-- vocabulario anterior (incluye 'progress'), no lo toques como parte de
+-- esta corrección.
 -- ---------------------------------------------------------------
 
 insert into pipeline_stages (id, name, icon, accent, position, is_won, is_lost) values
-  ('new',       'Nuevas oportunidades', 'sparkles',       'progress', 1, false, false),
-  ('analysis',  'Análisis',             'search',         'progress', 2, false, false),
-  ('scheduled', 'Cita agendada',        'calendar',       'progress', 3, false, false),
-  ('show',      'Asistió',              'check-circle',   'positive', 4, false, false),
+  ('new',       'Nuevas oportunidades', 'sparkles',       'neutral',  1, false, false),
+  ('analysis',  'Análisis',             'search',         'neutral',  2, false, false),
+  ('scheduled', 'Cita agendada',        'calendar',       'neutral',  3, false, false),
+  ('show',      'Asistió',              'check-circle',   'neutral',  4, false, false),
   ('no_show',   'No asistió',           'x-circle',       'pending',  5, false, false),
   ('won',       'Cerrado',              'trophy',         'positive', 6, true,  false),
   ('churn',     'Baja',                 'trending-down',  'negative', 7, false, true),

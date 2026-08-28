@@ -57,7 +57,7 @@ export default function RecuperarPage() {
         <p className="text-sm text-text-secondary">{copy.auth.recuperar.successDescription}</p>
         <Link
           href="/login"
-          className="mt-4 text-sm text-accent-text underline-offset-2 hover:underline"
+          className="mt-4 text-sm font-medium text-text-primary underline-offset-2 hover:underline"
         >
           {copy.auth.recuperar.backToLogin}
         </Link>

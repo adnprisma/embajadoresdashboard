@@ -5,39 +5,24 @@ import { es } from "date-fns/locale";
 import { AlertTriangle, Banknote, Calendar, Inbox, TrendingUp, Trophy, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AlertBanner } from "@/components/common/AlertBanner";
-import { Badge, type BadgeTone } from "@/components/common/Badge";
+import { Badge } from "@/components/common/Badge";
 import { EmptyState } from "@/components/common/EmptyState";
 import { MoneyValue } from "@/components/common/MoneyValue";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Panel } from "@/components/common/Panel";
 import { Skeleton } from "@/components/common/Skeleton";
-import { StatCard, type StatCardAccent } from "@/components/common/StatCard";
+import { StatCard } from "@/components/common/StatCard";
 import { CommissionsChart } from "@/components/dinero/CommissionsChart";
+import {
+  COMMISSION_STATUSES,
+  COMMISSION_STATUS_ACCENT,
+  COMMISSION_STATUS_BADGE_TONE,
+  COMMISSION_STATUSES_WITH_ESTIMATE_NOTE,
+  type CommissionStatus,
+} from "@/config/commission-status";
 import { copy } from "@/config/copy";
 import { useRealtimeInvalidate } from "@/hooks/useRealtimeInvalidate";
 import { dashboardKeys, useDashboardSummary } from "@/lib/queries/dashboard";
-
-const COMMISSION_STATUSES = ["validating", "trial", "payable", "paid"] as const;
-type CommissionStatus = (typeof COMMISSION_STATUSES)[number];
-
-// El coral ya lo usa el gráfico de comisiones (única aparición "con peso"
-// en esta pantalla) — ninguna StatCard, ni siquiera "payable" (que en el
-// mapeo original del roadmap era "primary"/coral), lo vuelve a usar aquí.
-const STATUS_ACCENT: Record<CommissionStatus, StatCardAccent> = {
-  validating: "warning",
-  trial: "info",
-  payable: "neutral",
-  paid: "success",
-};
-
-const STATUS_BADGE_TONE: Record<CommissionStatus, BadgeTone> = {
-  validating: "warning",
-  trial: "info",
-  payable: "neutral",
-  paid: "success",
-};
-
-const STATUSES_WITH_ESTIMATE_NOTE: readonly CommissionStatus[] = ["validating", "trial"];
 
 function useSecondsAgo(timestamp: number | undefined) {
   const [seconds, setSeconds] = useState(0);
@@ -60,6 +45,16 @@ function formatPeriod(period: string) {
 
 function formatRenewalDate(date: string) {
   return format(parseISO(date), "d 'de' MMMM", { locale: es });
+}
+
+// Estas 4 mini-tarjetas y las 4 de arriba de /dinero comparten etiqueta de
+// estado pero NO periodo (aquí es solo el mes en curso; en /dinero es todo
+// el histórico) — sin esta línea, la misma etiqueta con cifras distintas
+// se lee como un error de los datos, no como un filtro de tiempo distinto.
+function getMiniCardHint(status: CommissionStatus) {
+  return COMMISSION_STATUSES_WITH_ESTIMATE_NOTE.includes(status)
+    ? `${copy.common.thisMonthNote} · ${copy.common.estimatedNote}`
+    : copy.common.thisMonthNote;
 }
 
 export function DashboardView({
@@ -157,10 +152,11 @@ export function DashboardView({
                   value={entry?.amount ?? 0}
                   format="currency"
                   icon={Banknote}
-                  accent={STATUS_ACCENT[status]}
-                  hint={STATUSES_WITH_ESTIMATE_NOTE.includes(status) ? copy.common.estimatedNote : undefined}
+                  accent={COMMISSION_STATUS_ACCENT[status]}
+                  hint={getMiniCardHint(status)}
                   href={`/dinero?estado=${status}`}
                   loading={isLoading}
+                  size="compact"
                 />
               );
             })}
@@ -240,7 +236,7 @@ export function DashboardView({
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-3">
-                      <Badge tone={STATUS_BADGE_TONE[commission.status as CommissionStatus]}>
+                      <Badge tone={COMMISSION_STATUS_BADGE_TONE[commission.status as CommissionStatus]}>
                         {copy.dashboard.commissionStatuses[commission.status as CommissionStatus]}
                       </Badge>
                       <span className="text-sm font-medium">

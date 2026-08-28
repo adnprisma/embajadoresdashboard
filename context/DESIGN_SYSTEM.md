@@ -64,6 +64,29 @@ desaturados para no competir con el coral:
 **Regla dura:** el coral NO es un color de estado. El coral es acción y foco.
 Si usas coral para "éxito", pierdes el único acento fuerte que tiene la marca.
 
+### Acento de etapa en el pipeline — CONFIRMADO
+
+El pipeline (`/pipeline`) tiene 9 etapas, pero eso no es una paleta de 9
+colores: usa los mismos tokens de estado de arriba, más "neutral" (que no es
+un color nuevo — es la ausencia de acento: `--text-muted` sobre
+`--bg-sunken`, igual que en `Badge` y `StatCard`).
+
+El acento codifica el **desenlace** de la etapa, no su identidad. La mayoría
+de las columnas van sin color — el color aparece solo donde hay algo que
+señalar:
+
+| Etapa | Acento | Por qué |
+|---|---|---|
+| Nuevas oportunidades, Análisis, Cita agendada, Asistió | Neutral | Flujo normal, nada que señalar |
+| No asistió, En seguimiento | Pendiente | Requiere acción |
+| Cerrado (ganado) | Positivo | Dinero real |
+| Baja, Descartado | Negativo | Pérdida terminal |
+
+**Regla dura:** cuando se agregue una etapa nueva al pipeline, su acento por
+defecto es neutral. Solo se asigna un color de estado si la etapa representa
+una ganancia, una pérdida terminal, o algo que requiere acción del usuario —
+nunca solo para diferenciarla visualmente de las demás.
+
 ---
 
 ## 3. Contraste — pares válidos e inválidos
@@ -89,8 +112,16 @@ muchas etiquetas pequeñas, el coral es donde vas a fallar.
   señal (peso tipográfico, fondo, ícono).
 - **Nunca** como color de texto pequeño, ni como único indicador de estado.
 
-Para texto que deba ser coral por énfasis, usa un coral oscurecido:
-`--coral-text: #C93B1C` (≈5.2:1 sobre beige). Marcado como PROPUESTA.
+**Propuesta descartada:** se evaluó un coral oscurecido para texto de énfasis
+(`#C93B1C`). El número original (~5.2:1 sobre beige) estaba mal calculado —
+el valor real es **4.39:1**, por debajo del mínimo de 4.5:1. Oscurecerlo lo
+suficiente para pasar 4.5:1 significa que deja de leerse como coral, así que
+no tiene caso forzarlo: se descarta, no se corrige el número y ya.
+
+**El énfasis en texto se hace con carbón + peso tipográfico (`font-medium` /
+`font-semibold`), nunca con color.** Ningún token de color sirve para texto
+pequeño con énfasis — ese es exactamente el hueco que el coral no puede
+llenar en este sistema.
 
 ---
 

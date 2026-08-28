@@ -1,4 +1,5 @@
 import { getCurrentProfile } from "@/lib/supabase/get-current-profile";
+import { getDisplayName } from "@/lib/utils/display-name";
 import { DashboardView } from "./DashboardView";
 
 export default async function DashboardPage() {
@@ -6,7 +7,7 @@ export default async function DashboardPage() {
 
   return (
     <DashboardView
-      greetingName={profile?.full_name || profile?.email || ""}
+      greetingName={profile ? getDisplayName(profile.full_name, profile.email) : ""}
       billingComplete={profile?.billing_complete ?? true}
     />
   );

@@ -19,9 +19,13 @@ aquí o en `context/DESIGN_SYSTEM.md`, es una propuesta pendiente de aprobación
 ## Notas
 
 - Los colores de estado (`--state-positive`, `--state-pending`, `--state-progress`,
-  `--state-negative`) y `--accent-text` están marcados como PROPUESTA en
-  `tokens.css` y en `DESIGN_SYSTEM.md` §2–3. Requieren aprobación explícita antes
-  de tratarse como definitivos.
+  `--state-negative`) están marcados como PROPUESTA en `tokens.css` y en
+  `DESIGN_SYSTEM.md` §2. Requieren aprobación explícita antes de tratarse
+  como definitivos.
+- Un coral oscurecido para texto (`--accent-text`) se evaluó y se descartó:
+  el contraste real es 4.39:1 sobre beige (no 4.5:1). No existe ningún color
+  aprobado para énfasis de texto — se hace con carbón + peso tipográfico
+  (`font-medium`/`font-semibold`). Ver `DESIGN_SYSTEM.md` §3.
 - No existe modo oscuro aprobado. No agregues un bloque `prefers-color-scheme`
   a `tokens.css` sin decisión de marca (DESIGN_SYSTEM.md §1).
 - `src/config/nav.ts`, `stages.ts`, `ranks.ts` y `pricing.ts` tienen su
