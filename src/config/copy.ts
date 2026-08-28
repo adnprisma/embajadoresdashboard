@@ -110,8 +110,6 @@ export const copy = {
       calendar: "Calendario",
       tasks: "Mis tareas",
       resources: "Recursos",
-      myLink: "Mi link",
-      ranking: "Ranking",
     },
     userMenu: {
       profile: "Perfil",
@@ -150,8 +148,6 @@ export const copy = {
       earnedThisMonth: "Ganado del mes",
       activeClients: "Clientes activos",
       mrr: "MRR",
-      ranking: "Ranking",
-      rankingHint: (total: number) => `de ${total}`,
     },
     commissionStatuses: {
       validating: "En validación",
@@ -197,27 +193,6 @@ export const copy = {
       columnStatus: "Estado",
       columnPeriod: "Periodo",
       columnAmount: "Monto",
-    },
-    walletPanel: {
-      title: "Monedero",
-      available: "Disponible",
-      locked: "Bloqueado",
-      total: "Total",
-      filterStatusLabel: "Estado",
-      filterStatusAvailable: "Disponible",
-      filterStatusLocked: "Bloqueado",
-      typeLabel: "Tipo",
-      typeEarned: "Ganado",
-      typeReleased: "Liberado",
-      typeRedeemed: "Canjeado",
-      typeAdjustment: "Ajuste",
-      periodLabel: "Periodo",
-      summaryCount: (count: number) => (count === 1 ? "1 movimiento" : `${count} movimientos`),
-      unlocksOn: (date: string) => `Libera el ${date}`,
-      emptyTitle: "Todavía no hay movimientos",
-      emptyDescription: "Tus puntos aparecerán aquí en cuanto tengas actividad.",
-      noMatchesTitle: "Nada con estos filtros",
-      noMatchesDescription: "Prueba con otro estado, tipo o periodo.",
     },
   },
 
@@ -645,6 +620,16 @@ export const copy = {
       emptyTitle: "Todavía no hay documentos",
       emptyDescription: "Los archivos que subas aparecerán aquí.",
       moreActionsLabel: "Más acciones",
+    },
+  },
+
+  recursos: {
+    emptyTitle: "Todavía no hay recursos",
+    emptyDescription: "Se irán agregando conforme estén listos.",
+    viewer: {
+      back: "Volver a Recursos",
+      fullscreen: "Pantalla completa",
+      iframeTitle: (titulo: string) => `Contenido de ${titulo}`,
     },
   },
 

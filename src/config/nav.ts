@@ -6,9 +6,7 @@ import {
   Contact,
   Kanban,
   LayoutDashboard,
-  Link2,
   ListTodo,
-  Trophy,
   Users,
   Wallet,
   type LucideIcon,
@@ -45,9 +43,5 @@ export const NAV_GROUPS: NavGroup[] = [
   [
     { label: copy.shell.nav.resources, href: "/recursos", icon: BookOpen },
     // Enlaces externos: PENDIENTE. Se agregan cuando se definan las URLs reales.
-  ],
-  [
-    { label: copy.shell.nav.myLink, href: "/mi-link", icon: Link2 },
-    { label: copy.shell.nav.ranking, href: "/ranking", icon: Trophy },
   ],
 ];

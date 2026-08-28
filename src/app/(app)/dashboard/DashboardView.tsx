@@ -2,7 +2,7 @@
 
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
-import { AlertTriangle, Banknote, Calendar, Inbox, TrendingUp, Trophy, Users } from "lucide-react";
+import { AlertTriangle, Banknote, Calendar, Inbox, TrendingUp, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AlertBanner } from "@/components/common/AlertBanner";
 import { Badge } from "@/components/common/Badge";
@@ -106,7 +106,7 @@ export function DashboardView({
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <StatCard
               label={copy.dashboard.stats.earnedThisMonth}
               value={data?.earned_this_month ?? 0}
@@ -129,15 +129,6 @@ export function DashboardView({
               format="currency"
               icon={TrendingUp}
               accent="neutral"
-              loading={isLoading}
-            />
-            <StatCard
-              label={copy.dashboard.stats.ranking}
-              value={data ? `#${data.ranking.position}` : "#—"}
-              icon={Trophy}
-              accent="neutral"
-              hint={data ? copy.dashboard.stats.rankingHint(data.ranking.total_users) : undefined}
-              href="/ranking"
               loading={isLoading}
             />
           </div>
