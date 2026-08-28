@@ -20,6 +20,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/common/Badge";
 import { EmptyState } from "@/components/common/EmptyState";
+import { Illustration } from "@/components/common/Illustration";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Skeleton } from "@/components/common/Skeleton";
 import { ContactFormDialog } from "@/components/contactos/ContactFormDialog";
@@ -98,6 +99,7 @@ function TimelinePanel({ contactId }: { contactId: string }) {
     return (
       <EmptyState
         icon={MessageSquare}
+        illustration={<Illustration name="encontrar" size="md" />}
         title={copy.contactos.detail.timeline.emptyTitle}
         description={copy.contactos.detail.timeline.emptyDescription}
       />
@@ -137,6 +139,7 @@ function TasksPanel({ contactId }: { contactId: string }) {
     return (
       <EmptyState
         icon={ListTodo}
+        illustration={<Illustration name="planear" size="md" />}
         title={copy.contactos.detail.tasksTab.emptyTitle}
         description={copy.contactos.detail.tasksTab.emptyDescription}
       />
@@ -375,6 +378,7 @@ export function ContactDetailView({ contact: initialContact }: { contact: Contac
         <Tabs.Content value="opportunities" className="pt-5">
           <EmptyState
             icon={Kanban}
+            illustration={<Illustration name="encontrar" size="md" />}
             title={copy.contactos.detail.opportunitiesTab.emptyTitle}
             description={copy.contactos.detail.opportunitiesTab.emptyDescription}
           />

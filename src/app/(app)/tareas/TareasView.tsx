@@ -4,6 +4,7 @@ import * as Collapsible from "@radix-ui/react-collapsible";
 import { AlertTriangle, ChevronDown, ListTodo } from "lucide-react";
 import { useMemo, useState } from "react";
 import { EmptyState } from "@/components/common/EmptyState";
+import { Illustration } from "@/components/common/Illustration";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Skeleton } from "@/components/common/Skeleton";
 import { TaskRow } from "@/components/tareas/TaskRow";
@@ -81,6 +82,7 @@ export function TareasView() {
       ) : tasks.length === 0 ? (
         <EmptyState
           icon={ListTodo}
+          illustration={<Illustration name="planear" size="lg" />}
           title={copy.tareas.emptyTitle}
           description={copy.tareas.emptyDescription}
           cta={{ label: copy.tareas.emptyCta, href: "/contactos" }}

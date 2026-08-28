@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import { Badge } from "@/components/common/Badge";
 import { DataTable, type DataTableColumn } from "@/components/common/DataTable";
 import { EmptyState } from "@/components/common/EmptyState";
+import { Illustration } from "@/components/common/Illustration";
 import { PageHeader } from "@/components/common/PageHeader";
 import { ContactFormDialog } from "@/components/contactos/ContactFormDialog";
 import { ImportDialog } from "@/components/contactos/ImportDialog";
@@ -231,12 +232,14 @@ export function ContactosView() {
               contacts.length === 0 ? (
                 <EmptyState
                   icon={Users}
+                  illustration={<Illustration name="encontrar" size="lg" />}
                   title={copy.contactos.emptyTitle}
                   description={copy.contactos.emptyDescription}
                 />
               ) : (
                 <EmptyState
                   icon={Search}
+                  illustration={<Illustration name="encontrar" size="lg" />}
                   title={copy.contactos.noMatchesTitle}
                   description={copy.contactos.noMatchesDescription}
                   cta={hasActiveFilters ? { label: copy.contactos.filters.clearFilters, onClick: clearFilters } : undefined}

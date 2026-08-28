@@ -8,6 +8,7 @@ import { useMemo, useState } from "react";
 import { Badge } from "@/components/common/Badge";
 import { DataTable, type DataTableColumn } from "@/components/common/DataTable";
 import { EmptyState } from "@/components/common/EmptyState";
+import { Illustration } from "@/components/common/Illustration";
 import { MoneyValue } from "@/components/common/MoneyValue";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Panel } from "@/components/common/Panel";
@@ -163,6 +164,7 @@ export function DineroView() {
               empty={
                 <EmptyState
                   icon={Inbox}
+                  illustration={<Illustration name="encontrar" size="md" />}
                   title={copy.dinero.historyPanel.emptyTitle}
                   description={copy.dinero.historyPanel.emptyDescription}
                 />

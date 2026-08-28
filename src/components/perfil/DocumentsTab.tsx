@@ -8,6 +8,7 @@ import { FileText, MoreHorizontal, Trash2, TriangleAlert, Upload } from "lucide-
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/common/EmptyState";
+import { Illustration } from "@/components/common/Illustration";
 import { Skeleton } from "@/components/common/Skeleton";
 import { copy } from "@/config/copy";
 import {
@@ -169,6 +170,7 @@ export function DocumentsTab() {
       ) : documents.length === 0 ? (
         <EmptyState
           icon={FileText}
+          illustration={<Illustration name="crear" size="sm" />}
           title={copy.perfil.documents.emptyTitle}
           description={copy.perfil.documents.emptyDescription}
         />

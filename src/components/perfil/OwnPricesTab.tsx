@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { EmptyState } from "@/components/common/EmptyState";
+import { Illustration } from "@/components/common/Illustration";
 import { Skeleton } from "@/components/common/Skeleton";
 import { copy } from "@/config/copy";
 import { useProfile, useUpdateOwnPrices } from "@/lib/queries/profile";
@@ -93,6 +94,7 @@ export function OwnPricesTab() {
       {fields.length === 0 ? (
         <EmptyState
           icon={Plus}
+          illustration={<Illustration name="crear" size="sm" />}
           title={copy.perfil.prices.emptyTitle}
           description={copy.perfil.prices.emptyDescription}
         />

@@ -17,6 +17,7 @@ import { useMemo, useState } from "react";
 import { Badge, type BadgeTone } from "@/components/common/Badge";
 import { DataTable, type DataTableColumn } from "@/components/common/DataTable";
 import { EmptyState } from "@/components/common/EmptyState";
+import { Illustration } from "@/components/common/Illustration";
 import { MoneyValue } from "@/components/common/MoneyValue";
 import { PageHeader } from "@/components/common/PageHeader";
 import { StatCard } from "@/components/common/StatCard";
@@ -257,7 +258,12 @@ export function ClientesView() {
             loading={isLoading}
             getRowHref={(row) => (row.contact_id ? `/contactos/${row.contact_id}` : "")}
             empty={
-              <EmptyState icon={Users} title={copy.clientes.emptyTitle} description={copy.clientes.emptyDescription} />
+              <EmptyState
+                icon={Users}
+                illustration={<Illustration name="encontrar" size="lg" />}
+                title={copy.clientes.emptyTitle}
+                description={copy.clientes.emptyDescription}
+              />
             }
           />
         </>

@@ -14,7 +14,7 @@ aquí o en `context/DESIGN_SYSTEM.md`, es una propuesta pendiente de aprobación
 | `[TIPOGRAFÍA SECUNDARIA]` | `src/styles/tokens.css` (`--font-body`) | **Resuelto.** IBM Plex Sans, vía `next/font/google` en `src/app/layout.tsx` (pesos 400/500/600, subset `latin`, `display: swap`). |
 | `[TIPOGRAFÍA PRINCIPAL]` | `src/styles/tokens.css` (`--font-display`) | **Marcador temporal**, no decisión final — hoy apunta a IBM Plex Sans igual que `--font-body`, en espera de que se confirme la licencia de una tipografía propia de marca (DESIGN_SYSTEM.md §4). Cuando se confirme: sustituye **solo** el valor de la línea `--font-display` en `tokens.css` (está comentada exactamente ahí) — no toques `--font-body`, son decisiones independientes. |
 | `[TONO DE VOZ]` | `src/config/copy.ts` | Todo el texto visible vive aquí, nunca en JSX. Por ahora solo tiene los textos del shell y del dashboard; el resto se agrega conforme avanza `context/ROADMAP.md`. |
-| `[IMÁGENES/ILUSTRACIONES]` | `public/illustrations/` | Ya resuelto con los PNG aprobados del Kit Prisma (personajes P01–P04, escenas, símbolos, patrones — todos con transparencia real). No generes ilustraciones nuevas; el componente `<Illustration />` que las sirve se agrega cuando una pantalla lo necesite (a partir del bloque 4). |
+| `[IMÁGENES/ILUSTRACIONES]` | `public/illustrations/` | **Resuelto.** `<Illustration name size />` (`src/components/common/Illustration.tsx`) sirve las 3 escenas hoy disponibles (`encontrar`, `crear`, `planear` — ver el comentario en el propio archivo para el mapeo a los PNG reales) vía `next/image`, sin animación. Conectado a los 14 `EmptyState` de la app, `LoadingScreen`, `error.tsx`, `not-found.tsx` y al layout de `(auth)`. Cuando lleguen más escenas/símbolos aprobados, agrégalos al objeto `ILLUSTRATIONS` del componente — nunca generes uno nuevo. |
 
 ## Notas
 
@@ -28,7 +28,12 @@ aquí o en `context/DESIGN_SYSTEM.md`, es una propuesta pendiente de aprobación
   (`font-medium`/`font-semibold`). Ver `DESIGN_SYSTEM.md` §3.
 - No existe modo oscuro aprobado. No agregues un bloque `prefers-color-scheme`
   a `tokens.css` sin decisión de marca (DESIGN_SYSTEM.md §1).
-- `src/config/nav.ts`, `stages.ts`, `ranks.ts` y `pricing.ts` tienen su
-  estructura de tipos lista pero sus datos se llenan en los bloques del
-  roadmap que los usan (9, 11 y 14 respectivamente) — no son marcadores de
-  marca, son datos de negocio pendientes.
+- `src/config/pricing.ts` tiene su estructura de tipos lista (planes,
+  complementos) pero los datos se llenan en el bloque 14 (cotizador y
+  calculadora), que todavía no se construye — no es un marcador de marca,
+  es dato de negocio pendiente.
+- `stages.ts` y `ranks.ts` (los stubs equivalentes para pipeline y ranking)
+  ya no existen: `stages.ts` se eliminó en el bloque 15 por quedar
+  totalmente muerto una vez que el bloque 9 (Pipeline) empezó a traer las
+  etapas reales desde Supabase; `ranks.ts` se eliminó junto con el resto
+  del código de `/ranking` cuando esa pantalla se pausó (ver README.md).

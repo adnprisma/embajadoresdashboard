@@ -13,10 +13,6 @@ export const copy = {
     estimatedNote: "Estimado",
     thisMonthNote: "Este mes",
     historicNote: "Histórico",
-    placeholderPageDescription: "Esta pantalla se construye en un bloque posterior del roadmap.",
-    copyFieldCopyLabel: "Copiar",
-    copyFieldShareLabel: "Compartir",
-    copyFieldCopied: "Copiado",
   },
 
   notFound: {
@@ -630,82 +626,6 @@ export const copy = {
       back: "Volver a Recursos",
       fullscreen: "Pantalla completa",
       iframeTitle: (titulo: string) => `Contenido de ${titulo}`,
-    },
-  },
-
-  // Página temporal del bloque 5 (/demo) — se borra en el bloque 15.
-  demo: {
-    pageTitle: "Demo de componentes",
-    pageDescription: "Página temporal del bloque 5. Se borra en el bloque 15 del roadmap.",
-    sections: {
-      statCard: "StatCard",
-      panel: "Panel",
-      emptyState: "EmptyState",
-      segmentedControl: "SegmentedControl",
-      dataTable: "DataTable",
-      copyField: "CopyField",
-      stepper: "Stepper",
-      alertBanner: "AlertBanner",
-      moneyValue: "MoneyValue",
-      badge: "Badge",
-      skeleton: "Skeleton",
-    },
-    statCard: {
-      earned: "Ganado del mes",
-      clients: "Clientes activos",
-      ranking: "Ranking",
-      rankingHint: "de 128",
-      loadingLabel: "Cargando",
-    },
-    panel: {
-      title: "Panel de ejemplo",
-      subtitle: "Subtítulo opcional",
-      body: "Contenido de ejemplo dentro del panel.",
-      action: "Ver todo",
-    },
-    emptyState: {
-      title: "Todavía no hay datos",
-      description: "Aparecerán aquí en cuanto tengas actividad.",
-      cta: "Crear el primero",
-    },
-    segmentedControl: {
-      week: "Semana",
-      month: "Mes",
-      year: "Año",
-    },
-    dataTable: {
-      columnName: "Nombre",
-      columnStatus: "Estado",
-      columnAmount: "Monto",
-      emptyTitle: "Sin registros",
-      emptyDescription: "Todavía no hay filas para mostrar.",
-    },
-    copyField: {
-      label: "Tu link de referido",
-      secondaryAction: "Restablecer",
-    },
-    stepper: {
-      step1: "Datos generales",
-      step2: "Complementos",
-      step3: "Resumen",
-      next: "Avanzar",
-    },
-    alertBanner: {
-      warningTitle: "Revisa tus datos de facturación",
-      warningDescription: "Faltan datos para poder pagarte.",
-      infoTitle: "Nueva función disponible",
-      infoDescription: "Ya puedes exportar tus contactos a CSV.",
-    },
-    badge: {
-      neutral: "Neutral",
-      info: "Info",
-      success: "Éxito",
-      warning: "Pendiente",
-      danger: "Error",
-    },
-    errorState: {
-      title: "No pudimos cargar esta sección",
-      description: "Intenta de nuevo en unos segundos.",
     },
   },
 } as const;

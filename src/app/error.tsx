@@ -1,5 +1,6 @@
 "use client";
 
+import { Illustration } from "@/components/common/Illustration";
 import { copy } from "@/config/copy";
 
 export default function Error({
@@ -10,6 +11,7 @@ export default function Error({
 }) {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-3 bg-bg-base px-4 text-center">
+      <Illustration name="planear" size="lg" className="mb-2" />
       <h1 className="text-2xl font-semibold text-text-primary">
         {copy.appError.title}
       </h1>

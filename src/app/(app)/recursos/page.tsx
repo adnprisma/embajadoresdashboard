@@ -2,6 +2,7 @@ import { LibraryBig } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/common/Badge";
 import { EmptyState } from "@/components/common/EmptyState";
+import { Illustration } from "@/components/common/Illustration";
 import { PageHeader } from "@/components/common/PageHeader";
 import { copy } from "@/config/copy";
 import { RECURSOS } from "@/config/recursos";
@@ -14,6 +15,7 @@ export default function RecursosPage() {
       {RECURSOS.length === 0 ? (
         <EmptyState
           icon={LibraryBig}
+          illustration={<Illustration name="crear" size="lg" />}
           title={copy.recursos.emptyTitle}
           description={copy.recursos.emptyDescription}
         />

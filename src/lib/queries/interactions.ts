@@ -3,14 +3,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 
-export type InteractionRow = {
-  id: string;
-  contact_id: string;
-  kind: string;
-  body: string | null;
-  occurred_at: string;
-};
-
 export const interactionsKeys = {
   all: ["interactions"] as const,
   forContact: (contactId: string) => [...interactionsKeys.all, "contact", contactId] as const,

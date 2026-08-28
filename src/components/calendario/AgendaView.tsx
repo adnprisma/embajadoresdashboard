@@ -4,6 +4,7 @@ import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { CalendarDays } from "lucide-react";
 import { EmptyState } from "@/components/common/EmptyState";
+import { Illustration } from "@/components/common/Illustration";
 import { copy } from "@/config/copy";
 import type { AppointmentRow } from "@/lib/queries/appointments";
 import { EventChip } from "./EventChip";
@@ -33,6 +34,7 @@ export function AgendaView({
     return (
       <EmptyState
         icon={CalendarDays}
+        illustration={<Illustration name="planear" size="md" />}
         title={copy.calendario.emptyAgendaTitle}
         description={copy.calendario.emptyAgendaDescription}
       />

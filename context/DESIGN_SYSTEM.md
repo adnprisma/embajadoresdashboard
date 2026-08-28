@@ -229,3 +229,60 @@ Registro del kit: editorial, humano, preciso y accesible. Aplicado a UI:
 - Sin lenguaje de venta: esta app es de uso interno, no convierte a nadie.
 
 Todo el texto vive en `src/config/copy.ts`.
+
+---
+
+## 9. Logotipo
+
+Decisión de marca (verificada contra el manual original): la interfaz usa el
+**isotipo** (la "P"), nunca el logotipo completo. El archivo del logotipo
+completo (la palabra "PRISMA") tiene bordes degradados por calco raster y no
+aguanta los tamaños de una interfaz — a 24–32px se ve sucio. El nombre de
+marca acompaña al isotipo como **texto**, con la tipografía del sistema, no
+como imagen.
+
+### Archivos
+
+| Archivo | Uso |
+|---|---|
+| `public/brand/isotipo-carbon.png` | Variante por defecto. Isotipo carbón, para usar sobre beige o blanco. |
+| `public/brand/isotipo-coral.png` | Variante de acento. Solo donde el fondo es oscuro o donde el isotipo carbón no tenga suficiente presencia — uso puntual, no la variante por defecto del shell. |
+
+Ambos 1254×1254, transparencia real. `<Logo variant="carbon" \| "coral" />`
+(`src/components/layout/Logo.tsx`) es la única forma aprobada de mostrarlos —
+usa `next/image`, nunca un `<img>` suelto ni un `background-image` en CSS.
+
+### Tamaño por contexto
+
+| Contexto | Alto | Notas |
+|---|---|---|
+| Sidebar de escritorio | 32px | `priority` activado — es contenido above-the-fold en cada carga. |
+| Topbar móvil | 28px | Mismo componente, prop de tamaño distinta. |
+| Favicon / ícono de app | 32, 180, 512px | Generados del isotipo carbón con `sharp` en `app/icon.png` y `app/apple-icon.png` — nunca a mano, nunca con otra herramienta. |
+
+No hay un tamaño aprobado por debajo de 24px: el isotipo pierde el corte
+característico de la "P" (el corte diagonal en el asta) si se aplasta más.
+
+### `alt` según el contexto
+
+- Isotipo acompañado del nombre de marca en texto (sidebar, topbar, footer):
+  `alt=""` + `aria-hidden` — el nombre en texto ya lo dice todo, duplicarlo
+  en el `alt` es ruido para el lector de pantalla.
+  Isotipo solo, sin nombre visible al lado (favicon, ícono de app): `alt`
+  con el nombre de marca completo.
+
+### Prohibido
+
+- **Nunca** el logotipo completo (la palabra "PRISMA") en ninguna pantalla,
+  aunque sea la versión de bordes limpios — la decisión de marca es isotipo
+  + texto del sistema, no logotipo completo. Esto no es negociable por
+  disponibilidad de archivo.
+- **Nunca** reconstruir, recortar o "mejorar" el isotipo con CSS o código —
+  si hace falta un tamaño o color que no está entre los aprobados, se pide
+  el archivo, no se improvisa.
+- **Nunca** un placeholder con forma de isotipo mientras no haya archivo
+  aprobado para un contexto nuevo (CLAUDE.md §2) — mejor un espacio vacío o
+  solo el nombre en texto que una aproximación.
+- **Nunca** animar el isotipo (hover de color aparte, ver DESIGN_SYSTEM.md §6)
+  ni usarlo como fondo repetido o marca de agua fuera de los patrones ya
+  aprobados del kit.

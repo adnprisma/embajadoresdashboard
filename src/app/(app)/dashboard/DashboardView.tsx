@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { AlertBanner } from "@/components/common/AlertBanner";
 import { Badge } from "@/components/common/Badge";
 import { EmptyState } from "@/components/common/EmptyState";
+import { Illustration } from "@/components/common/Illustration";
 import { MoneyValue } from "@/components/common/MoneyValue";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Panel } from "@/components/common/Panel";
@@ -210,6 +211,7 @@ export function DashboardView({
             ) : !data || data.recent_commissions.length === 0 ? (
               <EmptyState
                 icon={Inbox}
+                illustration={<Illustration name="encontrar" size="sm" />}
                 title={copy.dashboard.recentCommissions.emptyTitle}
                 description={copy.dashboard.recentCommissions.emptyDescription}
               />
@@ -249,6 +251,7 @@ export function DashboardView({
             ) : !data || data.upcoming_renewals.length === 0 ? (
               <EmptyState
                 icon={Calendar}
+                illustration={<Illustration name="encontrar" size="sm" />}
                 title={copy.dashboard.upcomingRenewals.emptyTitle}
                 description={copy.dashboard.upcomingRenewals.emptyDescription}
               />
