@@ -1,8 +1,5 @@
-import { PageHeader } from "@/components/common/PageHeader";
-import { copy } from "@/config/copy";
+import { ClientesView } from "./ClientesView";
 
 export default function ClientesPage() {
-  return (
-    <PageHeader title={copy.shell.nav.clients} description={copy.common.placeholderPageDescription} />
-  );
+  return <ClientesView />;
 }

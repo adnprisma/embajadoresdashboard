@@ -516,6 +516,47 @@ export const copy = {
     },
   },
 
+  clientes: {
+    stats: {
+      active: "Clientes activos",
+      mrr: "MRR activo",
+      atRisk: "En riesgo",
+      cancelled: "Cancelados",
+    },
+    table: {
+      columnName: "Cliente",
+      columnPlan: "Plan",
+      columnMrr: "MRR",
+      columnStatus: "Estado",
+      columnRenewal: "Próxima renovación",
+      columnActions: "Acciones",
+      noValue: "—",
+    },
+    status: {
+      active: "Activo",
+      at_risk: "En riesgo",
+      cancelled: "Cancelado",
+    },
+    emptyTitle: "Todavía no hay clientes",
+    emptyDescription: "Los clientes que cierres desde el pipeline aparecerán aquí.",
+    moreActionsLabel: "Más acciones",
+    deleteLabel: "Eliminar cliente",
+    deleteDialog: {
+      title: (name: string) => `¿Eliminar a ${name}?`,
+      intro: (name: string) =>
+        `Esto elimina a ${name} de tu cartera de clientes de forma permanente. No se puede deshacer.`,
+      loadingImpact: "Calculando qué más se ve afectado…",
+      keepNotice: (parts: string) => `${parts} seguirán existiendo, pero sin este cliente vinculado.`,
+      keepNone: "Este cliente no tiene comisiones registradas, así que no se pierde nada más.",
+      commissionUnit: (n: number) => (n === 1 ? "1 comisión" : `${n} comisiones`),
+      cancel: "Cancelar",
+      confirm: "Eliminar cliente",
+      confirming: "Eliminando…",
+      successToast: "Cliente eliminado.",
+      errorToast: "No pudimos eliminar el cliente. Intenta de nuevo.",
+    },
+  },
+
   // Página temporal del bloque 5 (/demo) — se borra en el bloque 15.
   demo: {
     pageTitle: "Demo de componentes",
