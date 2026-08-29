@@ -1,23 +1,72 @@
 "use client";
 
-import { format } from "date-fns";
-import { AlertTriangle, Download, Plus, Search, Upload, Users } from "lucide-react";
+import { format, parseISO } from "date-fns";
+import { es } from "date-fns/locale";
+import { AlertTriangle, Download, Phone, Plus, Search, Upload, Users } from "lucide-react";
+import Link from "next/link";
 import Papa from "papaparse";
 import { useMemo, useState } from "react";
 import { Badge } from "@/components/common/Badge";
+import { CardList } from "@/components/common/CardList";
 import { DataTable, type DataTableColumn } from "@/components/common/DataTable";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Illustration } from "@/components/common/Illustration";
 import { PageHeader } from "@/components/common/PageHeader";
+import { Skeleton } from "@/components/common/Skeleton";
 import { ContactFormDialog } from "@/components/contactos/ContactFormDialog";
 import { ImportDialog } from "@/components/contactos/ImportDialog";
 import { copy } from "@/config/copy";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { type ContactRow, useContacts } from "@/lib/queries/contacts";
+import { type TaskRow, useTasks } from "@/lib/queries/tasks";
 import { normalizeText } from "@/lib/utils/normalize-text";
 
 const SELECT_CLASSES =
   "rounded-[var(--radius-control)] border border-border-subtle bg-bg-surface px-3 py-2 text-sm text-text-primary";
+
+// Tarjeta de contacto para <640px (ver DataTable/CardList más abajo): misma
+// fila que la tabla, jerarquía distinta. Enlace principal y teléfono con
+// min-h-11 (44px) para área táctil real en móvil.
+function ContactCard({ contact, nextTask }: { contact: ContactRow; nextTask?: TaskRow }) {
+  return (
+    <div className="rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface p-4">
+      <Link
+        href={`/contactos/${contact.id}`}
+        className="flex min-h-11 items-center font-semibold text-text-primary hover:underline"
+      >
+        {contact.business_name}
+      </Link>
+      {contact.contact_name ? <p className="text-sm text-text-secondary">{contact.contact_name}</p> : null}
+      {contact.phone ? (
+        <a
+          href={`tel:${contact.phone}`}
+          className="flex min-h-11 items-center gap-2 text-sm text-text-primary"
+        >
+          <Phone aria-hidden="true" className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+          {contact.phone}
+        </a>
+      ) : null}
+      {contact.industry || contact.tags.length > 0 ? (
+        <div className="mt-1 flex flex-wrap gap-1">
+          {contact.industry ? <Badge tone="neutral">{contact.industry}</Badge> : null}
+          {contact.tags.map((tag) => (
+            <Badge key={tag} tone="neutral">
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      ) : null}
+      {nextTask ? (
+        <p className="mt-3 border-t border-border-subtle pt-2 text-xs text-text-muted">
+          {copy.contactos.card.nextTask(
+            nextTask.title,
+            nextTask.due_at ? format(parseISO(nextTask.due_at), "d MMM", { locale: es }) : undefined,
+          )}
+        </p>
+      ) : null}
+    </div>
+  );
+}
 
 const SECONDARY_BUTTON_CLASSES =
   "inline-flex items-center gap-2 rounded-[var(--radius-control)] border border-border-subtle px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-bg-sunken disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent";
@@ -51,6 +100,20 @@ function exportContactsCsv(rows: ContactRow[]) {
 export function ContactosView() {
   const { data, isLoading, isError, refetch } = useContacts();
   const contacts = useMemo(() => data ?? [], [data]);
+  const { data: tasksData } = useTasks();
+
+  // Una tarea por contacto: la primera no completada, ya viene ordenada por
+  // due_at ascendente (nulls al final) desde useTasks(). Memo aparte del
+  // filtro de abajo — no es lógica de filtrado, es un dato extra que solo
+  // consume la tarjeta.
+  const nextTaskByContact = useMemo(() => {
+    const map = new Map<string, TaskRow>();
+    for (const task of tasksData ?? []) {
+      if (task.done || !task.contact_id || map.has(task.contact_id)) continue;
+      map.set(task.contact_id, task);
+    }
+    return map;
+  }, [tasksData]);
 
   const [searchInput, setSearchInput] = useState("");
   const debouncedSearch = useDebouncedValue(searchInput, 300);
@@ -178,7 +241,7 @@ export function ContactosView() {
         </div>
       ) : (
         <>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <div className="relative min-w-[240px] flex-1">
               <Search
                 aria-hidden="true"
@@ -222,14 +285,15 @@ export function ContactosView() {
             </select>
           </div>
 
-          <DataTable
-            columns={columns}
-            rows={filteredContacts}
-            loading={isLoading}
-            virtualized
-            getRowHref={(row) => `/contactos/${row.id}`}
-            empty={
-              contacts.length === 0 ? (
+          {isLoading ? (
+            <div className="flex flex-col gap-3">
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+            </div>
+          ) : filteredContacts.length === 0 ? (
+            <div className="rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface">
+              {contacts.length === 0 ? (
                 <EmptyState
                   icon={Users}
                   illustration={<Illustration name="encontrar" size="lg" />}
@@ -244,9 +308,36 @@ export function ContactosView() {
                   description={copy.contactos.noMatchesDescription}
                   cta={hasActiveFilters ? { label: copy.contactos.filters.clearFilters, onClick: clearFilters } : undefined}
                 />
-              )
-            }
-          />
+              )}
+            </div>
+          ) : (
+            <>
+              {/* Tabla desde 640px, tarjetas debajo — decisión por CSS
+                  (hidden sm:block / sm:hidden), nunca useMediaQuery: ambos
+                  renderers montan siempre, así que no hay parpadeo de
+                  hidratación ni salto de layout cuando el viewport real no
+                  coincide con el que adivinó el server. */}
+              <div className="hidden sm:block">
+                <DataTable
+                  columns={columns}
+                  rows={filteredContacts}
+                  loading={false}
+                  virtualized
+                  getRowHref={(row) => `/contactos/${row.id}`}
+                  empty={null}
+                />
+              </div>
+              <div className="sm:hidden">
+                <CardList
+                  rows={filteredContacts}
+                  virtualized
+                  renderCard={(contact) => (
+                    <ContactCard contact={contact} nextTask={nextTaskByContact.get(contact.id)} />
+                  )}
+                />
+              </div>
+            </>
+          )}
         </>
       )}
     </div>

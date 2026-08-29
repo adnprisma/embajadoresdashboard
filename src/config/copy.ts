@@ -220,6 +220,10 @@ export const copy = {
       tagAll: "Todas las etiquetas",
       clearFilters: "Limpiar filtros",
     },
+    card: {
+      nextTask: (title: string, date?: string) =>
+        date ? `Próxima tarea: ${title} · ${date}` : `Próxima tarea: ${title}`,
+    },
     emptyTitle: "Todavía no tienes contactos",
     emptyDescription: "Se irán agregando conforme captures tu cartera.",
     noMatchesTitle: "Sin resultados",

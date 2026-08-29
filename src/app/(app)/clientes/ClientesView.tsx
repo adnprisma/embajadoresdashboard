@@ -13,13 +13,16 @@ import {
   Wallet,
   XCircle,
 } from "lucide-react";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Badge, type BadgeTone } from "@/components/common/Badge";
+import { CardList } from "@/components/common/CardList";
 import { DataTable, type DataTableColumn } from "@/components/common/DataTable";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Illustration } from "@/components/common/Illustration";
 import { MoneyValue } from "@/components/common/MoneyValue";
 import { PageHeader } from "@/components/common/PageHeader";
+import { Skeleton } from "@/components/common/Skeleton";
 import { StatCard } from "@/components/common/StatCard";
 import { copy } from "@/config/copy";
 import {
@@ -144,6 +147,41 @@ function ClientActionsMenu({ client }: { client: ClientRow }) {
   );
 }
 
+// Tarjeta de cliente para <640px. Mismo dato que la fila de la tabla,
+// jerarquía distinta — el enlace principal (al contacto vinculado) con
+// min-h-11 (44px) de área táctil.
+function ClientCard({ client }: { client: ClientRow }) {
+  return (
+    <div className="rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface p-4">
+      <div className="flex items-start justify-between gap-2">
+        {client.contact_id ? (
+          <Link
+            href={`/contactos/${client.contact_id}`}
+            className="flex min-h-11 items-center font-semibold text-text-primary hover:underline"
+          >
+            {client.name}
+          </Link>
+        ) : (
+          <span className="flex min-h-11 items-center font-semibold text-text-primary">{client.name}</span>
+        )}
+        <ClientActionsMenu client={client} />
+      </div>
+      <p className="text-sm text-text-secondary">{client.plan || copy.clientes.table.noValue}</p>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <Badge tone={STATUS_BADGE_TONE[client.status] ?? "neutral"}>{statusLabel(client.status)}</Badge>
+        <span className="text-sm font-medium text-text-primary">
+          <MoneyValue amount={client.mrr} />
+        </span>
+      </div>
+      {client.next_renewal ? (
+        <p className="mt-2 text-xs text-text-muted">
+          {copy.clientes.table.columnRenewal}: {formatDate(client.next_renewal)}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 export function ClientesView() {
   const { data, isLoading, isError, refetch } = useClients();
   const clients = useMemo(() => data ?? [], [data]);
@@ -252,20 +290,39 @@ export function ClientesView() {
             />
           </div>
 
-          <DataTable
-            columns={columns}
-            rows={clients}
-            loading={isLoading}
-            getRowHref={(row) => (row.contact_id ? `/contactos/${row.contact_id}` : "")}
-            empty={
+          {isLoading ? (
+            <div className="flex flex-col gap-3">
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+            </div>
+          ) : clients.length === 0 ? (
+            <div className="rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface">
               <EmptyState
                 icon={Users}
                 illustration={<Illustration name="encontrar" size="lg" />}
                 title={copy.clientes.emptyTitle}
                 description={copy.clientes.emptyDescription}
               />
-            }
-          />
+            </div>
+          ) : (
+            <>
+              {/* Tabla desde 640px, tarjetas debajo — por CSS, igual que en
+                  /contactos (hidden sm:block / sm:hidden), nunca useMediaQuery. */}
+              <div className="hidden sm:block">
+                <DataTable
+                  columns={columns}
+                  rows={clients}
+                  loading={false}
+                  getRowHref={(row) => (row.contact_id ? `/contactos/${row.contact_id}` : "")}
+                  empty={null}
+                />
+              </div>
+              <div className="sm:hidden">
+                <CardList rows={clients} renderCard={(client) => <ClientCard client={client} />} />
+              </div>
+            </>
+          )}
         </>
       )}
     </div>
