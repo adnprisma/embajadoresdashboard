@@ -363,12 +363,18 @@ export const copy = {
           // el mensaje tiene que seguir sonando a esa persona. Sin nombre
           // capturado, se omite la presentación entera: "Hola, vi tu
           // negocio..." ya se sostiene solo, sin un genérico ni un hueco.
-          greeting: (ownerName: string | null, businessName: string, colonia: string | null) => {
+          // Recibe solo el primer nombre (nunca el apellido) — la vendedora
+          // habla en primera persona del singular, no "podemos".
+          greeting: (ownerFirstName: string | null, businessName: string, colonia: string | null) => {
             const location = colonia ? ` en ${colonia}` : "";
-            const intro = ownerName ? `Hola, soy ${ownerName}. Vi` : "Hola, vi";
-            return `${intro} tu negocio ${businessName}${location} y quiero platicarte cómo podemos ayudarte:`;
+            const intro = ownerFirstName ? `Hola, soy ${ownerFirstName}. Vi` : "Hola, vi";
+            return `${intro} tu negocio ${businessName}${location}.`;
           },
-          closing: "¿Tienes unos minutos esta semana para platicarlo?",
+          // Frase de contexto antes de las viñetas — sin ella aparecen de la
+          // nada. `frase` ya trae armado el giro en plural + ubicación (ver
+          // mensajeContacto.ts), nunca se pluraliza aquí a mano.
+          justification: (frase: string) => `Trabajo con ${frase}. Esto es lo que puedo dejarte funcionando:`,
+          closing: "¿Tienes 15 minutos esta semana para platicarlo? Sin costo ni compromiso.",
           copyButton: "Copiar mensaje",
           copiedToast: "Mensaje copiado.",
           whatsappButton: "Abrir WhatsApp",

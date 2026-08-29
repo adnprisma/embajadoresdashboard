@@ -410,15 +410,17 @@ function MensajeSugeridoBlock({
   analysis,
   ownerFullName,
   contactPhone,
+  industry,
 }: {
   analysis: ProspectAnalysisRow;
   ownerFullName: string | null;
   contactPhone: string | null;
+  industry: string | null;
 }) {
   const { mensaje } = copy.contactos.detail.analysisTab;
   const texto = useMemo(
-    () => generarMensajeContacto({ ...analysis, ownerFullName }),
-    [analysis, ownerFullName],
+    () => generarMensajeContacto({ ...analysis, ownerFullName, industry }),
+    [analysis, ownerFullName, industry],
   );
 
   const handleCopy = async () => {
@@ -476,10 +478,12 @@ function AnalysisPanel({
   analysis,
   ownerFullName,
   contactPhone,
+  industry,
 }: {
   analysis: ProspectAnalysisRow;
   ownerFullName: string | null;
   contactPhone: string | null;
+  industry: string | null;
 }) {
   const { analysisTab } = copy.contactos.detail;
 
@@ -566,7 +570,7 @@ function AnalysisPanel({
         </div>
       ) : null}
 
-      <MensajeSugeridoBlock analysis={analysis} ownerFullName={ownerFullName} contactPhone={contactPhone} />
+      <MensajeSugeridoBlock analysis={analysis} ownerFullName={ownerFullName} contactPhone={contactPhone} industry={industry} />
     </div>
   );
 }
@@ -575,10 +579,12 @@ function AnalysisTabPanel({
   contactId,
   ownerFullName,
   contactPhone,
+  industry,
 }: {
   contactId: string;
   ownerFullName: string | null;
   contactPhone: string | null;
+  industry: string | null;
 }) {
   const { data, isLoading, isError, refetch } = useProspectAnalysis(contactId, true);
 
@@ -621,7 +627,7 @@ function AnalysisTabPanel({
     );
   }
 
-  return <AnalysisPanel analysis={data} ownerFullName={ownerFullName} contactPhone={contactPhone} />;
+  return <AnalysisPanel analysis={data} ownerFullName={ownerFullName} contactPhone={contactPhone} industry={industry} />;
 }
 
 function AssignmentsPanel({ contactId, enabled }: { contactId: string; enabled: boolean }) {
@@ -932,6 +938,7 @@ export function ContactDetailView({
             contactId={current.id}
             ownerFullName={current.owner_full_name}
             contactPhone={current.phone}
+            industry={current.industry}
           />
         </Tabs.Content>
 
