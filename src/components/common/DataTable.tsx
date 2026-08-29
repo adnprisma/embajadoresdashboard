@@ -17,6 +17,10 @@ export type DataTableColumn<T> = {
   render?: (row: T) => ReactNode;
   className?: string;
   sortable?: boolean;
+  // Solo aplica a la columna primaria (índice 0): su `render` arma varias
+  // líneas (ej. negocio + dirección) y cada línea se trunca por su cuenta,
+  // así que el wrapper no debe forzar un truncado de una sola línea encima.
+  multiline?: boolean;
 };
 
 type SortState<T> = { key: keyof T; direction: "asc" | "desc" } | null;
@@ -56,6 +60,7 @@ export function DataTable<T extends { id: string | number }>({
   empty,
   virtualized = false,
   selection,
+  rowHeight = ROW_HEIGHT,
 }: {
   columns: DataTableColumn<T>[];
   rows: T[];
@@ -64,6 +69,11 @@ export function DataTable<T extends { id: string | number }>({
   empty: ReactNode;
   virtualized?: boolean;
   selection?: DataTableSelection<T>;
+  // Fila más alta que la ROW_HEIGHT de siempre — para celdas de más de una
+  // línea (ej. negocio + dirección en la Comparativa de /contactos). Debe
+  // coincidir con la altura real que ocupe el contenido: el virtualizador no
+  // remide (a diferencia de CardList), confía en este número.
+  rowHeight?: number;
 }) {
   const router = useRouter();
   const [sort, setSort] = useState<SortState<T>>(null);
@@ -96,7 +106,7 @@ export function DataTable<T extends { id: string | number }>({
   const virtualizer = useVirtualizer({
     count: shouldVirtualize ? sortedRows.length : 0,
     getScrollElement: () => scrollRef.current,
-    estimateSize: () => ROW_HEIGHT,
+    estimateSize: () => rowHeight,
     overscan: 8,
   });
 
@@ -116,7 +126,8 @@ export function DataTable<T extends { id: string | number }>({
       <tr
         key={row.id}
         onClick={href ? handleRowClick(href) : undefined}
-        className={cn("h-12 border-t border-border-subtle", href && "cursor-pointer hover:bg-bg-sunken")}
+        style={{ height: rowHeight }}
+        className={cn("border-t border-border-subtle", href && "cursor-pointer hover:bg-bg-sunken")}
       >
         {selection ? (
           <td className="w-10 px-4 py-3">
@@ -139,7 +150,13 @@ export function DataTable<T extends { id: string | number }>({
               className={cn("px-4 py-3 text-sm text-text-primary", column.className)}
             >
               {isPrimaryCell ? (
-                <Link href={href} className="block truncate font-medium text-text-primary hover:underline">
+                <Link
+                  href={href}
+                  className={cn(
+                    "block font-medium text-text-primary hover:underline",
+                    !column.multiline && "truncate",
+                  )}
+                >
                   {content}
                 </Link>
               ) : (

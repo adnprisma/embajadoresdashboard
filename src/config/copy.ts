@@ -228,6 +228,48 @@ export const copy = {
       nextTask: (title: string, date?: string) =>
         date ? `Próxima tarea: ${title} · ${date}` : `Próxima tarea: ${title}`,
     },
+    // Vista alterna de la misma pantalla (ver ContactosView) — no una
+    // pestaña ni una pantalla nueva. Solo muestra contactos con análisis de
+    // prospección; `omittedNote` es la línea que explica por qué el resto no
+    // aparece, para que nadie lea la ausencia como contactos perdidos.
+    comparativa: {
+      viewLista: "Lista",
+      viewComparativa: "Comparativa",
+      omittedNote: (n: number) =>
+        n === 0
+          ? ""
+          : n === 1
+            ? "1 contacto sin análisis no se muestra aquí."
+            : `${n} contactos sin análisis no se muestran aquí.`,
+      columnScore: "Score",
+      columnColonia: "Colonia",
+      columnGaps: "Carencias",
+      columnPriority: "Prioridad",
+      scoreNone: "Sin score",
+      gapsNone: "—",
+      // Alta/Media/Baja no llevan color — la tabla ya está ordenada por
+      // score, la posición vertical ya comunica la prioridad. Solo Urgente
+      // lleva acento (--state-pending, "requiere acción"), nunca coral: en
+      // este sistema el rojo es desenlace negativo, y un urgente es la
+      // mejor oportunidad de la lista, no lo contrario.
+      priorityHigh: "Alta",
+      priorityMedium: "Media",
+      priorityLow: "Baja",
+      // Encabezados cortos para las 7 columnas de capacidad — la etiqueta
+      // completa ("WhatsApp visible") vive en el aria-label/title de cada
+      // celda (ver CapabilityIcon), no hace falta repetirla en el encabezado.
+      capacityHeaders: {
+        has_web: "Web",
+        has_whatsapp: "WhatsApp",
+        has_reservas: "Reservas",
+        has_crm: "CRM",
+        has_chat: "Chat",
+        has_blog: "Blog",
+        has_redes: "Redes",
+      },
+      noAnalysisTitle: "Ningún contacto con análisis",
+      noAnalysisDescription: "Los contactos que coinciden con estos filtros no tienen análisis de prospección todavía.",
+    },
     // Barra de selección múltiple — solo admin (ver ContactosView).
     selection: {
       count: (n: number) => (n === 1 ? "1 seleccionado" : `${n} seleccionados`),

@@ -8,7 +8,6 @@ import { es } from "date-fns/locale";
 import {
   Briefcase,
   Check,
-  CheckCircle2,
   Copy,
   Gauge,
   History,
@@ -16,13 +15,11 @@ import {
   ListTodo,
   MessageCircle,
   MessageSquare,
-  MinusCircle,
   MoreHorizontal,
   Pencil,
   Trash2,
   TriangleAlert,
   X,
-  XCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -34,13 +31,14 @@ import { MoneyValue } from "@/components/common/MoneyValue";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Panel } from "@/components/common/Panel";
 import { Skeleton } from "@/components/common/Skeleton";
+import { CapabilityChip, CAPABILITY_ORDER } from "@/components/contactos/CapabilityChip";
 import { ContactFormDialog } from "@/components/contactos/ContactFormDialog";
 import { OpportunityDialog } from "@/components/pipeline/OpportunityDialog";
 import { TaskDialog } from "@/components/tareas/TaskDialog";
 import { TaskRow } from "@/components/tareas/TaskRow";
 import { copy } from "@/config/copy";
 import { generarMensajeContacto } from "@/config/mensajeContacto";
-import { OFERTA_ADICIONAL, OFERTA_POR_CAPACIDAD, ofertaParaCarencias, type Capacidad, type OfertaItem } from "@/config/oferta";
+import { OFERTA_ADICIONAL, ofertaParaCarencias, type OfertaItem } from "@/config/oferta";
 import { useContactAssignments } from "@/lib/queries/contactAssignments";
 import { useContactInteractions } from "@/lib/queries/interactions";
 import {
@@ -243,19 +241,6 @@ function OpportunitiesPanel({ contactId }: { contactId: string }) {
   );
 }
 
-// Orden fijo de la rejilla — el mismo de la tabla comparativa de origen
-// (ver copy.contactos.fields / migración 0012), independiente del orden de
-// declaración de OFERTA_POR_CAPACIDAD en config/oferta.ts.
-const CAPABILITY_ORDER: Capacidad[] = [
-  "has_web",
-  "has_whatsapp",
-  "has_reservas",
-  "has_crm",
-  "has_chat",
-  "has_blog",
-  "has_redes",
-];
-
 // El único elemento coral de la pestaña además del badge de urgencia — el
 // score es "acento, acción, hallazgo" (DESIGN_SYSTEM.md §2), así que aquí
 // SÍ se justifica. Todo lo demás (chips, badges de alcance) usa tonos de
@@ -289,42 +274,6 @@ function UrgentBadge() {
   return (
     <span className="inline-flex items-center rounded-full bg-accent px-2.5 py-0.5 text-xs font-extrabold uppercase tracking-wide text-text-on-coral">
       {copy.contactos.detail.analysisTab.urgentBadge}
-    </span>
-  );
-}
-
-const CAPABILITY_TONE_CLASSES = {
-  success: "border-state-positive text-state-positive bg-state-positive-soft",
-  danger: "border-state-negative text-state-negative bg-state-negative-soft",
-  warning: "border-state-pending text-state-pending bg-state-pending-soft",
-} as const;
-
-function CapabilityChip({ capacidad, value, title }: { capacidad: Capacidad; value: boolean | null; title?: string | null }) {
-  const { capabilityState } = copy.contactos.detail.analysisTab;
-
-  // El ícono ya distingue el estado por forma (check/cruz/guion), no solo
-  // por color — el texto de estado sigue existiendo para lectores de
-  // pantalla vía aria-label, aunque no se vea en el chip.
-  const { Icon, tone, stateLabel } =
-    value === true
-      ? { Icon: CheckCircle2, tone: "success" as const, stateLabel: capabilityState.present }
-      : value === false
-        ? { Icon: XCircle, tone: "danger" as const, stateLabel: capabilityState.absent }
-        : { Icon: MinusCircle, tone: "warning" as const, stateLabel: capabilityState.partial };
-
-  const label = OFERTA_POR_CAPACIDAD[capacidad].carencia;
-
-  return (
-    <span
-      title={title ?? undefined}
-      aria-label={`${label}: ${stateLabel}`}
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium",
-        CAPABILITY_TONE_CLASSES[tone],
-      )}
-    >
-      <Icon aria-hidden="true" className="h-4 w-4 shrink-0" strokeWidth={1.75} />
-      {label}
     </span>
   );
 }

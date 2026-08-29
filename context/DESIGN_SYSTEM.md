@@ -57,12 +57,17 @@ desaturados para no competir con el coral:
 | Estado | Valor propuesto | Uso |
 |---|---|---|
 | Positivo | `#2F7A55` | Dinero real, confirmado, completado |
-| Pendiente | `#B8791F` | En validación, requiere acción |
+| Pendiente | `#8C5C18` | En validación, requiere acción |
 | En proceso | `#3A6B8F` | En prueba, en curso |
 | Negativo | `#B3382A` | Error, cancelado, vencido |
 
 **Regla dura:** el coral NO es un color de estado. El coral es acción y foco.
 Si usas coral para "éxito", pierdes el único acento fuerte que tiene la marca.
+
+**Pendiente, corregido:** el valor original (`#B8791F`) medía 3.15:1 sobre
+beige y 3.63:1 sobre blanco, ambos abajo del 4.5:1 mínimo de texto. `#8C5C18`
+da 4.99:1 y 5.74:1 respectivamente — misma familia de color (ámbar), solo
+más oscuro.
 
 ### Acento de etapa en el pipeline — CONFIRMADO
 

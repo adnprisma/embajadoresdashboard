@@ -61,8 +61,14 @@
   /* --- Estados funcionales (PROPUESTA — requieren aprobación) ------- */
   --state-positive:      #2F7A55;
   --state-positive-soft: rgb(47 122 85 / 0.12);
-  --state-pending:       #B8791F;
-  --state-pending-soft:  rgb(184 121 31 / 0.12);
+  /* Oscurecido de #B8791F a #8C5C18: el original media 3.15:1 sobre beige y
+     3.63:1 sobre blanco, ambos abajo del 4.5:1 mínimo de texto (CLAUDE.md
+     §4). Este valor da 4.99:1 sobre beige y 5.74:1 sobre blanco — el caso
+     real más ajustado (texto sobre --state-pending-soft compuesto sobre
+     blanco) da 5.02:1. Mismo hueco de accesibilidad en todos los usos del
+     token: badges, bordes de pipeline, StatCard, AlertBanner. */
+  --state-pending:       #8C5C18;
+  --state-pending-soft:  rgb(140 92 24 / 0.12);
   --state-progress:      #3A6B8F;
   --state-progress-soft: rgb(58 107 143 / 0.12);
   --state-negative:      #B3382A;
