@@ -28,10 +28,18 @@ Reglas que no se negocian:
 - **No copies la identidad de ninguna app existente.** La arquitectura y la
   funcionalidad de este dashboard se inspiran en una referencia auditada, pero
   el color, la tipografía, el copy y las ilustraciones son exclusivamente Prisma.
-- **No uses ningún logotipo.** El logotipo de Prisma está en revisión
-  independiente y NO está aprobado. Usa el componente `<Logo />` con su
-  placeholder neutro. No generes, reconstruyas ni "mejores" un logotipo,
-  ni siquiera como marcador temporal con forma de logo.
+- **Logotipo: decisión de marca tomada, con excepción explícita.** Los 6
+  archivos en `public/brand/` (isotipo/logotipo × carbón/coral/beige) están
+  generados por IA — confirmable con
+  `grep -l trainedAlgorithmicMedia public/brand/*.png`. El dueño de marca
+  los aprobó a sabiendas para usarse **solo dentro de la interfaz de este
+  dashboard**, vía `<Logo />` (ver `DESIGN_SYSTEM.md` §9 para la matriz
+  completa de archivo/superficie/tamaño). **Nunca salen de aquí:** no van en
+  material comercial, documentos impresos, propuestas a clientes ni registro
+  de marca — eso exige el vector original, que todavía no existe. Cuando
+  llegue, estos 6 PNG se reemplazan uno a uno sin tocar la API de `<Logo />`.
+  No generes un séptimo archivo de logo por tu cuenta: si hace falta una
+  variante nueva, se pide, no se improvisa.
 - **No generes ilustraciones nuevas.** Usa exclusivamente los PNG aprobados de
   `public/illustrations/`. Los personajes P01–P04 son identidades congeladas.
 - **Transparencia real** en los recursos aislados. Nunca simules transparencia

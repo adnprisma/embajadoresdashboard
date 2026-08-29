@@ -7,7 +7,7 @@ import { Logo } from "./Logo";
 export function LoadingScreen() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-bg-base px-4 text-center">
-      <Logo />
+      <Logo form="isotipo" showName />
       <Illustration name="encontrar" size="md" />
       <div className="flex flex-col gap-1">
         <p className="text-sm font-medium text-text-primary">{copy.shell.loadingScreen.title}</p>

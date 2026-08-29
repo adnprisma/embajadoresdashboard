@@ -36,5 +36,8 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|illustrations/).*)"],
+  // brand/: el logo del layout de (auth) tiene que cargar precisamente
+  // donde nunca hay sesión (login, recuperar, restablecer) — sin esta
+  // exclusión, el middleware redirigía la imagen misma a /login.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|illustrations/|brand/).*)"],
 };

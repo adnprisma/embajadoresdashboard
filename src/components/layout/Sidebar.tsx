@@ -9,7 +9,7 @@ export function Sidebar({ profile }: { profile: SidebarProfile }) {
   return (
     <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-border-subtle bg-bg-surface lg:flex">
       <div className="flex items-center justify-between px-4 py-4">
-        <Logo />
+        <Logo height={30} />
         <NotificationsBell />
       </div>
       <div className="min-h-0 flex-1">

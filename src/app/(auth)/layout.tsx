@@ -11,7 +11,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
       <div className="flex w-full max-w-3xl items-center justify-center gap-10">
         <Illustration name="crear" size="xl" alt="" className="hidden shrink-0 lg:block" />
         <div className="flex w-full max-w-md flex-col items-center gap-6">
-          <Logo />
+          <Logo height={34} />
           <div
             id="main-content"
             className="w-full rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface p-6 shadow-[var(--shadow-card)] sm:p-8"

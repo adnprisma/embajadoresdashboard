@@ -234,55 +234,98 @@ Todo el texto vive en `src/config/copy.ts`.
 
 ## 9. Logotipo
 
-Decisión de marca (verificada contra el manual original): la interfaz usa el
-**isotipo** (la "P"), nunca el logotipo completo. El archivo del logotipo
-completo (la palabra "PRISMA") tiene bordes degradados por calco raster y no
-aguanta los tamaños de una interfaz — a 24–32px se ve sucio. El nombre de
-marca acompaña al isotipo como **texto**, con la tipografía del sistema, no
-como imagen.
+Decisión de marca: la interfaz usa la **firma** (isotipo + la palabra
+"PRISMA" dibujada junta) como forma por defecto — no el isotipo solo. El
+nombre de marca **no se repite como texto** al lado de la firma: ya lo trae
+dibujado. El isotipo solo (sin la palabra) queda como forma secundaria, para
+los pocos contextos donde sí hace falta texto aparte (ver más abajo).
+
+### Excepción de procedencia — léela antes de tocar `public/brand/`
+
+Los 6 archivos de `public/brand/` están **generados por IA**, no son un
+vector de diseño original. Confirmable en cualquier momento:
+
+```
+grep -l trainedAlgorithmicMedia public/brand/*.png
+```
+
+El dueño de marca los aprobó a sabiendas, con una condición explícita:
+**se usan solo dentro de esta interfaz.** Nunca en material comercial,
+documentos impresos, propuestas a clientes ni registro de marca — eso exige
+el vector original, que todavía no existe. **No se les quitó el metadato
+C2PA** que declara el origen (no se debe quitar nunca): esconder la
+procedencia sería peor que asumirla. Cuando aparezca el archivo fuente real,
+estos 6 PNG se reemplazan uno a uno, sin tocar la API de `<Logo />` ni esta
+tabla salvo para actualizar esta nota.
 
 ### Archivos
 
-| Archivo | Uso |
-|---|---|
-| `public/brand/isotipo-carbon.png` | Variante por defecto. Isotipo carbón, para usar sobre beige o blanco. |
-| `public/brand/isotipo-coral.png` | Variante de acento. Solo donde el fondo es oscuro o donde el isotipo carbón no tenga suficiente presencia — uso puntual, no la variante por defecto del shell. |
+6 archivos en `public/brand/`, transparencia real. Isotipo 1254×1254, firma
+2172×724 (proporción ~3:1).
 
-Ambos 1254×1254, transparencia real. `<Logo variant="carbon" \| "coral" />`
-(`src/components/layout/Logo.tsx`) es la única forma aprobada de mostrarlos —
-usa `next/image`, nunca un `<img>` suelto ni un `background-image` en CSS.
-
-### Tamaño por contexto
-
-| Contexto | Alto | Notas |
+| `variant` | `form` | Archivo real |
 |---|---|---|
-| Sidebar de escritorio | 32px | `priority` activado — es contenido above-the-fold en cada carga. |
-| Topbar móvil | 28px | Mismo componente, prop de tamaño distinta. |
-| Favicon / ícono de app | 32, 180, 512px | Generados del isotipo carbón con `sharp` en `app/icon.png` y `app/apple-icon.png` — nunca a mano, nunca con otra herramienta. |
+| `carbon` | `firma` (default) | `logotipo_carbon.png` |
+| `carbon` | `isotipo` | `isotipo_carbon.png` |
+| `coral` | `firma` | `logotipo_rojo.png` |
+| `coral` | `isotipo` | `isotipo_rojo.png` |
+| `beige` | `firma` | `logotipo_beige.png` |
+| `beige` | `isotipo` | `isotipo_beige.png` |
 
-No hay un tamaño aprobado por debajo de 24px: el isotipo pierde el corte
-característico de la "P" (el corte diagonal en el asta) si se aplasta más.
+El prop `variant="coral"` usa el nombre del token de marca aunque el archivo
+en disco se llame "rojo" — el mapeo vive solo en `Logo.tsx`, en ningún otro
+lugar se debe usar el nombre de archivo directo.
+
+`<Logo variant form height showName />` (`src/components/layout/Logo.tsx`,
+`height` en px, calcula el ancho de la proporción real) es la única forma
+aprobada de mostrarlos — usa `next/image`, nunca un `<img>` suelto ni un
+`background-image` en CSS.
+
+`beige` y `coral` quedan disponibles en el componente aunque hoy ninguna
+pantalla los use como forma principal — son para superficies oscuras
+futuras (coral) o para overlays sobre fondos con textura (beige). `coral`
+sí se usa hoy, pero solo para el favicon (ver abajo), no como logo en pantalla.
+
+### Tamaño y superficie por contexto
+
+| Contexto | Superficie | Archivo | Alto |
+|---|---|---|---|
+| Sidebar de escritorio | Blanca (`bg-surface`) | `logotipo_carbon.png` | 30px |
+| Topbar móvil | Blanca (`bg-surface`) | `logotipo_carbon.png` | 26px |
+| Layout de `(auth)` (login, recuperar, restablecer) | Beige (`bg-base`) | `logotipo_carbon.png` | 34px |
+| `LoadingScreen` | Beige (`bg-base`) | `isotipo_carbon.png` (+ texto aparte, es el único lugar que lo necesita) | 32px |
+| Favicon / ícono de app | N/A — pestaña del navegador, clara u oscura | `isotipo_rojo.png` | 32, 180, 512px |
+
+Favicon en coral y no en carbón: el carbón desaparece en pestañas con tema
+oscuro del navegador; el coral tiene contraste en ambos. Generados con
+`scripts/generate-brand-icons.mjs` (usa `sharp`) hacia `src/app/icon.png` y
+`src/app/apple-icon.png` — nunca a mano, nunca con otra herramienta.
+
+No hay un tamaño aprobado por debajo de 24px de alto.
 
 ### `alt` según el contexto
 
-- Isotipo acompañado del nombre de marca en texto (sidebar, topbar, footer):
-  `alt=""` + `aria-hidden` — el nombre en texto ya lo dice todo, duplicarlo
-  en el `alt` es ruido para el lector de pantalla.
-  Isotipo solo, sin nombre visible al lado (favicon, ícono de app): `alt`
-  con el nombre de marca completo.
+- **Firma sola, sin texto aparte** (sidebar, topbar, layout de auth — los
+  tres casos por defecto: `showName` en `false`): `alt` con el nombre de
+  marca completo. La firma es lo único que comunica el nombre ahí, así que
+  el `alt` tiene que cargar esa información.
+- **Isotipo con texto aparte** (`LoadingScreen`, `showName` en `true`):
+  `alt=""` + `aria-hidden` en la imagen — el texto visible ya lo dice, y
+  duplicarlo en el `alt` es ruido para el lector de pantalla.
 
 ### Prohibido
 
-- **Nunca** el logotipo completo (la palabra "PRISMA") en ninguna pantalla,
-  aunque sea la versión de bordes limpios — la decisión de marca es isotipo
-  + texto del sistema, no logotipo completo. Esto no es negociable por
-  disponibilidad de archivo.
-- **Nunca** reconstruir, recortar o "mejorar" el isotipo con CSS o código —
-  si hace falta un tamaño o color que no está entre los aprobados, se pide
-  el archivo, no se improvisa.
-- **Nunca** un placeholder con forma de isotipo mientras no haya archivo
-  aprobado para un contexto nuevo (CLAUDE.md §2) — mejor un espacio vacío o
-  solo el nombre en texto que una aproximación.
-- **Nunca** animar el isotipo (hover de color aparte, ver DESIGN_SYSTEM.md §6)
+- **Nunca** los 6 archivos fuera de esta interfaz — ver la excepción de
+  procedencia arriba. Si alguien pide el logo para un documento, una
+  propuesta o material impreso, la respuesta es "todavía no hay vector
+  original", no exportar estos PNG.
+- **Nunca** quitarles el metadato C2PA de origen.
+- **Nunca** reconstruir, recortar o "mejorar" el logo con CSS o código — si
+  hace falta un tamaño, color o forma que no está entre los 6 archivos, se
+  pide, no se improvisa.
+- **Nunca** generar un séptimo archivo de logo por tu cuenta.
+- **Nunca** repetir el nombre de marca en texto al lado de la firma —
+  duplicación literal, se lee mal.
+- **Nunca** animar el logo (hover de color aparte, ver DESIGN_SYSTEM.md §6)
   ni usarlo como fondo repetido o marca de agua fuera de los patrones ya
   aprobados del kit.

@@ -16,7 +16,7 @@ export function MobileTopbar({ onOpenMenu }: { onOpenMenu: () => void }) {
       >
         <Menu aria-hidden="true" className="h-5 w-5" strokeWidth={1.5} />
       </button>
-      <Logo />
+      <Logo height={26} />
       <NotificationsBell />
     </header>
   );
