@@ -1,28 +1,41 @@
 // ---------------------------------------------------------------
-// Parsea los 4 HTML de prospección (tema oscuro, marca "Digital Owner
-// System") y genera el SQL para cargar prospect_analysis con las 7
-// capacidades booleanas + score + contacto + carencias + nota.
+// Parsea HTML de prospección (tema oscuro, marca "Digital Owner System") y
+// genera el SQL para cargar prospect_analysis con las 7 capacidades
+// booleanas + score + contacto + carencias + nota.
 //
 // A propósito NO extrae "Lo que Digital Owner System le da": es la misma
-// plantilla de oferta en los 104 registros, no es dato del prospecto — ver
+// plantilla de oferta en cada lote, no es dato del prospecto — ver
 // src/config/oferta.ts, que la reemplaza con la propuesta de Prisma.
 //
 // Cruza dos fuentes DENTRO de cada archivo (tabla comparativa + tarjetas de
-// detalle) por nombre de negocio normalizado, y reporta las que no casan.
+// detalle) por nombre de negocio normalizado, y reporta las que no casan —
+// SIEMPRE por coincidencia exacta (tras normalizar acentos/mayúsculas),
+// nunca por parecido aproximado: un match "cercano" mal resuelto es peor
+// que uno que se reporta y se revisa a mano.
+//
+// Este script NO tiene acceso a la base de datos (solo hay anon key en
+// este entorno) — por eso la idempotencia contra prospect_analysis se
+// resuelve con --known apuntando al SQL de una carga anterior (el mismo
+// archivo que este script generó la vez pasada), y además con un guardián
+// en el propio SQL generado (WHERE NOT EXISTS contra prospect_analysis)
+// como defensa adicional si --known se omite u olvida un archivo.
 //
 // Uso:
-//   node scripts/parse-prospect-analysis.mjs "<carpeta con los 4 HTML>" > supabase/test-data/07-load-prospect-analysis.sql
+//   node scripts/parse-prospect-analysis.mjs [--known <sql1> [--known <sql2> ...]] [--dry-run] <html-o-carpeta> [<html-o-carpeta> ...]
+//
+//   --known <archivo.sql>  SQL de una carga previa (ej. 07-load-prospect-analysis.sql).
+//                          Se puede repetir. Sin esto, no se puede saber qué
+//                          ya existe y el script avisa que no comprobó nada.
+//   --dry-run              Reporta todo (matches, mismatches, ya-existentes)
+//                          pero no imprime el SQL de carga — para confirmar
+//                          el diagnóstico antes de generar nada.
+//
+// La salida SQL va a stdout; redirige a un archivo nuevo en supabase/test-data/.
 // ---------------------------------------------------------------
 
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import * as cheerio from "cheerio";
-
-const dir = process.argv[2];
-if (!dir) {
-  console.error("Uso: node scripts/parse-prospect-analysis.mjs <carpeta>");
-  process.exit(1);
-}
 
 function normalize(value) {
   return value
@@ -60,12 +73,81 @@ function alcaldiaFromTitle(h1) {
   return match ? match[1] : h1;
 }
 
-const files = readdirSync(dir).filter((f) => f.endsWith(".html"));
+// --- CLI: separa flags de rutas, expande carpetas a sus .html ----------
+const argv = process.argv.slice(2);
+const knownFiles = [];
+let dryRun = false;
+const inputPaths = [];
+
+for (let i = 0; i < argv.length; i++) {
+  const arg = argv[i];
+  if (arg === "--known") {
+    const value = argv[++i];
+    if (!value) {
+      console.error("--known necesita una ruta de archivo SQL.");
+      process.exit(1);
+    }
+    knownFiles.push(value);
+  } else if (arg === "--dry-run") {
+    dryRun = true;
+  } else {
+    inputPaths.push(arg);
+  }
+}
+
+if (inputPaths.length === 0) {
+  console.error(
+    "Uso: node scripts/parse-prospect-analysis.mjs [--known <sql>] [--dry-run] <html-o-carpeta> [...]",
+  );
+  process.exit(1);
+}
+
+const htmlFiles = [];
+for (const path of inputPaths) {
+  const stat = statSync(path);
+  if (stat.isDirectory()) {
+    for (const entry of readdirSync(path)) {
+      if (entry.endsWith(".html")) htmlFiles.push(join(path, entry));
+    }
+  } else {
+    htmlFiles.push(path);
+  }
+}
+
+// --- Idempotencia: qué negocios ya tienen prospect_analysis -------------
+// Se extrae de los VALUES(...) de un INSERT INTO prospect_analysis previo
+// — el primer string literal de cada fila es business_name (ver el SQL
+// que este mismo script genera más abajo). No es un parser SQL general,
+// solo entiende su propio formato de salida.
+const knownBusinessNames = new Set();
+for (const knownFile of knownFiles) {
+  const content = readFileSync(knownFile, "utf-8");
+  const insertSection = content.split(/insert into prospect_analysis/i)[1];
+  if (!insertSection) {
+    console.error(`⚠ --known ${knownFile}: no encontré un "insert into prospect_analysis" ahí adentro, lo ignoro.`);
+    continue;
+  }
+  const rowPattern = /^\s*\('((?:[^'\\]|'')*)',/gm;
+  let match;
+  while ((match = rowPattern.exec(insertSection))) {
+    knownBusinessNames.add(normalize(match[1].replace(/''/g, "'")));
+  }
+}
+
+if (knownFiles.length === 0) {
+  console.error(
+    "⚠ No se pasó --known: no hay forma de saber qué negocios ya tienen prospect_analysis. " +
+      "Esta corrida no puede confirmar idempotencia — solo va a parsear los HTML como si todo fuera nuevo.",
+  );
+}
+
 const allRecords = [];
+const skippedExisting = [];
 const mismatches = [];
 
-for (const file of files) {
-  const html = readFileSync(join(dir, file), "utf-8");
+for (const filePath of htmlFiles) {
+  const file = filePath.split("/").pop();
+  const html = readFileSync(filePath, "utf-8");
   const $ = cheerio.load(html);
   const alcaldia = alcaldiaFromTitle($("h1").first().text().trim());
 
@@ -140,6 +222,12 @@ for (const file of files) {
       });
       continue;
     }
+
+    if (knownBusinessNames.has(key)) {
+      skippedExisting.push({ file, businessName: t.businessName });
+      continue;
+    }
+
     allRecords.push({
       business_name: t.businessName,
       alcaldia,
@@ -165,14 +253,22 @@ for (const file of files) {
 }
 
 if (mismatches.length > 0) {
-  console.error(`\n⚠ ${mismatches.length} negocios no casaron entre tabla y tarjetas:`);
+  console.error(`\n⚠ ${mismatches.length} negocios no casaron entre tabla y tarjetas (nombre tal cual en el HTML):`);
   for (const m of mismatches) {
     console.error(`  - [${m.file}] "${m.businessName}" ${m.problem}`);
   }
   console.error("");
 }
 
-console.error(`Total de registros a insertar: ${allRecords.length}`);
+if (skippedExisting.length > 0) {
+  console.error(`\n↷ ${skippedExisting.length} negocios ya tienen prospect_analysis — se saltan, no se pisan:`);
+  for (const s of skippedExisting) {
+    console.error(`  - [${s.file}] "${s.businessName}"`);
+  }
+  console.error("");
+}
+
+console.error(`Nuevos a insertar: ${allRecords.length}`);
 const capKeys = ["has_web", "has_whatsapp", "has_reservas", "has_crm", "has_chat", "has_blog", "has_redes"];
 const summary = { is_urgent: 0 };
 for (const key of capKeys) summary[key] = 0;
@@ -180,18 +276,36 @@ for (const r of allRecords) {
   if (r.is_urgent) summary.is_urgent += 1;
   for (const key of capKeys) if (r[key] === true) summary[key] += 1;
 }
-console.error(`Urgentes: ${summary.is_urgent}/${allRecords.length}`);
-console.error("Capacidad presente (true) por columna:", JSON.stringify(summary));
+if (allRecords.length > 0) {
+  console.error(`Urgentes: ${summary.is_urgent}/${allRecords.length}`);
+  console.error("Capacidad presente (true) por columna:", JSON.stringify(summary));
+}
+
+if (dryRun) {
+  console.error("\n— modo simulación (--dry-run): no se generó SQL. —");
+  process.exit(0);
+}
+
+if (allRecords.length === 0) {
+  console.error("\nNada nuevo que insertar — no se generó SQL de carga.");
+  process.exit(0);
+}
 
 // ---------------------------------------------------------------
 // SQL de salida: el match contra contacts es por nombre de negocio EXACTO
-// (mismo texto que se usó al importar el CSV a contacts.business_name),
+// (mismo texto que se usó al importar el lote a contacts.business_name),
 // insensible a mayúsculas y a espacios sobrantes — no por acentos, porque
 // el nombre en contacts viene del MISMO archivo fuente. owner_id y
 // contact_id salen del contacto real vía este join: si un negocio no
 // aparece en contacts (o el nombre no calza exacto), la fila se reporta
 // al final para revisión manual — nunca se inserta con owner_id null,
 // porque la columna es NOT NULL.
+//
+// El INSERT lleva además "and not exists (... prospect_analysis ...)"
+// como segunda barrera de idempotencia, independiente de --known: si este
+// script no supo de una carga anterior (--known no se pasó, o faltó un
+// archivo), la base de datos igual se niega a duplicar el análisis de un
+// contacto que ya lo tiene.
 // ---------------------------------------------------------------
 
 const rows = allRecords
@@ -201,16 +315,16 @@ const rows = allRecords
   .join(",\n");
 
 console.log(`-- ---------------------------------------------------------------
--- Carga de prospect_analysis desde los 4 HTML de prospección (28 agosto).
--- Generado por scripts/parse-prospect-analysis.mjs — no editar a mano,
--- volver a correr el script si hay que corregir algo en el origen.
+-- Carga de prospect_analysis generada por scripts/parse-prospect-analysis.mjs
+-- — no editar a mano, volver a correr el script si hay que corregir algo
+-- en el origen.
 --
 -- owner_id/contact_id salen de un LEFT JOIN por nombre exacto contra
 -- contacts. Corre primero el SELECT de abajo para ver cuántos no casan
 -- antes de insertar.
 -- ---------------------------------------------------------------
 
--- 1) Verificación: negocios del HTML sin match en contacts (deberían ser 0)
+-- 1) Verificación: negocios del lote sin match en contacts (deberían ser 0)
 select v.business_name
 from (values
 ${rows}
@@ -218,7 +332,9 @@ ${rows}
 left join contacts c on lower(trim(c.business_name)) = lower(trim(v.business_name))
 where c.id is null;
 
--- 2) Carga real
+-- 2) Carga real — el "and not exists" es la segunda barrera de
+-- idempotencia (ver comentario arriba): no duplica aunque --known no se
+-- haya usado.
 insert into prospect_analysis (
   owner_id, contact_id, business_name, alcaldia, colonia, address, phone, email,
   web_note, score, is_urgent, has_web, has_whatsapp, has_reservas, has_crm, has_chat,
@@ -231,5 +347,8 @@ select
 from (values
 ${rows}
 ) as v(business_name, alcaldia, colonia, address, phone, email, web_note, score, is_urgent, has_web, has_whatsapp, has_reservas, has_crm, has_chat, has_blog, has_redes, gaps, note, source_file)
-join contacts c on lower(trim(c.business_name)) = lower(trim(v.business_name));
+join contacts c on lower(trim(c.business_name)) = lower(trim(v.business_name))
+and not exists (
+  select 1 from prospect_analysis pa where pa.contact_id = c.id
+);
 `);
