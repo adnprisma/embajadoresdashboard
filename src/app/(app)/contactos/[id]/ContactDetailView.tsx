@@ -805,24 +805,35 @@ export function ContactDetailView({
         </Tabs.Content>
 
         <Tabs.Content value="timeline" className="pt-5">
-          <TimelinePanel contactId={current.id} />
+          <Panel title={copy.contactos.detail.tabs.timeline}>
+            <TimelinePanel contactId={current.id} />
+          </Panel>
         </Tabs.Content>
 
         <Tabs.Content value="tasks" className="pt-5">
-          <TasksPanel contactId={current.id} />
+          <Panel title={copy.contactos.detail.tabs.tasks}>
+            <TasksPanel contactId={current.id} />
+          </Panel>
         </Tabs.Content>
 
         <Tabs.Content value="opportunities" className="pt-5">
-          <OpportunitiesPanel contactId={current.id} />
+          <Panel title={copy.contactos.detail.tabs.opportunities}>
+            <OpportunitiesPanel contactId={current.id} />
+          </Panel>
         </Tabs.Content>
 
+        {/* Análisis ya trae su propia superficie del rediseño reciente
+            (tarjeta bg-surface con score, capacidades, oferta...) — meterla
+            en un Panel aquí le pondría un segundo marco encima. */}
         <Tabs.Content value="analysis" className="pt-5">
           <AnalysisTabPanel contactId={current.id} />
         </Tabs.Content>
 
         {isAdmin ? (
           <Tabs.Content value="assignments" className="pt-5">
-            <AssignmentsPanel contactId={current.id} enabled={isAdmin} />
+            <Panel title={copy.contactos.detail.tabs.assignments}>
+              <AssignmentsPanel contactId={current.id} enabled={isAdmin} />
+            </Panel>
           </Tabs.Content>
         ) : null}
       </Tabs.Root>

@@ -26,7 +26,7 @@ export function MonthGrid({
   const weekdayLabels = days.slice(0, 7).map((day) => format(day, "EEEEEE", { locale: es }));
 
   return (
-    <div className="overflow-hidden rounded-[var(--radius-card)] border border-border-subtle">
+    <div className="overflow-hidden rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface">
       <div className="grid grid-cols-7 border-b border-border-subtle bg-bg-sunken">
         {weekdayLabels.map((label, index) => (
           <div
