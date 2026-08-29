@@ -9,10 +9,12 @@ import {
   Briefcase,
   Check,
   CheckCircle2,
+  Copy,
   Gauge,
   History,
   Kanban,
   ListTodo,
+  MessageCircle,
   MessageSquare,
   MinusCircle,
   MoreHorizontal,
@@ -23,7 +25,8 @@ import {
   XCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/common/Badge";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Illustration } from "@/components/common/Illustration";
@@ -36,6 +39,7 @@ import { OpportunityDialog } from "@/components/pipeline/OpportunityDialog";
 import { TaskDialog } from "@/components/tareas/TaskDialog";
 import { TaskRow } from "@/components/tareas/TaskRow";
 import { copy } from "@/config/copy";
+import { generarMensajeContacto } from "@/config/mensajeContacto";
 import { OFERTA_ADICIONAL, OFERTA_POR_CAPACIDAD, ofertaParaCarencias, type Capacidad, type OfertaItem } from "@/config/oferta";
 import { useContactAssignments } from "@/lib/queries/contactAssignments";
 import { useContactInteractions } from "@/lib/queries/interactions";
@@ -388,6 +392,49 @@ function OportunidadGroup({
   );
 }
 
+// Varios prospectos traen "55 1234 5678 / 55 8765 4321 (emergencias)" en un
+// solo campo — se usa solo el primer número. wa.me necesita el número con
+// código de país sin signos; si ya trae 10 dígitos se asume México (52).
+function buildWhatsAppUrl(phone: string): string | null {
+  const primary = phone.split("/")[0] ?? phone;
+  const digits = primary.replace(/\D/g, "");
+  if (!digits) return null;
+  const withCountryCode = digits.length === 10 ? `52${digits}` : digits;
+  return `https://wa.me/${withCountryCode}`;
+}
+
+function MensajeSugeridoBlock({ analysis }: { analysis: ProspectAnalysisRow }) {
+  const { mensaje } = copy.contactos.detail.analysisTab;
+  const texto = useMemo(() => generarMensajeContacto(analysis), [analysis]);
+  const whatsappUrl = analysis.phone ? buildWhatsAppUrl(analysis.phone) : null;
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(texto);
+    toast.success(mensaje.copiedToast);
+  };
+
+  return (
+    <div className="flex flex-col gap-3 border-t border-border-subtle pt-4">
+      <h4 className="text-xs font-medium uppercase tracking-[0.06em] text-text-muted">{mensaje.title}</h4>
+      <p className="whitespace-pre-line rounded-[var(--radius-control)] bg-bg-sunken p-3.5 text-sm text-text-primary">
+        {texto}
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <button type="button" onClick={handleCopy} className={SECONDARY_BUTTON_CLASSES}>
+          <Copy aria-hidden="true" className="h-4 w-4" strokeWidth={1.5} />
+          {mensaje.copyButton}
+        </button>
+        {whatsappUrl ? (
+          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className={SECONDARY_BUTTON_CLASSES}>
+            <MessageCircle aria-hidden="true" className="h-4 w-4" strokeWidth={1.5} />
+            {mensaje.whatsappButton}
+          </a>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 function AnalysisPanel({ analysis }: { analysis: ProspectAnalysisRow }) {
   const { analysisTab } = copy.contactos.detail;
 
@@ -473,6 +520,8 @@ function AnalysisPanel({ analysis }: { analysis: ProspectAnalysisRow }) {
           <p className="text-sm italic text-text-secondary">{analysis.note}</p>
         </div>
       ) : null}
+
+      <MensajeSugeridoBlock analysis={analysis} />
     </div>
   );
 }

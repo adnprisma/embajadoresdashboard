@@ -356,6 +356,15 @@ export const copy = {
         opportunitiesTitle: "Qué le ofrece Prisma",
         scopeNucleo: "Incluido en el paquete",
         scopeComplemento: "Se cotiza aparte",
+        mensaje: {
+          title: "Mensaje sugerido",
+          greeting: (businessName: string, colonia: string | null) =>
+            `Hola, soy de ${BRAND.name}. Vi tu negocio ${businessName}${colonia ? ` en ${colonia}` : ""} y quiero platicarte cómo podemos ayudarte:`,
+          closing: "¿Tienes unos minutos esta semana para platicarlo?",
+          copyButton: "Copiar mensaje",
+          copiedToast: "Mensaje copiado.",
+          whatsappButton: "Abrir WhatsApp",
+        },
       },
       assignmentsTab: {
         emptyTitle: "Este contacto nunca se ha reasignado",

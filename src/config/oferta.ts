@@ -29,6 +29,14 @@ export interface OfertaItem {
   carencia: string
   /** Qué ofrece Prisma. Es el punto de conversación de la vendedora. */
   propuesta: string
+  /**
+   * Versión corta de `propuesta`, para viñetas de un mensaje de WhatsApp
+   * (ver config/mensajeContacto.ts). Se redacta aparte, a propósito: no es
+   * el párrafo largo truncado — cortarlo a la mitad de una idea se nota.
+   * TODO(nestor): son borrador mío, revísalas y reescríbelas si no suenan
+   * a como tú las dirías.
+   */
+  propuestaCorta: string
   /** Si viene incluido en cualquier paquete o si se cotiza aparte */
   alcance: 'nucleo' | 'complemento'
 }
@@ -38,6 +46,7 @@ export const OFERTA_POR_CAPACIDAD: Record<Capacidad, OfertaItem> = {
     carencia: 'WhatsApp visible',
     propuesta:
       'Un agente conversacional que atiende WhatsApp, Instagram y Facebook desde un solo lugar. Responde a cualquier hora, resuelve las preguntas de siempre y agenda la cita sin que nadie del equipo tenga que estar pendiente del teléfono.',
+    propuestaCorta: 'Un agente que responde WhatsApp, Instagram y Facebook a cualquier hora.',
     alcance: 'nucleo',
   },
 
@@ -45,6 +54,7 @@ export const OFERTA_POR_CAPACIDAD: Record<Capacidad, OfertaItem> = {
     carencia: 'Reservas en línea',
     propuesta:
       'Un calendario que agenda solo. El cliente elige su horario desde la conversación y queda registrado, sin llamadas de ida y vuelta ni citas anotadas en papel.',
+    propuestaCorta: 'Reservas en línea, sin llamadas de ida y vuelta.',
     alcance: 'nucleo',
   },
 
@@ -52,6 +62,7 @@ export const OFERTA_POR_CAPACIDAD: Record<Capacidad, OfertaItem> = {
     carencia: 'CRM',
     propuesta:
       'Un CRM donde queda el historial de cada cliente y cada mascota: qué se le hizo, cuándo, y cuándo toca volver. Deja de vivir en la memoria de quien atiende.',
+    propuestaCorta: 'El historial de cada cliente y mascota, siempre a la mano.',
     alcance: 'nucleo',
   },
 
@@ -59,6 +70,7 @@ export const OFERTA_POR_CAPACIDAD: Record<Capacidad, OfertaItem> = {
     carencia: 'Chat en vivo',
     propuesta:
       'El mismo agente conversacional cubre las consultas fuera de horario. La mayoría de los mensajes llegan cuando la clínica está cerrada — ahí es donde hoy se pierden.',
+    propuestaCorta: 'Atención automática para las consultas fuera de horario.',
     alcance: 'nucleo',
   },
 
@@ -66,6 +78,7 @@ export const OFERTA_POR_CAPACIDAD: Record<Capacidad, OfertaItem> = {
     carencia: 'Web propia',
     propuesta:
       'Un sitio conectado directo al WhatsApp, para que quien llega buscando información termine en una conversación y no en un formulario que nadie revisa. Un sitio suelto no vende; conectado, sí.',
+    propuestaCorta: 'Un sitio conectado directo a tu WhatsApp.',
     alcance: 'complemento',
   },
 
@@ -73,6 +86,7 @@ export const OFERTA_POR_CAPACIDAD: Record<Capacidad, OfertaItem> = {
     carencia: 'Presencia en redes',
     propuesta:
       'Contenido con línea gráfica propia, producido mes con mes: carruseles y piezas que explican lo que haces. Y si quieres alcance más rápido, campañas en Meta con seguimiento de resultados.',
+    propuestaCorta: 'Contenido con tu línea gráfica, mes con mes.',
     alcance: 'complemento',
   },
 
@@ -80,6 +94,7 @@ export const OFERTA_POR_CAPACIDAD: Record<Capacidad, OfertaItem> = {
     carencia: 'Contenido propio',
     propuesta:
       'Piezas de contenido que responden lo que la gente pregunta antes de decidir. Es lo que construye reputación sin depender de que alguien te recomiende.',
+    propuestaCorta: 'Piezas que responden lo que la gente pregunta antes de decidir.',
     alcance: 'complemento',
   },
 }
@@ -96,6 +111,7 @@ export const OFERTA_ADICIONAL: OfertaItem[] = [
     carencia: 'Reseñas en Google',
     propuesta:
       'Gestión de reseñas en Google. Para un negocio local es de donde viene la mayor parte de la confianza previa: quien busca una veterinaria cerca, primero lee.',
+    propuestaCorta: 'Gestión de tus reseñas en Google.',
     alcance: 'nucleo',
   },
 ]
