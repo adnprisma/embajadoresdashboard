@@ -32,7 +32,7 @@ import { ContactFormDialog } from "@/components/contactos/ContactFormDialog";
 import { TaskDialog } from "@/components/tareas/TaskDialog";
 import { TaskRow } from "@/components/tareas/TaskRow";
 import { copy } from "@/config/copy";
-import { CAPABILITY_ORDER, getOpportunities, type CapabilityKey } from "@/config/oferta";
+import { OFERTA_ADICIONAL, OFERTA_POR_CAPACIDAD, ofertaParaCarencias, type Capacidad, type OfertaItem } from "@/config/oferta";
 import { useContactAssignments } from "@/lib/queries/contactAssignments";
 import { useContactInteractions } from "@/lib/queries/interactions";
 import {
@@ -169,16 +169,29 @@ function TasksPanel({ contactId }: { contactId: string }) {
   );
 }
 
+// Orden fijo de la rejilla — el mismo de la tabla comparativa de origen
+// (ver copy.contactos.fields / migración 0012), independiente del orden de
+// declaración de OFERTA_POR_CAPACIDAD en config/oferta.ts.
+const CAPABILITY_ORDER: Capacidad[] = [
+  "has_web",
+  "has_whatsapp",
+  "has_reservas",
+  "has_crm",
+  "has_chat",
+  "has_blog",
+  "has_redes",
+];
+
 function CapabilityCell({
-  capabilityKey,
+  capacidad,
   value,
   webNote,
 }: {
-  capabilityKey: CapabilityKey;
+  capacidad: Capacidad;
   value: boolean | null;
   webNote?: string | null;
 }) {
-  const { capabilities, capabilityState } = copy.contactos.detail.analysisTab;
+  const { capabilityState } = copy.contactos.detail.analysisTab;
 
   // El color nunca es el único portador de estado (DESIGN_SYSTEM.md §4):
   // cada estado trae su propio ícono y su propia palabra, no solo un tono.
@@ -199,7 +212,7 @@ function CapabilityCell({
     <div className="flex flex-col gap-1 rounded-[var(--radius-control)] border border-border-subtle bg-bg-surface p-3">
       <div className="flex items-center gap-2">
         <Icon aria-hidden="true" className={cn("h-4 w-4 shrink-0", TONE_TEXT[tone])} strokeWidth={1.5} />
-        <span className="text-sm font-medium text-text-primary">{capabilities[capabilityKey]}</span>
+        <span className="text-sm font-medium text-text-primary">{OFERTA_POR_CAPACIDAD[capacidad].carencia}</span>
       </div>
       <span className={cn("text-xs", TONE_TEXT[tone])}>{stateLabel}</span>
       {webNote ? <span className="text-xs text-text-muted">{copy.contactos.detail.analysisTab.webNote(webNote)}</span> : null}
@@ -207,9 +220,33 @@ function CapabilityCell({
   );
 }
 
+function OportunidadGroup({ title, tone, items }: { title: string; tone: "success" | "neutral"; items: OfertaItem[] }) {
+  if (items.length === 0) return null;
+
+  return (
+    <div className="flex flex-col gap-2">
+      <Badge tone={tone}>{title}</Badge>
+      <ul className="flex flex-col gap-2">
+        {items.map((item) => (
+          <li key={item.carencia} className="text-sm text-text-primary">
+            <span className="font-medium">{item.carencia}:</span> {item.propuesta}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function AnalysisPanel({ analysis }: { analysis: ProspectAnalysisRow }) {
   const { analysisTab } = copy.contactos.detail;
-  const opportunities = getOpportunities(analysis);
+
+  // OFERTA_ADICIONAL siempre aparece — no depende de ninguna carencia
+  // detectada (ver config/oferta.ts). El resto sale de cruzar las
+  // capacidades REALES de este prospecto contra el mapa, así que cambia
+  // de una ficha a otra.
+  const oportunidades = [...ofertaParaCarencias(analysis), ...OFERTA_ADICIONAL];
+  const nucleo = oportunidades.filter((item) => item.alcance === "nucleo");
+  const complemento = oportunidades.filter((item) => item.alcance === "complemento");
 
   return (
     <div className="flex flex-col gap-6">
@@ -236,7 +273,7 @@ function AnalysisPanel({ analysis }: { analysis: ProspectAnalysisRow }) {
           {CAPABILITY_ORDER.map((key) => (
             <CapabilityCell
               key={key}
-              capabilityKey={key}
+              capacidad={key}
               value={analysis[key]}
               webNote={key === "has_web" ? analysis.web_note : undefined}
             />
@@ -259,18 +296,10 @@ function AnalysisPanel({ analysis }: { analysis: ProspectAnalysisRow }) {
         )}
       </div>
 
-      <div>
-        <h4 className="mb-2 text-xs font-medium uppercase tracking-[0.06em] text-text-muted">
-          {analysisTab.opportunitiesTitle}
-        </h4>
-        <ul className="flex flex-col gap-2">
-          {opportunities.map((opportunity) => (
-            <li key={opportunity.key} className="text-sm text-text-primary">
-              <span className="font-medium">{copy.contactos.detail.analysisTab.capabilities[opportunity.key]}:</span>{" "}
-              {opportunity.propuesta}
-            </li>
-          ))}
-        </ul>
+      <div className="flex flex-col gap-4">
+        <h4 className="text-xs font-medium uppercase tracking-[0.06em] text-text-muted">{analysisTab.opportunitiesTitle}</h4>
+        <OportunidadGroup title={analysisTab.scopeNucleo} tone="success" items={nucleo} />
+        <OportunidadGroup title={analysisTab.scopeComplemento} tone="neutral" items={complemento} />
       </div>
 
       {analysis.note ? (

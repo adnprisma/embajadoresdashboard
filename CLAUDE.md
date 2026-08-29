@@ -58,6 +58,11 @@ Reglas que no se negocian:
   `src/lib/queries/`.
 - **El cliente nunca calcula ni escribe dinero, puntos ni permisos.** Eso vive
   en funciones RPC `security definer` y en políticas RLS.
+- **Toda función RPC `security definer` que dependa de `auth.uid()` necesita un
+  parámetro de respaldo** para poder correrse desde el editor SQL de Supabase,
+  donde no hay sesión y `auth.uid()` es `null`. Ya pasó dos veces (el trigger
+  de cambio de rol en `profiles` y `reassign_contacts()`): sin el respaldo, la
+  función simplemente no se puede ejecutar a mano cuando hace falta.
 - Cada bloque de datos implementa los cuatro estados: cargando (Skeleton),
   vacío (`EmptyState` con instrucción de siguiente paso), con datos, y error
   con reintento. Una tarjeta en blanco es un bug.
@@ -90,3 +95,11 @@ Reglas que no se negocian:
   necesita el humano.
 - Si detectas una contradicción entre estas instrucciones y lo que te pido en
   el chat, **dímelo antes de avanzar**. No la resuelvas por tu cuenta.
+- **NUNCA corras `npm run build` mientras `npm run dev` esté activo:** comparten
+  el directorio `.next/` y el build de producción corrompe el servidor de
+  desarrollo. Los chunks empiezan a responder 503 y la interfaz queda con
+  handlers muertos sin error visible en consola — parece un bug de la app y no
+  lo es. Si necesitas verificar el build con el dev corriendo: detén dev
+  primero, o corre el build con un `distDir` distinto. Esto ya causó un falso
+  reporte de bug en el botón de "Nueva oportunidad" y dos sesiones de
+  desarrollo corrompidas.

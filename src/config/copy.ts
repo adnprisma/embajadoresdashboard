@@ -340,15 +340,6 @@ export const copy = {
         scoreLabel: (score: number) => `Score ${score}/10`,
         urgentBadge: "Urgente",
         capabilitiesTitle: "Capacidades detectadas",
-        capabilities: {
-          has_web: "Web propia",
-          has_whatsapp: "WhatsApp",
-          has_reservas: "Reservas online",
-          has_crm: "CRM",
-          has_chat: "Chat en vivo",
-          has_blog: "Blog",
-          has_redes: "Redes sociales",
-        },
         capabilityState: {
           present: "Presente",
           absent: "Ausente",
@@ -358,6 +349,8 @@ export const copy = {
         gapsTitle: "Carencias",
         gapsEmpty: "Sin carencias registradas.",
         opportunitiesTitle: "Oportunidades para Prisma",
+        scopeNucleo: "Incluido en el paquete",
+        scopeComplemento: "Se cotiza aparte",
         noteTitle: "Contexto",
       },
       assignmentsTab: {

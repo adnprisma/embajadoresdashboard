@@ -36,6 +36,21 @@ create policy "contact_assignments_select"
 -- prospecto después. Si un contacto ya se convirtió en cliente, ese
 -- cliente y su comisión se quedan con la vendedora original aunque el
 -- contacto (y su historial de prospección futura) se reasigne.
+--
+-- GUARDARRAÍL — dos formas de llamarla, según si hay sesión o no:
+--
+-- Desde la app (con sesión): 3 parámetros. auth.uid() resuelve assigned_by.
+--   select reassign_contacts(ids, destino, motivo);
+--
+-- Desde el editor SQL (sin sesión): 4 parámetros, el último es quién firma.
+--   select reassign_contacts(ids, destino, motivo, 'uuid-del-admin');
+--
+-- El coalesce es coalesce(auth.uid(), p_assigned_by): si hay sesión, manda
+-- la sesión SIEMPRE. p_assigned_by solo aplica cuando no hay ninguna, para
+-- que nadie pueda firmar un movimiento a nombre de otra persona desde la
+-- app. Si la llamas desde el SQL Editor sin el cuarto parámetro, falla con
+-- "No hay sesión activa y no se pasó p_assigned_by" — auth.uid() es null
+-- ahí y la función no tiene forma de saber quién firma.
 -- ---------------------------------------------------------------
 
 create function reassign_contacts(
