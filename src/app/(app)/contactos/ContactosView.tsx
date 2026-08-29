@@ -273,6 +273,7 @@ export function ContactosView({ isAdmin = false }: { isAdmin?: boolean }) {
         action={
           <div className="flex flex-wrap items-center gap-2">
             <ImportDialog
+              isAdmin={isAdmin}
               trigger={
                 <button type="button" className={SECONDARY_BUTTON_CLASSES}>
                   <Upload aria-hidden="true" className="h-4 w-4" strokeWidth={1.5} />

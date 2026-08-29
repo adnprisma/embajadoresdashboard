@@ -392,6 +392,11 @@ export const copy = {
         notMapped: "No importar",
         previewTitle: "Vista previa (primeras 5 filas)",
       },
+      assignTo: {
+        label: "Asignar a",
+        hint: "Los contactos importados quedarán a nombre de esta persona.",
+      },
+      assignmentReason: "Importación de contactos",
       step3: {
         readyTitle: "Todo listo para importar",
         readyDescription: (count: number) => `Se validarán ${count} filas antes de guardarlas.`,

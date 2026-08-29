@@ -213,6 +213,35 @@ export function useCreateContact() {
   });
 }
 
+// Un chunk del importador masivo (ImportDialog) — el owner lo valida
+// import_contacts() en el servidor, nunca el cliente: un no-admin no puede
+// lograr que se le acepte un owner_id que no sea el suyo ni manipulando la
+// petición. Sin toast/invalidate propios: ImportDialog corre esto varias
+// veces en un loop (uno por chunk) y decide cuándo mostrar el resultado e
+// invalidar la lista, igual que antes con el insert directo.
+export function useImportContacts() {
+  return useMutation({
+    mutationFn: async ({
+      contacts,
+      owner,
+      reason,
+    }: {
+      contacts: ContactInput[];
+      owner: string;
+      reason: string;
+    }) => {
+      const supabase = createClient();
+      const { data, error } = await supabase.rpc("import_contacts", {
+        p_contacts: contacts,
+        p_owner: owner,
+        p_reason: reason,
+      });
+      if (error) throw error;
+      return data as number;
+    },
+  });
+}
+
 // Conteo de lo que referencia a este contacto en otras tablas, usado por el
 // diálogo de borrado para decir con números reales qué se va a eliminar en
 // cascada (tasks, interactions — on delete cascade) y qué solo se desvincula

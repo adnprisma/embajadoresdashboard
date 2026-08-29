@@ -9,9 +9,8 @@ import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Stepper } from "@/components/common/Stepper";
 import { copy } from "@/config/copy";
-import { contactsKeys, type ContactInput } from "@/lib/queries/contacts";
-import { createClient } from "@/lib/supabase/client";
-import { getOwnerId } from "@/lib/supabase/get-owner-id";
+import { contactsKeys, useImportContacts, type ContactInput } from "@/lib/queries/contacts";
+import { useProfile, useTeamProfiles } from "@/lib/queries/profile";
 import { normalizeText } from "@/lib/utils/normalize-text";
 
 type DestField = "business_name" | "contact_name" | "phone" | "email" | "industry" | "tags" | "notes";
@@ -103,9 +102,17 @@ const SELECT_CLASSES =
 
 const BATCH_SIZE = 500;
 
-export function ImportDialog({ trigger }: { trigger: ReactNode }) {
+export function ImportDialog({ trigger, isAdmin = false }: { trigger: ReactNode; isAdmin?: boolean }) {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const importContacts = useImportContacts();
+
+  // useProfile() siempre resuelve "yo" — es el default y también el único
+  // owner posible para quien no es admin. useTeamProfiles() solo alimenta
+  // el selector, y solo se pinta si isAdmin (ya verificado en servidor):
+  // una vendedora nunca ve este campo, ni aunque la llamada corra igual.
+  const { data: profile } = useProfile();
+  const { data: teamData } = useTeamProfiles();
 
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
@@ -121,6 +128,7 @@ export function ImportDialog({ trigger }: { trigger: ReactNode }) {
     tags: "",
     notes: "",
   });
+  const [ownerId, setOwnerId] = useState("");
   const [isImporting, setIsImporting] = useState(false);
   const [result, setResult] = useState<{ imported: number; errors: ImportError[] } | null>(null);
 
@@ -138,6 +146,7 @@ export function ImportDialog({ trigger }: { trigger: ReactNode }) {
       tags: "",
       notes: "",
     });
+    setOwnerId("");
     setIsImporting(false);
     setResult(null);
   };
@@ -181,12 +190,15 @@ export function ImportDialog({ trigger }: { trigger: ReactNode }) {
   const previewRows = useMemo(() => parsedRows.slice(0, 5), [parsedRows]);
 
   const runImport = async () => {
+    const effectiveOwnerId = ownerId || profile?.id;
+    if (!effectiveOwnerId) {
+      toast.error(copy.common.genericErrorDescription);
+      return;
+    }
+
     setIsImporting(true);
 
     try {
-      const ownerId = await getOwnerId();
-      const supabase = createClient();
-
       const prepared: { rowNumber: number; original: Record<string, string>; input: ContactInput }[] = [];
       const errors: ImportError[] = [];
 
@@ -205,16 +217,19 @@ export function ImportDialog({ trigger }: { trigger: ReactNode }) {
 
       for (let i = 0; i < prepared.length; i += BATCH_SIZE) {
         const chunk = prepared.slice(i, i + BATCH_SIZE);
-        const { error } = await supabase
-          .from("contacts")
-          .insert(chunk.map((item) => ({ ...item.input, owner_id: ownerId })));
 
-        if (error) {
+        try {
+          const count = await importContacts.mutateAsync({
+            contacts: chunk.map((item) => item.input),
+            owner: effectiveOwnerId,
+            reason: copy.contactos.import.assignmentReason,
+          });
+          importedCount += count;
+        } catch (error) {
+          const message = error instanceof Error ? error.message : copy.common.genericErrorDescription;
           for (const item of chunk) {
-            errors.push({ rowNumber: item.rowNumber, original: item.original, message: error.message });
+            errors.push({ rowNumber: item.rowNumber, original: item.original, message });
           }
-        } else {
-          importedCount += chunk.length;
         }
       }
 
@@ -392,6 +407,23 @@ export function ImportDialog({ trigger }: { trigger: ReactNode }) {
                     <p className="text-sm text-text-secondary">
                       {copy.contactos.import.step3.readyDescription(parsedRows.length)}
                     </p>
+                    {isAdmin ? (
+                      <label className="flex w-full max-w-xs flex-col gap-1.5 text-left text-sm text-text-primary">
+                        {copy.contactos.import.assignTo.label}
+                        <select
+                          value={ownerId || profile?.id || ""}
+                          onChange={(event) => setOwnerId(event.target.value)}
+                          className={SELECT_CLASSES}
+                        >
+                          {(teamData ?? []).map((member) => (
+                            <option key={member.id} value={member.id}>
+                              {member.full_name}
+                            </option>
+                          ))}
+                        </select>
+                        <span className="text-xs text-text-muted">{copy.contactos.import.assignTo.hint}</span>
+                      </label>
+                    ) : null}
                     <button
                       type="button"
                       onClick={runImport}

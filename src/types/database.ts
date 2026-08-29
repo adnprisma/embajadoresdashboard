@@ -12,8 +12,8 @@
 //   supabase gen types typescript --project-id <tu-project-id> > src/types/database.ts
 //
 // Actualizado a mano también con 0008_prospect_analysis.sql,
-// 0009_roles.sql, 0010_rls_admin.sql, 0011_contact_assignments.sql y
-// 0012_prospect_analysis_capacidades.sql.
+// 0009_roles.sql, 0010_rls_admin.sql, 0011_contact_assignments.sql,
+// 0012_prospect_analysis_capacidades.sql y 0013_import_contacts.sql.
 // ---------------------------------------------------------------
 
 export type Json =
@@ -876,6 +876,15 @@ export type Database = {
         Args: {
           p_contact_ids: string[];
           p_to_owner: string;
+          p_reason?: string | null;
+          p_assigned_by?: string | null;
+        };
+        Returns: number;
+      };
+      import_contacts: {
+        Args: {
+          p_contacts: Json;
+          p_owner?: string | null;
           p_reason?: string | null;
           p_assigned_by?: string | null;
         };
