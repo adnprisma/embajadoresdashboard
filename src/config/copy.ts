@@ -299,7 +299,6 @@ export const copy = {
         edit: "Editar",
         newOpportunity: "Crear oportunidad",
         newTask: "Crear tarea",
-        comingSoon: "Esto llega en un bloque posterior del roadmap.",
         moreActions: "Más acciones",
         delete: "Eliminar contacto",
       },
@@ -332,7 +331,8 @@ export const copy = {
       },
       opportunitiesTab: {
         emptyTitle: "Todavía no hay oportunidades",
-        emptyDescription: "El pipeline llega en un bloque posterior del roadmap.",
+        emptyDescription: "Créalas con el botón \"Crear oportunidad\" de arriba.",
+        stageLabel: (stage: string) => `Etapa: ${stage}`,
       },
       analysisTab: {
         emptyTitle: "Este contacto no tiene análisis de prospección",

@@ -63,6 +63,7 @@ export const pipelineKeys = {
   stages: () => [...pipelineKeys.all, "stages"] as const,
   opportunities: () => [...pipelineKeys.all, "opportunities"] as const,
   metrics: () => [...pipelineKeys.all, "metrics"] as const,
+  forContact: (contactId: string) => [...pipelineKeys.all, "contact", contactId] as const,
 };
 
 const OPPORTUNITIES_SELECT =
@@ -95,6 +96,27 @@ export function useOpportunities() {
         .select(OPPORTUNITIES_SELECT)
         .order("position", { ascending: true })
         .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+// Query separada de useOpportunities() a propósito, con su propia llave de
+// caché: la pestaña "Oportunidades" de la ficha de contacto necesita poder
+// invalidarse sola sin depender de que /pipeline esté montado (o viceversa).
+// useCreateOpportunity() invalida las dos cuando la oportunidad trae
+// contact_id, para que ninguna pantalla se quede desincronizada.
+export function useContactOpportunities(contactId: string) {
+  return useQuery({
+    queryKey: pipelineKeys.forContact(contactId),
+    queryFn: async (): Promise<OpportunityRow[]> => {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("opportunities")
+        .select(OPPORTUNITIES_SELECT)
+        .eq("contact_id", contactId)
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -134,9 +156,16 @@ export function useCreateOpportunity() {
     onSuccess: () => {
       toast.success(copy.pipeline.dialog.successToast);
     },
-    onSettled: () => {
+    onSettled: (_data, _error, variables) => {
       queryClient.invalidateQueries({ queryKey: pipelineKeys.opportunities() });
       queryClient.invalidateQueries({ queryKey: pipelineKeys.metrics() });
+      // Si la oportunidad se creó desde la ficha de un contacto (o trae
+      // contact_id por cualquier otro camino), esa pestaña tiene su propia
+      // caché — sin esto se queda mostrando el EmptyState aunque /pipeline
+      // ya la vea.
+      if (variables.contact_id) {
+        queryClient.invalidateQueries({ queryKey: pipelineKeys.forContact(variables.contact_id) });
+      }
     },
   });
 }

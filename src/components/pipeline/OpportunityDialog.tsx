@@ -11,6 +11,7 @@ import { copy } from "@/config/copy";
 import type { ContactRow } from "@/lib/queries/contacts";
 import { useCreateOpportunity, type OpportunityInput, type PipelineStage } from "@/lib/queries/pipeline";
 import { ContactCombobox } from "@/components/common/ContactCombobox";
+import { cn } from "@/lib/utils/cn";
 
 const formSchema = z.object({
   business_name: z.string().min(1, copy.pipeline.dialog.errors.businessRequired),
@@ -23,10 +24,12 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-function defaultValues(stages: PipelineStage[]): FormValues {
+type LockedContact = { id: string; business_name: string };
+
+function defaultValues(stages: PipelineStage[], lockedContact?: LockedContact): FormValues {
   return {
-    business_name: "",
-    contact_id: null,
+    business_name: lockedContact?.business_name ?? "",
+    contact_id: lockedContact?.id ?? null,
     value: "",
     mrr: "",
     stage_id: stages[0]?.id ?? "",
@@ -51,11 +54,17 @@ const INPUT_CLASSES =
 export function OpportunityDialog({
   trigger,
   stages,
-  contacts,
+  contacts = [],
+  lockedContact,
 }: {
   trigger: ReactNode;
   stages: PipelineStage[];
-  contacts: ContactRow[];
+  contacts?: ContactRow[];
+  // Cuando se abre desde la ficha de un contacto: negocio y contacto ya
+  // están decididos por dónde estás parado, así que ni se muestra el
+  // combobox ni se deja editar el nombre — cambiarlos ahí solo genera
+  // datos inconsistentes con la ficha desde la que se creó.
+  lockedContact?: LockedContact;
 }) {
   const [open, setOpen] = useState(false);
   const createOpportunity = useCreateOpportunity();
@@ -68,14 +77,15 @@ export function OpportunityDialog({
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: defaultValues(stages),
+    defaultValues: defaultValues(stages, lockedContact),
   });
 
-  // Al abrir siempre parte de un formulario vacío con la primera etapa
-  // seleccionada — evita que quede el borrador de un envío anterior.
+  // Al abrir siempre parte de un formulario vacío (o precargado con el
+  // contacto fijo) con la primera etapa seleccionada — evita que quede el
+  // borrador de un envío anterior.
   useEffect(() => {
-    if (open) reset(defaultValues(stages));
-  }, [open, stages, reset]);
+    if (open) reset(defaultValues(stages, lockedContact));
+  }, [open, stages, lockedContact, reset]);
 
   const onSubmit = async (values: FormValues) => {
     try {
@@ -111,10 +121,11 @@ export function OpportunityDialog({
               </label>
               <input
                 id="business_name"
-                placeholder={copy.pipeline.dialog.businessPlaceholder}
+                placeholder={lockedContact ? undefined : copy.pipeline.dialog.businessPlaceholder}
+                disabled={Boolean(lockedContact)}
                 aria-invalid={errors.business_name ? "true" : "false"}
                 aria-describedby={errors.business_name ? "business_name-error" : undefined}
-                className={INPUT_CLASSES}
+                className={cn(INPUT_CLASSES, lockedContact && "cursor-not-allowed bg-bg-sunken text-text-muted")}
                 {...register("business_name")}
               />
               {errors.business_name ? (
@@ -124,23 +135,25 @@ export function OpportunityDialog({
               ) : null}
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="contact_id" className="text-sm font-medium text-text-primary">
-                {copy.pipeline.dialog.contactLabel}
-              </label>
-              <Controller
-                name="contact_id"
-                control={control}
-                render={({ field }) => (
-                  <ContactCombobox
-                    id="contact_id"
-                    contacts={contacts}
-                    value={field.value}
-                    onChange={(contact) => field.onChange(contact?.id ?? null)}
-                  />
-                )}
-              />
-            </div>
+            {lockedContact ? null : (
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="contact_id" className="text-sm font-medium text-text-primary">
+                  {copy.pipeline.dialog.contactLabel}
+                </label>
+                <Controller
+                  name="contact_id"
+                  control={control}
+                  render={({ field }) => (
+                    <ContactCombobox
+                      id="contact_id"
+                      contacts={contacts}
+                      value={field.value}
+                      onChange={(contact) => field.onChange(contact?.id ?? null)}
+                    />
+                  )}
+                />
+              </div>
+            )}
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">

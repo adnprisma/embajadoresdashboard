@@ -22,13 +22,14 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "sonner";
 import { Badge } from "@/components/common/Badge";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Illustration } from "@/components/common/Illustration";
+import { MoneyValue } from "@/components/common/MoneyValue";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Skeleton } from "@/components/common/Skeleton";
 import { ContactFormDialog } from "@/components/contactos/ContactFormDialog";
+import { OpportunityDialog } from "@/components/pipeline/OpportunityDialog";
 import { TaskDialog } from "@/components/tareas/TaskDialog";
 import { TaskRow } from "@/components/tareas/TaskRow";
 import { copy } from "@/config/copy";
@@ -42,6 +43,7 @@ import {
   type ContactRelatedCounts,
   type ContactRow,
 } from "@/lib/queries/contacts";
+import { useContactOpportunities, usePipelineStages } from "@/lib/queries/pipeline";
 import { useProspectAnalysis, type ProspectAnalysisRow } from "@/lib/queries/prospectAnalysis";
 import { useUndoableTaskDelete } from "@/hooks/useUndoableTaskDelete";
 import { useContactTasks, useToggleTask } from "@/lib/queries/tasks";
@@ -164,6 +166,71 @@ function TasksPanel({ contactId }: { contactId: string }) {
           onToggle={(id, done) => toggleTask.mutate({ id, done })}
           onDelete={deleteTask}
         />
+      ))}
+    </ul>
+  );
+}
+
+function OpportunitiesPanel({ contactId }: { contactId: string }) {
+  const { data, isLoading, isError, refetch } = useContactOpportunities(contactId);
+  const { data: stagesData } = usePipelineStages();
+  const opportunities = data ?? [];
+  const stageName = (stageId: string) => stagesData?.find((stage) => stage.id === stageId)?.name ?? stageId;
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-3">
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center gap-3 py-10 text-center">
+        <TriangleAlert aria-hidden="true" className="h-8 w-8 text-state-negative" strokeWidth={1.5} />
+        <div>
+          <p className="text-sm font-medium text-text-primary">{copy.common.genericErrorTitle}</p>
+          <p className="mt-1 text-sm text-text-secondary">{copy.common.genericErrorDescription}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => refetch()}
+          className="rounded-[var(--radius-control)] border border-border-subtle px-3 py-1.5 text-sm font-medium text-text-primary transition-colors hover:bg-bg-sunken"
+        >
+          {copy.common.retry}
+        </button>
+      </div>
+    );
+  }
+
+  if (opportunities.length === 0) {
+    return (
+      <EmptyState
+        icon={Kanban}
+        illustration={<Illustration name="encontrar" size="md" />}
+        title={copy.contactos.detail.opportunitiesTab.emptyTitle}
+        description={copy.contactos.detail.opportunitiesTab.emptyDescription}
+      />
+    );
+  }
+
+  return (
+    <ul className="flex flex-col divide-y divide-border-subtle">
+      {opportunities.map((opportunity) => (
+        <li key={opportunity.id} className="flex items-center justify-between gap-3 py-3">
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium text-text-primary">{opportunity.business_name}</p>
+            <p className="text-xs text-text-muted">{copy.contactos.detail.opportunitiesTab.stageLabel(stageName(opportunity.stage_id))}</p>
+          </div>
+          <div className="shrink-0 text-right">
+            <MoneyValue amount={opportunity.value} />
+            {opportunity.mrr > 0 ? (
+              <p className="text-xs text-text-muted">{copy.pipeline.card.mrrLabel} <MoneyValue amount={opportunity.mrr} /></p>
+            ) : null}
+          </div>
+        </li>
       ))}
     </ul>
   );
@@ -414,8 +481,8 @@ export function ContactDetailView({
   const router = useRouter();
   const { data: contact } = useContact(initialContact.id, initialContact);
   const current = contact ?? initialContact;
-
-  const handleComingSoon = () => toast.info(copy.contactos.detail.actions.comingSoon);
+  const { data: stagesData } = usePipelineStages();
+  const stages = stagesData ?? [];
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const relatedCounts = useContactRelatedCounts(current.id, deleteDialogOpen);
@@ -450,10 +517,16 @@ export function ContactDetailView({
                 </button>
               }
             />
-            <button type="button" onClick={handleComingSoon} className={SECONDARY_BUTTON_CLASSES}>
-              <Kanban aria-hidden="true" className="h-4 w-4" strokeWidth={1.5} />
-              {copy.contactos.detail.actions.newOpportunity}
-            </button>
+            <OpportunityDialog
+              stages={stages}
+              lockedContact={{ id: current.id, business_name: current.business_name }}
+              trigger={
+                <button type="button" className={SECONDARY_BUTTON_CLASSES}>
+                  <Kanban aria-hidden="true" className="h-4 w-4" strokeWidth={1.5} />
+                  {copy.contactos.detail.actions.newOpportunity}
+                </button>
+              }
+            />
             <TaskDialog
               contactId={current.id}
               trigger={
@@ -640,12 +713,7 @@ export function ContactDetailView({
         </Tabs.Content>
 
         <Tabs.Content value="opportunities" className="pt-5">
-          <EmptyState
-            icon={Kanban}
-            illustration={<Illustration name="encontrar" size="md" />}
-            title={copy.contactos.detail.opportunitiesTab.emptyTitle}
-            description={copy.contactos.detail.opportunitiesTab.emptyDescription}
-          />
+          <OpportunitiesPanel contactId={current.id} />
         </Tabs.Content>
 
         <Tabs.Content value="analysis" className="pt-5">
