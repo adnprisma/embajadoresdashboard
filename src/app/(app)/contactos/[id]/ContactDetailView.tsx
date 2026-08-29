@@ -392,26 +392,46 @@ function OportunidadGroup({
   );
 }
 
-// Varios prospectos traen "55 1234 5678 / 55 8765 4321 (emergencias)" en un
-// solo campo — se usa solo el primer número. wa.me necesita el número con
-// código de país sin signos; si ya trae 10 dígitos se asume México (52).
-function buildWhatsAppUrl(phone: string): string | null {
-  const primary = phone.split("/")[0] ?? phone;
-  const digits = primary.replace(/\D/g, "");
-  if (!digits) return null;
-  const withCountryCode = digits.length === 10 ? `52${digits}` : digits;
-  return `https://wa.me/${withCountryCode}`;
+// Los 104 contactos actuales guardan el teléfono como "+52 55 5651 2980" o
+// vacío — sin variantes. No hay garantía de que el próximo lote sea igual,
+// así que esto contempla los dos casos reales (10 dígitos sin código de
+// país, o 12 ya con el 52) y para cualquier otra forma devuelve null: un
+// link armado sobre un número que no se pudo confirmar abriría una
+// conversación con la persona equivocada, y eso es peor que no ofrecer el
+// botón.
+function normalizePhoneForWhatsApp(phone: string): string | null {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length === 10) return `52${digits}`;
+  if (digits.length === 12 && digits.startsWith("52")) return digits;
+  return null;
 }
 
-function MensajeSugeridoBlock({ analysis }: { analysis: ProspectAnalysisRow }) {
+function MensajeSugeridoBlock({
+  analysis,
+  ownerFullName,
+  contactPhone,
+}: {
+  analysis: ProspectAnalysisRow;
+  ownerFullName: string | null;
+  contactPhone: string | null;
+}) {
   const { mensaje } = copy.contactos.detail.analysisTab;
-  const texto = useMemo(() => generarMensajeContacto(analysis), [analysis]);
-  const whatsappUrl = analysis.phone ? buildWhatsAppUrl(analysis.phone) : null;
+  const texto = useMemo(
+    () => generarMensajeContacto({ ...analysis, ownerFullName }),
+    [analysis, ownerFullName],
+  );
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(texto);
     toast.success(mensaje.copiedToast);
   };
+
+  // Mismo texto para copiar y para WhatsApp — una sola fuente
+  // (generarMensajeContacto). Si no hay teléfono, el botón ni aparece; si
+  // hay teléfono pero no se pudo normalizar con confianza, aparece
+  // deshabilitado en vez de ocultarse — para que se note que el dato está
+  // raro, no que la función no existe.
+  const whatsappNumber = contactPhone ? normalizePhoneForWhatsApp(contactPhone) : null;
 
   return (
     <div className="flex flex-col gap-3 border-t border-border-subtle pt-4">
@@ -424,18 +444,43 @@ function MensajeSugeridoBlock({ analysis }: { analysis: ProspectAnalysisRow }) {
           <Copy aria-hidden="true" className="h-4 w-4" strokeWidth={1.5} />
           {mensaje.copyButton}
         </button>
-        {whatsappUrl ? (
-          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className={SECONDARY_BUTTON_CLASSES}>
-            <MessageCircle aria-hidden="true" className="h-4 w-4" strokeWidth={1.5} />
-            {mensaje.whatsappButton}
-          </a>
+        {contactPhone ? (
+          whatsappNumber ? (
+            <a
+              href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(texto)}`}
+              target="_blank"
+              rel="noopener"
+              className={SECONDARY_BUTTON_CLASSES}
+            >
+              <MessageCircle aria-hidden="true" className="h-4 w-4" strokeWidth={1.5} />
+              {mensaje.whatsappButton}
+            </a>
+          ) : (
+            <button
+              type="button"
+              disabled
+              title={mensaje.whatsappDisabledHint}
+              className={cn(SECONDARY_BUTTON_CLASSES, "cursor-not-allowed opacity-50")}
+            >
+              <MessageCircle aria-hidden="true" className="h-4 w-4" strokeWidth={1.5} />
+              {mensaje.whatsappButton}
+            </button>
+          )
         ) : null}
       </div>
     </div>
   );
 }
 
-function AnalysisPanel({ analysis }: { analysis: ProspectAnalysisRow }) {
+function AnalysisPanel({
+  analysis,
+  ownerFullName,
+  contactPhone,
+}: {
+  analysis: ProspectAnalysisRow;
+  ownerFullName: string | null;
+  contactPhone: string | null;
+}) {
   const { analysisTab } = copy.contactos.detail;
 
   // OFERTA_ADICIONAL siempre aparece — no depende de ninguna carencia
@@ -521,12 +566,20 @@ function AnalysisPanel({ analysis }: { analysis: ProspectAnalysisRow }) {
         </div>
       ) : null}
 
-      <MensajeSugeridoBlock analysis={analysis} />
+      <MensajeSugeridoBlock analysis={analysis} ownerFullName={ownerFullName} contactPhone={contactPhone} />
     </div>
   );
 }
 
-function AnalysisTabPanel({ contactId }: { contactId: string }) {
+function AnalysisTabPanel({
+  contactId,
+  ownerFullName,
+  contactPhone,
+}: {
+  contactId: string;
+  ownerFullName: string | null;
+  contactPhone: string | null;
+}) {
   const { data, isLoading, isError, refetch } = useProspectAnalysis(contactId, true);
 
   if (isLoading) {
@@ -568,7 +621,7 @@ function AnalysisTabPanel({ contactId }: { contactId: string }) {
     );
   }
 
-  return <AnalysisPanel analysis={data} />;
+  return <AnalysisPanel analysis={data} ownerFullName={ownerFullName} contactPhone={contactPhone} />;
 }
 
 function AssignmentsPanel({ contactId, enabled }: { contactId: string; enabled: boolean }) {
@@ -875,7 +928,11 @@ export function ContactDetailView({
             (tarjeta bg-surface con score, capacidades, oferta...) — meterla
             en un Panel aquí le pondría un segundo marco encima. */}
         <Tabs.Content value="analysis" className="pt-5">
-          <AnalysisTabPanel contactId={current.id} />
+          <AnalysisTabPanel
+            contactId={current.id}
+            ownerFullName={current.owner_full_name}
+            contactPhone={current.phone}
+          />
         </Tabs.Content>
 
         {isAdmin ? (

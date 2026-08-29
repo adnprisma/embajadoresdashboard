@@ -8,7 +8,7 @@ aquí o en `context/DESIGN_SYSTEM.md`, es una propuesta pendiente de aprobación
 
 | Marcador | Archivo | Qué hacer |
 |---|---|---|
-| `[NOMBRE DE MARCA]` | `src/config/brand.ts` | **Resuelto.** `BRAND.name` es `"Prisma"`. Se propaga solo — `<Logo />`, el `<title>` del sitio y el footer del shell lo leen de aquí. |
+| `[NOMBRE DE MARCA]` | `src/config/brand.ts` | Sustituir `BRAND.name` por el nombre aprobado. Se propaga solo — `<Logo />`, el `<title>` del sitio y el footer del shell lo leen de aquí. |
 | `[LOGO]` | `src/components/layout/Logo.tsx` | **Resuelto, con excepción de procedencia.** `<Logo variant form height showName />` sirve los 6 archivos de `public/brand/` (isotipo/firma × carbón/coral/beige — matriz completa en `DESIGN_SYSTEM.md` §9). **Los 6 están generados por IA** (`grep -l trainedAlgorithmicMedia public/brand/*.png`); el dueño de marca los aprobó a sabiendas, solo para esta interfaz — nunca en material comercial, impresos, propuestas ni registro de marca. Cuando exista el vector original, se reemplazan uno a uno sin tocar la API del componente. |
 | `[PALETA DE COLORES]` | `src/styles/tokens.css` | Ya está resuelta con los 4 colores aprobados del Kit Prisma (carbón, coral, beige, blanco) más los estados funcionales marcados como PROPUESTA. Es el único archivo con hexadecimales — no dupliques valores en otro lugar. Cambios de paleta se hacen aquí y se propagan a Tailwind vía `src/app/globals.css`. |
 | `[TIPOGRAFÍA SECUNDARIA]` | `src/styles/tokens.css` (`--font-body`) | **Resuelto.** IBM Plex Sans, vía `next/font/google` en `src/app/layout.tsx` (pesos 400/500/600, subset `latin`, `display: swap`). |

@@ -358,12 +358,21 @@ export const copy = {
         scopeComplemento: "Se cotiza aparte",
         mensaje: {
           title: "Mensaje sugerido",
-          greeting: (businessName: string, colonia: string | null) =>
-            `Hola, soy de ${BRAND.name}. Vi tu negocio ${businessName}${colonia ? ` en ${colonia}` : ""} y quiero platicarte cómo podemos ayudarte:`,
+          // Quien se presenta es la vendedora dueña del contacto, no la
+          // marca — si abre un admin la ficha de un lead de otra persona,
+          // el mensaje tiene que seguir sonando a esa persona. Sin nombre
+          // capturado, se omite la presentación entera: "Hola, vi tu
+          // negocio..." ya se sostiene solo, sin un genérico ni un hueco.
+          greeting: (ownerName: string | null, businessName: string, colonia: string | null) => {
+            const location = colonia ? ` en ${colonia}` : "";
+            const intro = ownerName ? `Hola, soy ${ownerName}. Vi` : "Hola, vi";
+            return `${intro} tu negocio ${businessName}${location} y quiero platicarte cómo podemos ayudarte:`;
+          },
           closing: "¿Tienes unos minutos esta semana para platicarlo?",
           copyButton: "Copiar mensaje",
           copiedToast: "Mensaje copiado.",
           whatsappButton: "Abrir WhatsApp",
+          whatsappDisabledHint: "No pudimos confirmar el formato de este teléfono.",
         },
       },
       assignmentsTab: {

@@ -12,6 +12,10 @@ export type MensajeContactoInput = {
   business_name: string;
   colonia: string | null;
   note: string | null;
+  // Nombre de quien tiene ASIGNADO el contacto (el owner), no de quien está
+  // viendo la pantalla — un admin abriendo la ficha de un lead ajeno tiene
+  // que ver el mensaje que mandaría esa vendedora, no el suyo.
+  ownerFullName: string | null;
 } & Partial<Record<Capacidad, boolean | null>>;
 
 // Un primer mensaje con ocho viñetas no lo lee nadie. Si algún día se
@@ -30,7 +34,7 @@ export function generarMensajeContacto(input: MensajeContactoInput): string {
     .join("\n");
 
   const blocks = [
-    mensaje.greeting(input.business_name, input.colonia),
+    mensaje.greeting(input.ownerFullName, input.business_name, input.colonia),
     bullets || null,
     input.note || null,
     mensaje.closing,
