@@ -7,13 +7,18 @@ import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import {
   Briefcase,
+  CheckCircle2,
+  Gauge,
+  History,
   Kanban,
   ListTodo,
   MessageSquare,
+  MinusCircle,
   MoreHorizontal,
   Pencil,
   Trash2,
   TriangleAlert,
+  XCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -27,6 +32,8 @@ import { ContactFormDialog } from "@/components/contactos/ContactFormDialog";
 import { TaskDialog } from "@/components/tareas/TaskDialog";
 import { TaskRow } from "@/components/tareas/TaskRow";
 import { copy } from "@/config/copy";
+import { CAPABILITY_ORDER, getOpportunities, type CapabilityKey } from "@/config/oferta";
+import { useContactAssignments } from "@/lib/queries/contactAssignments";
 import { useContactInteractions } from "@/lib/queries/interactions";
 import {
   useContact,
@@ -35,8 +42,10 @@ import {
   type ContactRelatedCounts,
   type ContactRow,
 } from "@/lib/queries/contacts";
+import { useProspectAnalysis, type ProspectAnalysisRow } from "@/lib/queries/prospectAnalysis";
 import { useUndoableTaskDelete } from "@/hooks/useUndoableTaskDelete";
 import { useContactTasks, useToggleTask } from "@/lib/queries/tasks";
+import { cn } from "@/lib/utils/cn";
 
 const SECONDARY_BUTTON_CLASSES =
   "inline-flex items-center gap-2 rounded-[var(--radius-control)] border border-border-subtle px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-bg-sunken";
@@ -160,7 +169,219 @@ function TasksPanel({ contactId }: { contactId: string }) {
   );
 }
 
-export function ContactDetailView({ contact: initialContact }: { contact: ContactRow }) {
+function CapabilityCell({
+  capabilityKey,
+  value,
+  webNote,
+}: {
+  capabilityKey: CapabilityKey;
+  value: boolean | null;
+  webNote?: string | null;
+}) {
+  const { capabilities, capabilityState } = copy.contactos.detail.analysisTab;
+
+  // El color nunca es el único portador de estado (DESIGN_SYSTEM.md §4):
+  // cada estado trae su propio ícono y su propia palabra, no solo un tono.
+  const { Icon, tone, stateLabel } =
+    value === true
+      ? { Icon: CheckCircle2, tone: "success" as const, stateLabel: capabilityState.present }
+      : value === false
+        ? { Icon: XCircle, tone: "danger" as const, stateLabel: capabilityState.absent }
+        : { Icon: MinusCircle, tone: "warning" as const, stateLabel: capabilityState.partial };
+
+  const TONE_TEXT: Record<typeof tone, string> = {
+    success: "text-state-positive",
+    danger: "text-state-negative",
+    warning: "text-state-pending",
+  };
+
+  return (
+    <div className="flex flex-col gap-1 rounded-[var(--radius-control)] border border-border-subtle bg-bg-surface p-3">
+      <div className="flex items-center gap-2">
+        <Icon aria-hidden="true" className={cn("h-4 w-4 shrink-0", TONE_TEXT[tone])} strokeWidth={1.5} />
+        <span className="text-sm font-medium text-text-primary">{capabilities[capabilityKey]}</span>
+      </div>
+      <span className={cn("text-xs", TONE_TEXT[tone])}>{stateLabel}</span>
+      {webNote ? <span className="text-xs text-text-muted">{copy.contactos.detail.analysisTab.webNote(webNote)}</span> : null}
+    </div>
+  );
+}
+
+function AnalysisPanel({ analysis }: { analysis: ProspectAnalysisRow }) {
+  const { analysisTab } = copy.contactos.detail;
+  const opportunities = getOpportunities(analysis);
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-wrap items-center gap-2">
+        {analysis.score !== null ? (
+          <Badge tone="neutral">
+            <Gauge aria-hidden="true" className="mr-1 inline h-3 w-3" strokeWidth={1.5} />
+            {analysisTab.scoreLabel(analysis.score)}
+          </Badge>
+        ) : null}
+        {analysis.is_urgent ? (
+          <Badge tone="danger">
+            <TriangleAlert aria-hidden="true" className="mr-1 inline h-3 w-3" strokeWidth={1.5} />
+            {analysisTab.urgentBadge}
+          </Badge>
+        ) : null}
+      </div>
+
+      <div>
+        <h4 className="mb-2 text-xs font-medium uppercase tracking-[0.06em] text-text-muted">
+          {analysisTab.capabilitiesTitle}
+        </h4>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+          {CAPABILITY_ORDER.map((key) => (
+            <CapabilityCell
+              key={key}
+              capabilityKey={key}
+              value={analysis[key]}
+              webNote={key === "has_web" ? analysis.web_note : undefined}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h4 className="mb-2 text-xs font-medium uppercase tracking-[0.06em] text-text-muted">{analysisTab.gapsTitle}</h4>
+        {analysis.gaps && analysis.gaps.length > 0 ? (
+          <ul className="flex flex-col gap-1">
+            {analysis.gaps.map((gap) => (
+              <li key={gap} className="text-sm text-text-primary">
+                • {gap}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-text-muted">{analysisTab.gapsEmpty}</p>
+        )}
+      </div>
+
+      <div>
+        <h4 className="mb-2 text-xs font-medium uppercase tracking-[0.06em] text-text-muted">
+          {analysisTab.opportunitiesTitle}
+        </h4>
+        <ul className="flex flex-col gap-2">
+          {opportunities.map((opportunity) => (
+            <li key={opportunity.key} className="text-sm text-text-primary">
+              <span className="font-medium">{copy.contactos.detail.analysisTab.capabilities[opportunity.key]}:</span>{" "}
+              {opportunity.propuesta}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {analysis.note ? (
+        <div className="border-t border-border-subtle pt-4">
+          <h4 className="mb-1 text-xs font-medium uppercase tracking-[0.06em] text-text-muted">{analysisTab.noteTitle}</h4>
+          <p className="text-sm text-text-secondary">{analysis.note}</p>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function AnalysisTabPanel({ contactId }: { contactId: string }) {
+  const { data, isLoading, isError, refetch } = useProspectAnalysis(contactId, true);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-3">
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center gap-3 py-10 text-center">
+        <TriangleAlert aria-hidden="true" className="h-8 w-8 text-state-negative" strokeWidth={1.5} />
+        <div>
+          <p className="text-sm font-medium text-text-primary">{copy.common.genericErrorTitle}</p>
+          <p className="mt-1 text-sm text-text-secondary">{copy.common.genericErrorDescription}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => refetch()}
+          className="rounded-[var(--radius-control)] border border-border-subtle px-3 py-1.5 text-sm font-medium text-text-primary transition-colors hover:bg-bg-sunken"
+        >
+          {copy.common.retry}
+        </button>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <EmptyState
+        icon={Gauge}
+        illustration={<Illustration name="encontrar" size="md" />}
+        title={copy.contactos.detail.analysisTab.emptyTitle}
+        description={copy.contactos.detail.analysisTab.emptyDescription}
+      />
+    );
+  }
+
+  return <AnalysisPanel analysis={data} />;
+}
+
+function AssignmentsPanel({ contactId, enabled }: { contactId: string; enabled: boolean }) {
+  const { data, isLoading } = useContactAssignments(contactId, enabled);
+  const assignments = data ?? [];
+  const { assignmentsTab } = copy.contactos.detail;
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-3">
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+      </div>
+    );
+  }
+
+  if (assignments.length === 0) {
+    return (
+      <EmptyState
+        icon={History}
+        illustration={<Illustration name="encontrar" size="md" />}
+        title={assignmentsTab.emptyTitle}
+        description={assignmentsTab.emptyDescription}
+      />
+    );
+  }
+
+  return (
+    <ul className="flex flex-col divide-y divide-border-subtle">
+      {assignments.map((assignment) => (
+        <li key={assignment.id} className="py-3">
+          <p className="text-xs font-medium uppercase tracking-[0.06em] text-text-muted">
+            {formatDate(assignment.created_at)}
+          </p>
+          <p className="mt-1 text-sm text-text-primary">
+            {assignment.from_owner_name ? assignmentsTab.from(assignment.from_owner_name) : assignmentsTab.fromNone}
+            {" → "}
+            {assignmentsTab.to(assignment.to_owner_name)}
+          </p>
+          <p className="mt-1 text-sm text-text-secondary">
+            {assignment.reason ?? assignmentsTab.noReason}
+          </p>
+          <p className="mt-1 text-xs text-text-muted">{assignmentsTab.authorizedBy(assignment.assigned_by_name)}</p>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export function ContactDetailView({
+  contact: initialContact,
+  isAdmin = false,
+}: {
+  contact: ContactRow;
+  isAdmin?: boolean;
+}) {
   const router = useRouter();
   const { data: contact } = useContact(initialContact.id, initialContact);
   const current = contact ?? initialContact;
@@ -300,6 +521,12 @@ export function ContactDetailView({ contact: initialContact }: { contact: Contac
         </AlertDialog.Portal>
       </AlertDialog.Root>
 
+      {isAdmin ? (
+        <p className="text-sm font-medium text-text-secondary">
+          {copy.contactos.detail.ownerLabel(current.owner_full_name ?? copy.contactos.reassignDialog.currentOwnerNone)}
+        </p>
+      ) : null}
+
       {current.industry || current.tags.length > 0 ? (
         <div className="flex flex-wrap items-center gap-2">
           {current.industry ? (
@@ -330,6 +557,14 @@ export function ContactDetailView({ contact: initialContact }: { contact: Contac
           <Tabs.Trigger value="opportunities" className={TAB_TRIGGER_CLASSES}>
             {copy.contactos.detail.tabs.opportunities}
           </Tabs.Trigger>
+          <Tabs.Trigger value="analysis" className={TAB_TRIGGER_CLASSES}>
+            {copy.contactos.detail.tabs.analysis}
+          </Tabs.Trigger>
+          {isAdmin ? (
+            <Tabs.Trigger value="assignments" className={TAB_TRIGGER_CLASSES}>
+              {copy.contactos.detail.tabs.assignments}
+            </Tabs.Trigger>
+          ) : null}
         </Tabs.List>
 
         <Tabs.Content value="data" className="pt-5">
@@ -383,6 +618,16 @@ export function ContactDetailView({ contact: initialContact }: { contact: Contac
             description={copy.contactos.detail.opportunitiesTab.emptyDescription}
           />
         </Tabs.Content>
+
+        <Tabs.Content value="analysis" className="pt-5">
+          <AnalysisTabPanel contactId={current.id} />
+        </Tabs.Content>
+
+        {isAdmin ? (
+          <Tabs.Content value="assignments" className="pt-5">
+            <AssignmentsPanel contactId={current.id} enabled={isAdmin} />
+          </Tabs.Content>
+        ) : null}
       </Tabs.Root>
     </div>
   );

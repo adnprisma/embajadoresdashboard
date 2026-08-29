@@ -6,6 +6,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { MouseEvent, ReactNode } from "react";
 import { useMemo, useRef, useState } from "react";
+import { Checkbox } from "@/components/common/Checkbox";
+import { copy } from "@/config/copy";
 import { cn } from "@/lib/utils/cn";
 import { Skeleton } from "./Skeleton";
 
@@ -19,8 +21,25 @@ export type DataTableColumn<T> = {
 
 type SortState<T> = { key: keyof T; direction: "asc" | "desc" } | null;
 
+// Opcional: checkbox por fila + "seleccionar todo lo filtrado" en el
+// encabezado. Vive fuera de `columns` porque la casilla del encabezado no
+// es una columna con datos — es una acción sobre el conjunto completo de
+// `rows` que le pasó el caller (ya filtrado/buscado), no solo lo visible
+// en pantalla.
+export type DataTableSelection<T> = {
+  isSelected: (row: T) => boolean;
+  onToggleRow: (row: T) => void;
+  onToggleAll: () => void;
+  allSelected: boolean;
+  getRowLabel?: (row: T) => string;
+};
+
 const VIRTUALIZE_THRESHOLD = 100;
-const ROW_HEIGHT_ESTIMATE = 48;
+// Altura FIJA a propósito, no medida (measureElement) — con `table-fixed` +
+// una sola línea por celda (truncate) toda fila mide exactamente esto, así
+// que el virtualizador nunca tiene que corregir posiciones a medio scroll.
+// Debe coincidir con la clase `h-12` de <tr> en renderRow.
+const ROW_HEIGHT = 48;
 
 // <thead> sticky top-0. El destino real de cada fila es un <a> (next/link)
 // en la celda principal (primera columna) — así el teclado, el "abrir en
@@ -36,6 +55,7 @@ export function DataTable<T extends { id: string | number }>({
   loading = false,
   empty,
   virtualized = false,
+  selection,
 }: {
   columns: DataTableColumn<T>[];
   rows: T[];
@@ -43,6 +63,7 @@ export function DataTable<T extends { id: string | number }>({
   loading?: boolean;
   empty: ReactNode;
   virtualized?: boolean;
+  selection?: DataTableSelection<T>;
 }) {
   const router = useRouter();
   const [sort, setSort] = useState<SortState<T>>(null);
@@ -75,7 +96,7 @@ export function DataTable<T extends { id: string | number }>({
   const virtualizer = useVirtualizer({
     count: shouldVirtualize ? sortedRows.length : 0,
     getScrollElement: () => scrollRef.current,
-    estimateSize: () => ROW_HEIGHT_ESTIMATE,
+    estimateSize: () => ROW_HEIGHT,
     overscan: 8,
   });
 
@@ -95,23 +116,34 @@ export function DataTable<T extends { id: string | number }>({
       <tr
         key={row.id}
         onClick={href ? handleRowClick(href) : undefined}
-        className={cn("border-t border-border-subtle", href && "cursor-pointer hover:bg-bg-sunken")}
+        className={cn("h-12 border-t border-border-subtle", href && "cursor-pointer hover:bg-bg-sunken")}
       >
+        {selection ? (
+          <td className="w-10 px-4 py-3">
+            <Checkbox
+              checked={selection.isSelected(row)}
+              onCheckedChange={() => selection.onToggleRow(row)}
+              ariaLabel={selection.getRowLabel?.(row) ?? String(row[columns[0]?.key as keyof T] ?? "")}
+            />
+          </td>
+        ) : null}
         {columns.map((column, columnIndex) => {
           const content = column.render ? column.render(row) : String(row[column.key] ?? "");
+          const rawValue = String(row[column.key] ?? "");
           const isPrimaryCell = columnIndex === 0 && href;
 
           return (
             <td
               key={String(column.key)}
+              title={rawValue || undefined}
               className={cn("px-4 py-3 text-sm text-text-primary", column.className)}
             >
               {isPrimaryCell ? (
-                <Link href={href} className="font-medium text-text-primary hover:underline">
+                <Link href={href} className="block truncate font-medium text-text-primary hover:underline">
                   {content}
                 </Link>
               ) : (
-                content
+                <div className="truncate">{content}</div>
               )}
             </td>
           );
@@ -123,14 +155,15 @@ export function DataTable<T extends { id: string | number }>({
   if (loading) {
     return (
       <div className="overflow-hidden rounded-[var(--radius-card)] border border-border-subtle">
-        <table className="w-full border-collapse">
+        <table className="w-full table-fixed border-collapse">
           <thead className="bg-bg-sunken">
             <tr>
+              {selection ? <th className="w-10 px-4 py-2.5" /> : null}
               {columns.map((column) => (
                 <th
                   key={String(column.key)}
                   className={cn(
-                    "px-4 py-2.5 text-left text-xs font-medium uppercase tracking-[0.06em] text-text-muted",
+                    "truncate px-4 py-2.5 text-left text-xs font-medium uppercase tracking-[0.06em] text-text-muted",
                     column.className,
                   )}
                 >
@@ -142,6 +175,7 @@ export function DataTable<T extends { id: string | number }>({
           <tbody>
             {Array.from({ length: 5 }).map((_, rowIndex) => (
               <tr key={rowIndex} className="border-t border-border-subtle">
+                {selection ? <td className="w-10 px-4 py-3" /> : null}
                 {columns.map((column) => (
                   <td key={String(column.key)} className={cn("px-4 py-3", column.className)}>
                     <Skeleton className="h-4 w-full max-w-[140px]" />
@@ -168,14 +202,23 @@ export function DataTable<T extends { id: string | number }>({
       ref={scrollRef}
       className="max-h-[480px] overflow-auto rounded-[var(--radius-card)] border border-border-subtle"
     >
-      <table className="w-full border-collapse">
+      <table className="w-full table-fixed border-collapse">
         <thead className="sticky top-0 z-10 bg-bg-sunken">
           <tr>
+            {selection ? (
+              <th className="w-10 px-4 py-2.5">
+                <Checkbox
+                  checked={selection.allSelected}
+                  onCheckedChange={() => selection.onToggleAll()}
+                  ariaLabel={copy.common.selectAllLabel}
+                />
+              </th>
+            ) : null}
             {columns.map((column) => (
               <th
                 key={String(column.key)}
                 className={cn(
-                  "px-4 py-2.5 text-left text-xs font-medium uppercase tracking-[0.06em] text-text-muted",
+                  "truncate px-4 py-2.5 text-left text-xs font-medium uppercase tracking-[0.06em] text-text-muted",
                   column.className,
                 )}
               >
@@ -207,7 +250,10 @@ export function DataTable<T extends { id: string | number }>({
           {shouldVirtualize ? (
             <>
               <tr aria-hidden="true">
-                <td colSpan={columns.length} style={{ height: virtualizer.getVirtualItems()[0]?.start ?? 0 }} />
+                <td
+                  colSpan={columns.length + (selection ? 1 : 0)}
+                  style={{ height: virtualizer.getVirtualItems()[0]?.start ?? 0 }}
+                />
               </tr>
               {virtualizer.getVirtualItems().map((virtualRow) => {
                 const row = sortedRows[virtualRow.index];
@@ -215,7 +261,7 @@ export function DataTable<T extends { id: string | number }>({
               })}
               <tr aria-hidden="true">
                 <td
-                  colSpan={columns.length}
+                  colSpan={columns.length + (selection ? 1 : 0)}
                   style={{
                     height:
                       virtualizer.getTotalSize() - (virtualizer.getVirtualItems().at(-1)?.end ?? 0),

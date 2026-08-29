@@ -36,6 +36,8 @@ import { getOwnerId } from "@/lib/supabase/get-owner-id";
 
 export type ContactRow = {
   id: string;
+  owner_id: string;
+  owner_full_name: string | null;
   business_name: string;
   contact_name: string | null;
   phone: string | null;
@@ -45,6 +47,41 @@ export type ContactRow = {
   notes: string | null;
   created_at: string;
 };
+
+// profiles(full_name) es un embed de PostgREST vía contacts.owner_id ->
+// profiles.id — quién es "la vendedora" de este contacto. Solo lo consume
+// la UI de admin (columna, filtro, diálogo de reasignación); para una
+// seller es siempre su propio nombre, sin costo extra real.
+type ContactQueryRow = {
+  id: string;
+  owner_id: string;
+  business_name: string;
+  contact_name: string | null;
+  phone: string | null;
+  email: string | null;
+  industry: string | null;
+  tags: string[];
+  notes: string | null;
+  created_at: string;
+  profiles: { full_name: string } | { full_name: string }[] | null;
+};
+
+function toContactRow(row: ContactQueryRow): ContactRow {
+  const owner = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+  return {
+    id: row.id,
+    owner_id: row.owner_id,
+    owner_full_name: owner?.full_name ?? null,
+    business_name: row.business_name,
+    contact_name: row.contact_name,
+    phone: row.phone,
+    email: row.email,
+    industry: row.industry,
+    tags: row.tags,
+    notes: row.notes,
+    created_at: row.created_at,
+  };
+}
 
 export type ContactInput = {
   business_name: string;
@@ -63,7 +100,7 @@ export const contactsKeys = {
 };
 
 const CONTACTS_SELECT =
-  "id, business_name, contact_name, phone, email, industry, tags, notes, created_at";
+  "id, owner_id, business_name, contact_name, phone, email, industry, tags, notes, created_at, profiles(full_name)";
 
 // PAGE_SIZE es el tamaño de bloque de .range(), no una página de UI: existe
 // porque un select() sin rango tiene un tope por defecto en PostgREST, y
@@ -90,7 +127,7 @@ export function useContacts() {
 
         if (error) throw error;
 
-        rows.push(...(data ?? []));
+        rows.push(...(data as ContactQueryRow[] | null ?? []).map(toContactRow));
 
         if (!data || data.length < PAGE_SIZE) break;
       }
@@ -114,7 +151,7 @@ export function useContact(id: string, initialData?: ContactRow) {
         .eq("id", id)
         .single();
       if (error) throw error;
-      return data;
+      return toContactRow(data as ContactQueryRow);
     },
     initialData,
   });
@@ -133,14 +170,20 @@ export function useCreateContact() {
         .select(CONTACTS_SELECT)
         .single();
       if (error) throw error;
-      return data;
+      return toContactRow(data as ContactQueryRow);
     },
     onMutate: async (input) => {
       await queryClient.cancelQueries({ queryKey: contactsKeys.list() });
       const previous = queryClient.getQueryData<ContactRow[]>(contactsKeys.list());
 
+      // owner_id/owner_full_name quedan vacíos en el optimista a propósito:
+      // resolverlos de verdad implicaría un round-trip (rompe el punto de
+      // ser optimista) y se corrigen solos en cuanto la mutación real
+      // resuelve e invalida la lista.
       const optimisticRow: ContactRow = {
         id: `optimistic-${Date.now()}`,
+        owner_id: "",
+        owner_full_name: null,
         business_name: input.business_name,
         contact_name: input.contact_name ?? null,
         phone: input.phone ?? null,
@@ -257,7 +300,7 @@ export function useUpdateContact(id: string) {
         .select(CONTACTS_SELECT)
         .single();
       if (error) throw error;
-      return data;
+      return toContactRow(data as ContactQueryRow);
     },
     onMutate: async (input) => {
       await queryClient.cancelQueries({ queryKey: contactsKeys.detail(id) });

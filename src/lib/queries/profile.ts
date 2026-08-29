@@ -93,6 +93,33 @@ export function useProfile() {
   });
 }
 
+export type TeamProfileRow = {
+  id: string;
+  full_name: string;
+  email: string;
+  role: "admin" | "seller";
+};
+
+// Todo el equipo (admin + sellers) — solo lo consume la UI de admin
+// (filtro y columna "Vendedora" en /contactos, destino del diálogo de
+// reasignación). Para una seller, profiles_select_own solo le deja ver su
+// propia fila vía RLS, así que esta query no filtra nada aquí: la
+// pantalla que la usa ya está gateada por isAdmin del servidor.
+export function useTeamProfiles() {
+  return useQuery({
+    queryKey: [...profileKeys.all, "team"] as const,
+    queryFn: async (): Promise<TeamProfileRow[]> => {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, full_name, email, role")
+        .order("full_name", { ascending: true });
+      if (error) throw error;
+      return data as TeamProfileRow[];
+    },
+  });
+}
+
 // Solo para la vista previa dentro de esta misma página — TTL corto, no se
 // guarda ni se reutiliza en otro lado (ver alcance documentado en
 // PersonalDataTab: el avatar no se propaga al UserMenu en este bloque).

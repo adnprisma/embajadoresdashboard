@@ -13,6 +13,7 @@ export const copy = {
     estimatedNote: "Estimado",
     thisMonthNote: "Este mes",
     historicNote: "Histórico",
+    selectAllLabel: "Seleccionar todo lo filtrado",
   },
 
   notFound: {
@@ -205,6 +206,7 @@ export const copy = {
       industry: "Giro",
       tags: "Etiquetas",
       notes: "Notas",
+      owner: "Vendedora",
     },
     actions: {
       import: "Importar",
@@ -218,11 +220,37 @@ export const copy = {
       industryAll: "Todos los giros",
       tagLabel: "Etiqueta",
       tagAll: "Todas las etiquetas",
+      ownerLabel: "Vendedora",
+      ownerAll: "Todas",
       clearFilters: "Limpiar filtros",
     },
     card: {
       nextTask: (title: string, date?: string) =>
         date ? `Próxima tarea: ${title} · ${date}` : `Próxima tarea: ${title}`,
+    },
+    // Barra de selección múltiple — solo admin (ver ContactosView).
+    selection: {
+      count: (n: number) => (n === 1 ? "1 seleccionado" : `${n} seleccionados`),
+      reassign: "Reasignar",
+      rowLabel: (businessName: string) => `Seleccionar ${businessName}`,
+    },
+    reassignDialog: {
+      title: "Reasignar contactos",
+      description: (n: number) => (n === 1 ? "Vas a mover 1 contacto:" : `Vas a mover ${n} contactos:`),
+      currentOwner: (name: string) => `de ${name}`,
+      currentOwnerNone: "sin vendedora asignada",
+      toLabel: "Nueva vendedora",
+      toPlaceholder: "Elige una vendedora",
+      reasonLabel: "Motivo",
+      reasonPlaceholder: "Por qué se reasignan estos contactos",
+      reasonRequired: "El motivo es obligatorio.",
+      historyWarning:
+        "También se mueve todo su historial: tareas, interacciones, oportunidades, citas y análisis de prospección.",
+      cancel: "Cancelar",
+      confirm: "Reasignar",
+      confirming: "Reasignando…",
+      successToast: (n: number) => (n === 1 ? "1 contacto reasignado." : `${n} contactos reasignados.`),
+      errorToast: "No pudimos reasignar los contactos. Intenta de nuevo.",
     },
     emptyTitle: "Todavía no tienes contactos",
     emptyDescription: "Se irán agregando conforme captures tu cartera.",
@@ -254,11 +282,14 @@ export const copy = {
     },
 
     detail: {
+      ownerLabel: (name: string) => `Vendedora: ${name}`,
       tabs: {
         data: "Datos",
         timeline: "Línea de tiempo",
         tasks: "Tareas",
         opportunities: "Oportunidades",
+        analysis: "Análisis",
+        assignments: "Historial de asignación",
       },
       dataPanel: {
         createdAt: "Contacto desde",
@@ -302,6 +333,41 @@ export const copy = {
       opportunitiesTab: {
         emptyTitle: "Todavía no hay oportunidades",
         emptyDescription: "El pipeline llega en un bloque posterior del roadmap.",
+      },
+      analysisTab: {
+        emptyTitle: "Este contacto no tiene análisis de prospección",
+        emptyDescription: "Solo los contactos que vinieron de una prospección cargada tienen este análisis.",
+        scoreLabel: (score: number) => `Score ${score}/10`,
+        urgentBadge: "Urgente",
+        capabilitiesTitle: "Capacidades detectadas",
+        capabilities: {
+          has_web: "Web propia",
+          has_whatsapp: "WhatsApp",
+          has_reservas: "Reservas online",
+          has_crm: "CRM",
+          has_chat: "Chat en vivo",
+          has_blog: "Blog",
+          has_redes: "Redes sociales",
+        },
+        capabilityState: {
+          present: "Presente",
+          absent: "Ausente",
+          partial: "Parcial",
+        },
+        webNote: (note: string) => `Web: ${note}`,
+        gapsTitle: "Carencias",
+        gapsEmpty: "Sin carencias registradas.",
+        opportunitiesTitle: "Oportunidades para Prisma",
+        noteTitle: "Contexto",
+      },
+      assignmentsTab: {
+        emptyTitle: "Este contacto nunca se ha reasignado",
+        emptyDescription: "Los cambios de vendedora aparecerán aquí, con fecha, motivo y quién los autorizó.",
+        from: (name: string) => `De ${name}`,
+        fromNone: "Sin vendedora anterior",
+        to: (name: string) => `a ${name}`,
+        authorizedBy: (name: string) => `Autorizó: ${name}`,
+        noReason: "Sin motivo registrado",
       },
     },
 

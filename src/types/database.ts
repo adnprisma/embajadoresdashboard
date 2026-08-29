@@ -10,6 +10,10 @@
 //
 // En cuanto exista un proyecto real, reemplázalo con el comando de verdad:
 //   supabase gen types typescript --project-id <tu-project-id> > src/types/database.ts
+//
+// Actualizado a mano también con 0008_prospect_analysis.sql,
+// 0009_roles.sql, 0010_rls_admin.sql, 0011_contact_assignments.sql y
+// 0012_prospect_analysis_capacidades.sql.
 // ---------------------------------------------------------------
 
 export type Json =
@@ -37,6 +41,7 @@ export type Database = {
           tax_data: Json | null;
           own_prices: Json | null;
           tour_seen: boolean;
+          role: string;
           created_at: string;
         };
         Insert: {
@@ -52,6 +57,7 @@ export type Database = {
           tax_data?: Json | null;
           own_prices?: Json | null;
           tour_seen?: boolean;
+          role?: string;
           created_at?: string;
         };
         Update: {
@@ -67,6 +73,7 @@ export type Database = {
           tax_data?: Json | null;
           own_prices?: Json | null;
           tour_seen?: boolean;
+          role?: string;
           created_at?: string;
         };
         Relationships: [];
@@ -643,6 +650,163 @@ export type Database = {
         };
         Relationships: [];
       };
+
+      prospect_analysis: {
+        Row: {
+          id: string;
+          owner_id: string;
+          contact_id: string | null;
+          business_name: string;
+          score: number | null;
+          is_urgent: boolean | null;
+          colonia: string | null;
+          alcaldia: string | null;
+          address: string | null;
+          phone: string | null;
+          email: string | null;
+          social: string | null;
+          has_web: boolean | null;
+          has_whatsapp: boolean | null;
+          has_reservas: boolean | null;
+          has_crm: boolean | null;
+          has_chat: boolean | null;
+          has_blog: boolean | null;
+          has_redes: boolean | null;
+          web_note: string | null;
+          gaps: string[] | null;
+          note: string | null;
+          source_file: string | null;
+          created_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          owner_id: string;
+          contact_id?: string | null;
+          business_name: string;
+          score?: number | null;
+          is_urgent?: boolean | null;
+          colonia?: string | null;
+          alcaldia?: string | null;
+          address?: string | null;
+          phone?: string | null;
+          email?: string | null;
+          social?: string | null;
+          has_web?: boolean | null;
+          has_whatsapp?: boolean | null;
+          has_reservas?: boolean | null;
+          has_crm?: boolean | null;
+          has_chat?: boolean | null;
+          has_blog?: boolean | null;
+          has_redes?: boolean | null;
+          web_note?: string | null;
+          gaps?: string[] | null;
+          note?: string | null;
+          source_file?: string | null;
+          created_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          owner_id?: string;
+          contact_id?: string | null;
+          business_name?: string;
+          score?: number | null;
+          is_urgent?: boolean | null;
+          colonia?: string | null;
+          alcaldia?: string | null;
+          address?: string | null;
+          phone?: string | null;
+          email?: string | null;
+          social?: string | null;
+          has_web?: boolean | null;
+          has_whatsapp?: boolean | null;
+          has_reservas?: boolean | null;
+          has_crm?: boolean | null;
+          has_chat?: boolean | null;
+          has_blog?: boolean | null;
+          has_redes?: boolean | null;
+          web_note?: string | null;
+          gaps?: string[] | null;
+          note?: string | null;
+          source_file?: string | null;
+          created_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "prospect_analysis_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "prospect_analysis_contact_id_fkey";
+            columns: ["contact_id"];
+            isOneToOne: false;
+            referencedRelation: "contacts";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+
+      contact_assignments: {
+        Row: {
+          id: string;
+          contact_id: string;
+          from_owner: string | null;
+          to_owner: string;
+          assigned_by: string;
+          reason: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          contact_id: string;
+          from_owner?: string | null;
+          to_owner: string;
+          assigned_by: string;
+          reason?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          contact_id?: string;
+          from_owner?: string | null;
+          to_owner?: string;
+          assigned_by?: string;
+          reason?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "contact_assignments_contact_id_fkey";
+            columns: ["contact_id"];
+            isOneToOne: false;
+            referencedRelation: "contacts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contact_assignments_from_owner_fkey";
+            columns: ["from_owner"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contact_assignments_to_owner_fkey";
+            columns: ["to_owner"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contact_assignments_assigned_by_fkey";
+            columns: ["assigned_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -703,6 +867,19 @@ export type Database = {
       mark_tour_seen: {
         Args: Record<PropertyKey, never>;
         Returns: undefined;
+      };
+      is_admin: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
+      reassign_contacts: {
+        Args: {
+          p_contact_ids: string[];
+          p_to_owner: string;
+          p_reason?: string | null;
+          p_assigned_by?: string | null;
+        };
+        Returns: number;
       };
     };
     Enums: {

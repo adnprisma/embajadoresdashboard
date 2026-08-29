@@ -15,9 +15,11 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Skeleton } from "@/components/common/Skeleton";
 import { ContactFormDialog } from "@/components/contactos/ContactFormDialog";
 import { ImportDialog } from "@/components/contactos/ImportDialog";
+import { ReassignDialog } from "@/components/contactos/ReassignDialog";
 import { copy } from "@/config/copy";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { type ContactRow, useContacts } from "@/lib/queries/contacts";
+import { useTeamProfiles } from "@/lib/queries/profile";
 import { type TaskRow, useTasks } from "@/lib/queries/tasks";
 import { normalizeText } from "@/lib/utils/normalize-text";
 
@@ -27,7 +29,15 @@ const SELECT_CLASSES =
 // Tarjeta de contacto para <640px (ver DataTable/CardList más abajo): misma
 // fila que la tabla, jerarquía distinta. Enlace principal y teléfono con
 // min-h-11 (44px) para área táctil real en móvil.
-function ContactCard({ contact, nextTask }: { contact: ContactRow; nextTask?: TaskRow }) {
+function ContactCard({
+  contact,
+  nextTask,
+  isAdmin,
+}: {
+  contact: ContactRow;
+  nextTask?: TaskRow;
+  isAdmin?: boolean;
+}) {
   return (
     <div className="rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface p-4">
       <Link
@@ -36,6 +46,11 @@ function ContactCard({ contact, nextTask }: { contact: ContactRow; nextTask?: Ta
       >
         {contact.business_name}
       </Link>
+      {isAdmin ? (
+        <p className="text-sm text-text-secondary">
+          {contact.owner_full_name ?? copy.contactos.reassignDialog.currentOwnerNone}
+        </p>
+      ) : null}
       {contact.contact_name ? <p className="text-sm text-text-secondary">{contact.contact_name}</p> : null}
       {contact.phone ? (
         <a
@@ -97,10 +112,12 @@ function exportContactsCsv(rows: ContactRow[]) {
   URL.revokeObjectURL(url);
 }
 
-export function ContactosView() {
+export function ContactosView({ isAdmin = false }: { isAdmin?: boolean }) {
   const { data, isLoading, isError, refetch } = useContacts();
   const contacts = useMemo(() => data ?? [], [data]);
   const { data: tasksData } = useTasks();
+  const { data: teamData } = useTeamProfiles();
+  const sellers = useMemo(() => (teamData ?? []).filter((profile) => profile.role === "seller"), [teamData]);
 
   // Una tarea por contacto: la primera no completada, ya viene ordenada por
   // due_at ascendente (nulls al final) desde useTasks(). Memo aparte del
@@ -119,6 +136,9 @@ export function ContactosView() {
   const debouncedSearch = useDebouncedValue(searchInput, 300);
   const [industryFilter, setIndustryFilter] = useState("all");
   const [tagFilter, setTagFilter] = useState("all");
+  const [ownerFilter, setOwnerFilter] = useState("all");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [reassignDialogOpen, setReassignDialogOpen] = useState(false);
 
   const industryOptions = useMemo(() => {
     const set = new Set<string>();
@@ -136,15 +156,27 @@ export function ContactosView() {
     return Array.from(set).sort((a, b) => a.localeCompare(b, "es"));
   }, [contacts]);
 
-  // Los 3 filtros (búsqueda, giro, etiqueta) combinan en AND, en un solo
-  // useMemo — nada de esto pega a la red, todo corre sobre `contacts` ya
-  // cargado por completo.
+  // Opciones del filtro "Vendedora" a partir de owner_id/owner_full_name ya
+  // presentes en contacts — no de useTeamProfiles(), para no ofrecer una
+  // vendedora que hoy no tiene ningún contacto asignado.
+  const ownerOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const contact of contacts) {
+      map.set(contact.owner_id, contact.owner_full_name ?? copy.contactos.reassignDialog.currentOwnerNone);
+    }
+    return Array.from(map.entries()).sort((a, b) => a[1].localeCompare(b[1], "es"));
+  }, [contacts]);
+
+  // Los 4 filtros (búsqueda, giro, etiqueta, vendedora) combinan en AND, en
+  // un solo useMemo — nada de esto pega a la red, todo corre sobre
+  // `contacts` ya cargado por completo.
   const filteredContacts = useMemo(() => {
     const normalizedSearch = normalizeText(debouncedSearch.trim());
 
     return contacts.filter((contact) => {
       if (industryFilter !== "all" && contact.industry !== industryFilter) return false;
       if (tagFilter !== "all" && !contact.tags.includes(tagFilter)) return false;
+      if (isAdmin && ownerFilter !== "all" && contact.owner_id !== ownerFilter) return false;
 
       if (normalizedSearch) {
         const haystack = normalizeText(
@@ -157,27 +189,63 @@ export function ContactosView() {
 
       return true;
     });
-  }, [contacts, industryFilter, tagFilter, debouncedSearch]);
+  }, [contacts, industryFilter, tagFilter, ownerFilter, isAdmin, debouncedSearch]);
 
-  const hasActiveFilters = searchInput.trim() !== "" || industryFilter !== "all" || tagFilter !== "all";
+  const hasActiveFilters =
+    searchInput.trim() !== "" || industryFilter !== "all" || tagFilter !== "all" || ownerFilter !== "all";
 
   const clearFilters = () => {
     setSearchInput("");
     setIndustryFilter("all");
     setTagFilter("all");
+    setOwnerFilter("all");
   };
 
+  const selectedContacts = useMemo(
+    () => filteredContacts.filter((contact) => selectedIds.has(contact.id)),
+    [filteredContacts, selectedIds],
+  );
+
+  const toggleRowSelection = (contact: ContactRow) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(contact.id)) next.delete(contact.id);
+      else next.add(contact.id);
+      return next;
+    });
+  };
+
+  const allFilteredSelected =
+    filteredContacts.length > 0 && filteredContacts.every((contact) => selectedIds.has(contact.id));
+
+  const toggleAllSelection = () => {
+    setSelectedIds((prev) => {
+      if (allFilteredSelected) {
+        const next = new Set(prev);
+        for (const contact of filteredContacts) next.delete(contact.id);
+        return next;
+      }
+      const next = new Set(prev);
+      for (const contact of filteredContacts) next.add(contact.id);
+      return next;
+    });
+  };
+
+  // Anchos fijos a propósito (table-fixed en DataTable): Negocio es el
+  // campo que de verdad se lee, así que se lleva el ancho que Contacto y
+  // Correo no usan (vacíos en toda la cartera actual). Cada celda es de una
+  // sola línea (truncate) — alto de fila fijo, sin medición dinámica.
   const columns: DataTableColumn<ContactRow>[] = [
-    { key: "business_name", header: copy.contactos.fields.business },
-    { key: "contact_name", header: copy.contactos.fields.contact },
-    { key: "phone", header: copy.contactos.fields.phone },
-    { key: "email", header: copy.contactos.fields.email },
-    { key: "industry", header: copy.contactos.fields.industry },
+    { key: "business_name", header: copy.contactos.fields.business, className: "w-72" },
+    { key: "contact_name", header: copy.contactos.fields.contact, className: "w-28" },
+    { key: "phone", header: copy.contactos.fields.phone, className: "w-32" },
+    { key: "email", header: copy.contactos.fields.email, className: "w-28" },
+    { key: "industry", header: copy.contactos.fields.industry, className: "w-32" },
     {
       key: "tags",
       header: copy.contactos.fields.tags,
       render: (row) => (
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-nowrap items-center gap-1 overflow-hidden">
           {row.tags.map((tag) => (
             <Badge key={tag} tone="neutral">
               {tag}
@@ -186,6 +254,16 @@ export function ContactosView() {
         </div>
       ),
     },
+    ...(isAdmin
+      ? [
+          {
+            key: "owner_full_name",
+            header: copy.contactos.fields.owner,
+            className: "w-36",
+            render: (row: ContactRow) => row.owner_full_name ?? copy.contactos.reassignDialog.currentOwnerNone,
+          } satisfies DataTableColumn<ContactRow>,
+        ]
+      : []),
   ];
 
   return (
@@ -283,7 +361,37 @@ export function ContactosView() {
                 </option>
               ))}
             </select>
+            {isAdmin ? (
+              <select
+                value={ownerFilter}
+                onChange={(event) => setOwnerFilter(event.target.value)}
+                aria-label={copy.contactos.filters.ownerLabel}
+                className={SELECT_CLASSES}
+              >
+                <option value="all">{copy.contactos.filters.ownerAll}</option>
+                {ownerOptions.map(([ownerId, ownerName]) => (
+                  <option key={ownerId} value={ownerId}>
+                    {ownerName}
+                  </option>
+                ))}
+              </select>
+            ) : null}
           </div>
+
+          {isAdmin && selectedContacts.length > 0 ? (
+            <div className="flex items-center justify-between rounded-[var(--radius-control)] border border-border-subtle bg-bg-sunken px-4 py-2.5">
+              <p className="text-sm font-medium text-text-primary">
+                {copy.contactos.selection.count(selectedContacts.length)}
+              </p>
+              <button
+                type="button"
+                onClick={() => setReassignDialogOpen(true)}
+                className={PRIMARY_BUTTON_CLASSES}
+              >
+                {copy.contactos.selection.reassign}
+              </button>
+            </div>
+          ) : null}
 
           {isLoading ? (
             <div className="flex flex-col gap-3">
@@ -325,6 +433,17 @@ export function ContactosView() {
                   virtualized
                   getRowHref={(row) => `/contactos/${row.id}`}
                   empty={null}
+                  selection={
+                    isAdmin
+                      ? {
+                          isSelected: (row) => selectedIds.has(row.id),
+                          onToggleRow: toggleRowSelection,
+                          onToggleAll: toggleAllSelection,
+                          allSelected: allFilteredSelected,
+                          getRowLabel: (row) => copy.contactos.selection.rowLabel(row.business_name),
+                        }
+                      : undefined
+                  }
                 />
               </div>
               <div className="sm:hidden">
@@ -332,7 +451,7 @@ export function ContactosView() {
                   rows={filteredContacts}
                   virtualized
                   renderCard={(contact) => (
-                    <ContactCard contact={contact} nextTask={nextTaskByContact.get(contact.id)} />
+                    <ContactCard contact={contact} nextTask={nextTaskByContact.get(contact.id)} isAdmin={isAdmin} />
                   )}
                 />
               </div>
@@ -340,6 +459,16 @@ export function ContactosView() {
           )}
         </>
       )}
+
+      {isAdmin ? (
+        <ReassignDialog
+          open={reassignDialogOpen}
+          onOpenChange={setReassignDialogOpen}
+          contacts={selectedContacts}
+          sellers={sellers}
+          onReassigned={() => setSelectedIds(new Set())}
+        />
+      ) : null}
     </div>
   );
 }
