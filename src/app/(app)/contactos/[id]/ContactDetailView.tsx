@@ -339,22 +339,50 @@ function ContactField({ label, value, href }: { label: string; value: string; hr
   );
 }
 
-function OportunidadGroup({ title, tone, items }: { title: string; tone: "success" | "neutral"; items: OfertaItem[] }) {
+// Núcleo vs. complemento se distingue por jerarquía tipográfica, superficie
+// y borde — NUNCA por color: el coral de esta pantalla ya lo tiene el score
+// y el badge de urgencia, y un tercer acento (aunque fuera otro tono)
+// diluiría cuál es el foco real. El núcleo lleva más peso a propósito: es
+// lo que se vende: encabezado en prosa normal, sin caja. El complemento se
+// lee después y más chico, metido en una superficie hundida — "se suma",
+// no "se vende".
+function OportunidadGroup({
+  heading,
+  items,
+  emphasis,
+}: {
+  heading: string;
+  items: OfertaItem[];
+  emphasis: "nucleo" | "complemento";
+}) {
   if (items.length === 0) return null;
 
+  const list = (
+    <ul className="flex flex-col gap-3">
+      {items.map((item) => (
+        <li key={item.carencia} className="flex items-start gap-2 text-sm text-text-primary">
+          <Check aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-text-primary" strokeWidth={2} />
+          <span>
+            <span className="font-semibold">{item.carencia}:</span> {item.propuesta}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+
+  if (emphasis === "nucleo") {
+    return (
+      <div className="flex flex-col gap-2">
+        <h5 className="text-sm font-semibold text-text-primary">{heading}</h5>
+        {list}
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col gap-2">
-      <Badge tone={tone}>{title}</Badge>
-      <ul className="flex flex-col gap-2">
-        {items.map((item) => (
-          <li key={item.carencia} className="flex items-start gap-2 text-sm text-text-primary">
-            <Check aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-state-positive" strokeWidth={2} />
-            <span>
-              <span className="font-medium">{item.carencia}:</span> {item.propuesta}
-            </span>
-          </li>
-        ))}
-      </ul>
+    <div className="flex flex-col gap-2 rounded-[var(--radius-control)] border border-border-subtle bg-bg-sunken p-3.5">
+      <h5 className="text-xs font-medium uppercase tracking-[0.06em] text-text-muted">{heading}</h5>
+      {list}
     </div>
   );
 }
@@ -409,32 +437,34 @@ function AnalysisPanel({ analysis }: { analysis: ProspectAnalysisRow }) {
         </div>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="flex flex-col gap-2">
-          <h4 className="text-xs font-medium uppercase tracking-[0.06em] text-state-negative">
-            {analysisTab.gapsTitle(gaps.length)}
-          </h4>
-          {gaps.length > 0 ? (
-            <ul className="flex flex-col gap-2">
-              {gaps.map((gap) => (
-                <li key={gap} className="flex items-start gap-2 text-sm text-text-primary">
-                  <X aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-state-negative" strokeWidth={2} />
-                  <span>{gap}</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-text-muted">{analysisTab.gapsEmpty}</p>
-          )}
-        </div>
+      {/* Primero el diagnóstico, luego la propuesta — en ese orden y uno
+          debajo del otro, nunca lado a lado: es el orden de la conversación
+          de venta, y el bloque de oferta es texto largo que no cabe bien en
+          una columna angosta (menos aún en móvil). */}
+      <div className="flex flex-col gap-2">
+        <h4 className="text-xs font-medium uppercase tracking-[0.06em] text-state-negative">
+          {analysisTab.gapsTitle(gaps.length)}
+        </h4>
+        {gaps.length > 0 ? (
+          <ul className="flex flex-col gap-2">
+            {gaps.map((gap) => (
+              <li key={gap} className="flex items-start gap-2 text-sm text-text-primary">
+                <X aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-state-negative" strokeWidth={2} />
+                <span>{gap}</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-text-muted">{analysisTab.gapsEmpty}</p>
+        )}
+      </div>
 
-        <div className="flex flex-col gap-3">
-          <h4 className="text-xs font-medium uppercase tracking-[0.06em] text-state-positive">
-            {analysisTab.opportunitiesTitle}
-          </h4>
-          <OportunidadGroup title={analysisTab.scopeNucleo} tone="success" items={nucleo} />
-          <OportunidadGroup title={analysisTab.scopeComplemento} tone="neutral" items={complemento} />
-        </div>
+      <div className="flex flex-col gap-4">
+        <h4 className="text-xs font-medium uppercase tracking-[0.06em] text-state-positive">
+          {analysisTab.opportunitiesTitle}
+        </h4>
+        <OportunidadGroup heading={analysisTab.scopeNucleo} emphasis="nucleo" items={nucleo} />
+        <OportunidadGroup heading={analysisTab.scopeComplemento} emphasis="complemento" items={complemento} />
       </div>
 
       {analysis.note ? (
