@@ -29,6 +29,7 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { Illustration } from "@/components/common/Illustration";
 import { MoneyValue } from "@/components/common/MoneyValue";
 import { PageHeader } from "@/components/common/PageHeader";
+import { Panel } from "@/components/common/Panel";
 import { Skeleton } from "@/components/common/Skeleton";
 import { ContactFormDialog } from "@/components/contactos/ContactFormDialog";
 import { OpportunityDialog } from "@/components/pipeline/OpportunityDialog";
@@ -767,38 +768,40 @@ export function ContactDetailView({
         </Tabs.List>
 
         <Tabs.Content value="data" className="pt-5">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <DataRow label={copy.contactos.fields.business} value={current.business_name} />
-            <DataRow
-              label={copy.contactos.fields.contact}
-              value={current.contact_name || copy.contactos.detail.dataPanel.noValue}
-            />
-            <DataRow
-              label={copy.contactos.fields.phone}
-              value={current.phone || copy.contactos.detail.dataPanel.noValue}
-            />
-            <DataRow
-              label={copy.contactos.fields.email}
-              value={current.email || copy.contactos.detail.dataPanel.noValue}
-            />
-            <DataRow
-              label={copy.contactos.fields.industry}
-              value={current.industry || copy.contactos.detail.dataPanel.noValue}
-            />
-            <DataRow
-              label={copy.contactos.fields.tags}
-              value={current.tags.length > 0 ? current.tags.join(", ") : copy.contactos.detail.dataPanel.noValue}
-            />
-            <DataRow
-              label={copy.contactos.detail.dataPanel.createdAt}
-              value={formatDate(current.created_at)}
-            />
-          </div>
-          {current.notes ? (
-            <div className="mt-4">
-              <DataRow label={copy.contactos.fields.notes} value={current.notes} />
+          <Panel title={copy.contactos.detail.tabs.data}>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <DataRow label={copy.contactos.fields.business} value={current.business_name} />
+              <DataRow
+                label={copy.contactos.fields.contact}
+                value={current.contact_name || copy.contactos.detail.dataPanel.noValue}
+              />
+              <DataRow
+                label={copy.contactos.fields.phone}
+                value={current.phone || copy.contactos.detail.dataPanel.noValue}
+              />
+              <DataRow
+                label={copy.contactos.fields.email}
+                value={current.email || copy.contactos.detail.dataPanel.noValue}
+              />
+              <DataRow
+                label={copy.contactos.fields.industry}
+                value={current.industry || copy.contactos.detail.dataPanel.noValue}
+              />
+              <DataRow
+                label={copy.contactos.fields.tags}
+                value={current.tags.length > 0 ? current.tags.join(", ") : copy.contactos.detail.dataPanel.noValue}
+              />
+              <DataRow
+                label={copy.contactos.detail.dataPanel.createdAt}
+                value={formatDate(current.created_at)}
+              />
             </div>
-          ) : null}
+            {current.notes ? (
+              <div className="mt-4">
+                <DataRow label={copy.contactos.fields.notes} value={current.notes} />
+              </div>
+            ) : null}
+          </Panel>
         </Tabs.Content>
 
         <Tabs.Content value="timeline" className="pt-5">
