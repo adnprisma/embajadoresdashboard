@@ -7,6 +7,7 @@ import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import {
   Briefcase,
+  Check,
   CheckCircle2,
   Gauge,
   History,
@@ -18,6 +19,7 @@ import {
   Pencil,
   Trash2,
   TriangleAlert,
+  X,
   XCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -249,19 +251,55 @@ const CAPABILITY_ORDER: Capacidad[] = [
   "has_redes",
 ];
 
-function CapabilityCell({
-  capacidad,
-  value,
-  webNote,
-}: {
-  capacidad: Capacidad;
-  value: boolean | null;
-  webNote?: string | null;
-}) {
+// El único elemento coral de la pestaña además del badge de urgencia — el
+// score es "acento, acción, hallazgo" (DESIGN_SYSTEM.md §2), así que aquí
+// SÍ se justifica. Todo lo demás (chips, badges de alcance) usa tonos de
+// estado, nunca coral, para que el score y la urgencia sigan siendo el
+// único foco de la pantalla.
+function scoreBandClasses(score: number) {
+  if (score >= 9) return "border-accent text-accent bg-accent-soft";
+  if (score >= 7) return "border-state-pending text-state-pending bg-state-pending-soft";
+  return "border-border-subtle text-text-muted bg-bg-sunken";
+}
+
+function ScoreCircle({ score }: { score: number }) {
+  return (
+    <div
+      role="img"
+      aria-label={copy.contactos.detail.analysisTab.scoreLabel(score)}
+      className={cn(
+        "flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full border-2 text-base font-extrabold",
+        scoreBandClasses(score),
+      )}
+    >
+      {score}
+    </div>
+  );
+}
+
+// Relleno coral con texto CARBÓN a propósito — blanco no pasa 3:1 sobre
+// coral (ver --text-on-coral en tokens.css). Es el segundo y último uso de
+// coral en esta pestaña: el hallazgo más urgente del análisis.
+function UrgentBadge() {
+  return (
+    <span className="inline-flex items-center rounded-full bg-accent px-2.5 py-0.5 text-xs font-extrabold uppercase tracking-wide text-text-on-coral">
+      {copy.contactos.detail.analysisTab.urgentBadge}
+    </span>
+  );
+}
+
+const CAPABILITY_TONE_CLASSES = {
+  success: "border-state-positive text-state-positive bg-state-positive-soft",
+  danger: "border-state-negative text-state-negative bg-state-negative-soft",
+  warning: "border-state-pending text-state-pending bg-state-pending-soft",
+} as const;
+
+function CapabilityChip({ capacidad, value, title }: { capacidad: Capacidad; value: boolean | null; title?: string | null }) {
   const { capabilityState } = copy.contactos.detail.analysisTab;
 
-  // El color nunca es el único portador de estado (DESIGN_SYSTEM.md §4):
-  // cada estado trae su propio ícono y su propia palabra, no solo un tono.
+  // El ícono ya distingue el estado por forma (check/cruz/guion), no solo
+  // por color — el texto de estado sigue existiendo para lectores de
+  // pantalla vía aria-label, aunque no se vea en el chip.
   const { Icon, tone, stateLabel } =
     value === true
       ? { Icon: CheckCircle2, tone: "success" as const, stateLabel: capabilityState.present }
@@ -269,21 +307,35 @@ function CapabilityCell({
         ? { Icon: XCircle, tone: "danger" as const, stateLabel: capabilityState.absent }
         : { Icon: MinusCircle, tone: "warning" as const, stateLabel: capabilityState.partial };
 
-  const TONE_TEXT: Record<typeof tone, string> = {
-    success: "text-state-positive",
-    danger: "text-state-negative",
-    warning: "text-state-pending",
-  };
+  const label = OFERTA_POR_CAPACIDAD[capacidad].carencia;
 
   return (
-    <div className="flex flex-col gap-1 rounded-[var(--radius-control)] border border-border-subtle bg-bg-surface p-3">
-      <div className="flex items-center gap-2">
-        <Icon aria-hidden="true" className={cn("h-4 w-4 shrink-0", TONE_TEXT[tone])} strokeWidth={1.5} />
-        <span className="text-sm font-medium text-text-primary">{OFERTA_POR_CAPACIDAD[capacidad].carencia}</span>
-      </div>
-      <span className={cn("text-xs", TONE_TEXT[tone])}>{stateLabel}</span>
-      {webNote ? <span className="text-xs text-text-muted">{copy.contactos.detail.analysisTab.webNote(webNote)}</span> : null}
-    </div>
+    <span
+      title={title ?? undefined}
+      aria-label={`${label}: ${stateLabel}`}
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium",
+        CAPABILITY_TONE_CLASSES[tone],
+      )}
+    >
+      <Icon aria-hidden="true" className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+      {label}
+    </span>
+  );
+}
+
+function ContactField({ label, value, href }: { label: string; value: string; href?: string }) {
+  return (
+    <p>
+      <span className="font-semibold text-text-muted">{label}: </span>
+      {href ? (
+        <a href={href} className="text-text-primary hover:underline">
+          {value}
+        </a>
+      ) : (
+        <span className="text-text-primary">{value}</span>
+      )}
+    </p>
   );
 }
 
@@ -295,8 +347,11 @@ function OportunidadGroup({ title, tone, items }: { title: string; tone: "succes
       <Badge tone={tone}>{title}</Badge>
       <ul className="flex flex-col gap-2">
         {items.map((item) => (
-          <li key={item.carencia} className="text-sm text-text-primary">
-            <span className="font-medium">{item.carencia}:</span> {item.propuesta}
+          <li key={item.carencia} className="flex items-start gap-2 text-sm text-text-primary">
+            <Check aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-state-positive" strokeWidth={2} />
+            <span>
+              <span className="font-medium">{item.carencia}:</span> {item.propuesta}
+            </span>
           </li>
         ))}
       </ul>
@@ -314,65 +369,77 @@ function AnalysisPanel({ analysis }: { analysis: ProspectAnalysisRow }) {
   const oportunidades = [...ofertaParaCarencias(analysis), ...OFERTA_ADICIONAL];
   const nucleo = oportunidades.filter((item) => item.alcance === "nucleo");
   const complemento = oportunidades.filter((item) => item.alcance === "complemento");
+  const gaps = analysis.gaps ?? [];
+
+  const contactFields: { label: string; value: string; href?: string }[] = [];
+  if (analysis.address) contactFields.push({ label: analysisTab.contactPanel.address, value: analysis.address });
+  if (analysis.phone) contactFields.push({ label: analysisTab.contactPanel.phone, value: analysis.phone, href: `tel:${analysis.phone}` });
+  if (analysis.email) contactFields.push({ label: analysisTab.contactPanel.email, value: analysis.email, href: `mailto:${analysis.email}` });
+  if (analysis.web_note) contactFields.push({ label: analysisTab.contactPanel.web, value: analysis.web_note });
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center gap-2">
-        {analysis.score !== null ? (
-          <Badge tone="neutral">
-            <Gauge aria-hidden="true" className="mr-1 inline h-3 w-3" strokeWidth={1.5} />
-            {analysisTab.scoreLabel(analysis.score)}
-          </Badge>
-        ) : null}
-        {analysis.is_urgent ? (
-          <Badge tone="danger">
-            <TriangleAlert aria-hidden="true" className="mr-1 inline h-3 w-3" strokeWidth={1.5} />
-            {analysisTab.urgentBadge}
-          </Badge>
-        ) : null}
+    <div className="flex flex-col gap-4 rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="text-base font-semibold text-text-primary">{analysis.business_name}</h3>
+          {analysis.is_urgent ? <UrgentBadge /> : null}
+        </div>
+        {analysis.score !== null ? <ScoreCircle score={analysis.score} /> : null}
       </div>
 
-      <div>
-        <h4 className="mb-2 text-xs font-medium uppercase tracking-[0.06em] text-text-muted">
-          {analysisTab.capabilitiesTitle}
-        </h4>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+      <div className="flex flex-col gap-2">
+        <h4 className="text-xs font-medium uppercase tracking-[0.06em] text-text-muted">{analysisTab.capabilitiesTitle}</h4>
+        <div className="flex flex-wrap gap-2">
           {CAPABILITY_ORDER.map((key) => (
-            <CapabilityCell
+            <CapabilityChip
               key={key}
               capacidad={key}
               value={analysis[key]}
-              webNote={key === "has_web" ? analysis.web_note : undefined}
+              title={key === "has_web" ? analysis.web_note : undefined}
             />
           ))}
         </div>
       </div>
 
-      <div>
-        <h4 className="mb-2 text-xs font-medium uppercase tracking-[0.06em] text-text-muted">{analysisTab.gapsTitle}</h4>
-        {analysis.gaps && analysis.gaps.length > 0 ? (
-          <ul className="flex flex-col gap-1">
-            {analysis.gaps.map((gap) => (
-              <li key={gap} className="text-sm text-text-primary">
-                • {gap}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-text-muted">{analysisTab.gapsEmpty}</p>
-        )}
-      </div>
+      {contactFields.length > 0 ? (
+        <div className="flex flex-col gap-1.5 rounded-[10px] bg-bg-sunken p-3.5 text-sm">
+          {contactFields.map((field) => (
+            <ContactField key={field.label} {...field} />
+          ))}
+        </div>
+      ) : null}
 
-      <div className="flex flex-col gap-4">
-        <h4 className="text-xs font-medium uppercase tracking-[0.06em] text-text-muted">{analysisTab.opportunitiesTitle}</h4>
-        <OportunidadGroup title={analysisTab.scopeNucleo} tone="success" items={nucleo} />
-        <OportunidadGroup title={analysisTab.scopeComplemento} tone="neutral" items={complemento} />
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="flex flex-col gap-2">
+          <h4 className="text-xs font-medium uppercase tracking-[0.06em] text-state-negative">
+            {analysisTab.gapsTitle(gaps.length)}
+          </h4>
+          {gaps.length > 0 ? (
+            <ul className="flex flex-col gap-2">
+              {gaps.map((gap) => (
+                <li key={gap} className="flex items-start gap-2 text-sm text-text-primary">
+                  <X aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-state-negative" strokeWidth={2} />
+                  <span>{gap}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-text-muted">{analysisTab.gapsEmpty}</p>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <h4 className="text-xs font-medium uppercase tracking-[0.06em] text-state-positive">
+            {analysisTab.opportunitiesTitle}
+          </h4>
+          <OportunidadGroup title={analysisTab.scopeNucleo} tone="success" items={nucleo} />
+          <OportunidadGroup title={analysisTab.scopeComplemento} tone="neutral" items={complemento} />
+        </div>
       </div>
 
       {analysis.note ? (
-        <div className="border-t border-border-subtle pt-4">
-          <h4 className="mb-1 text-xs font-medium uppercase tracking-[0.06em] text-text-muted">{analysisTab.noteTitle}</h4>
-          <p className="text-sm text-text-secondary">{analysis.note}</p>
+        <div className="border-t border-border-subtle pt-3.5">
+          <p className="text-sm italic text-text-secondary">{analysis.note}</p>
         </div>
       ) : null}
     </div>
