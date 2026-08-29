@@ -52,6 +52,12 @@ Reglas que no se negocian:
 - TypeScript estricto. **Cero `any`.**
 - Todo color sale de tokens CSS (`src/styles/tokens.css`).
   **Cero hexadecimales escritos a mano en componentes.**
+- **El beige (`--bg-base`) es el fondo de la página, no el de los bloques de
+  contenido.** Toda tabla, lista, formulario o panel de detalle va sobre
+  `--bg-surface`. Un bloque puesto directo sobre `--bg-base` es un bug de
+  jerarquía visual, aunque el contraste de texto pase — carbón sobre beige da
+  ~15:1, así que ningún grep de contraste lo detecta. Esto se ve a ojo o no se
+  detecta: revísalo tú, no un linter.
 - Todo texto visible al usuario vive en `src/config/copy.ts`.
   **Cero strings en JSX.**
 - Los componentes nunca llaman a `supabase` directamente. Solo a los hooks de
