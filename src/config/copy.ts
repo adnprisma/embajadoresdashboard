@@ -327,7 +327,6 @@ export const copy = {
     detail: {
       ownerLabel: (name: string) => `Vendedora: ${name}`,
       tabs: {
-        data: "Datos",
         timeline: "Línea de tiempo",
         tasks: "Tareas",
         opportunities: "Oportunidades",
@@ -379,7 +378,8 @@ export const copy = {
       },
       analysisTab: {
         emptyTitle: "Este contacto no tiene análisis de prospección",
-        emptyDescription: "Solo los contactos que vinieron de una prospección cargada tienen este análisis.",
+        emptyDescription:
+          "Solo los contactos que vinieron de un lote de prospección analizado tienen esta información. Si hace falta, pide que se incluya en la próxima carga.",
         scoreLabel: (score: number) => `Score ${score}/10`,
         urgentBadge: "Urgente",
         capabilitiesTitle: "Capacidades detectadas",

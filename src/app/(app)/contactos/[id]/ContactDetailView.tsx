@@ -13,10 +13,12 @@ import {
   History,
   Kanban,
   ListTodo,
+  Mail,
   MessageCircle,
   MessageSquare,
   MoreHorizontal,
   Pencil,
+  Phone,
   Trash2,
   TriangleAlert,
   X,
@@ -423,7 +425,100 @@ function MensajeSugeridoBlock({
   );
 }
 
-function AnalysisPanel({
+// Parte 1 de la narrativa ("quién es y cómo lo contacto") — sale de
+// `current` (prop síncrona, ya la tiene ContactDetailView), nunca del
+// análisis: tiene que pintarse de inmediato aunque el análisis tarde o no
+// exista. Teléfono/correo arriba y con enlace, porque es lo que se usa al
+// vuelo; giro/etiquetas/contacto desde son metadatos, van compactos en una
+// sola línea — no como los pares etiqueta/valor de la extinta pestaña Datos.
+function ContactInfoBlock({ current }: { current: ContactRow }) {
+  const { fields, detail } = copy.contactos;
+  const { dataPanel } = detail;
+
+  return (
+    <div className="flex flex-col gap-3">
+      {current.contact_name ? <p className="text-sm text-text-secondary">{current.contact_name}</p> : null}
+
+      <div className="flex flex-wrap gap-x-5 gap-y-2">
+        {current.phone ? (
+          <a
+            href={`tel:${current.phone}`}
+            className="flex min-h-11 items-center gap-2 text-sm font-medium text-text-primary hover:underline"
+          >
+            <Phone aria-hidden="true" className="h-4 w-4 shrink-0 text-text-muted" strokeWidth={1.5} />
+            {current.phone}
+          </a>
+        ) : (
+          <span className="flex items-center gap-2 text-sm text-text-muted">
+            <Phone aria-hidden="true" className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+            {dataPanel.noValue}
+          </span>
+        )}
+        {current.email ? (
+          <a
+            href={`mailto:${current.email}`}
+            className="flex min-h-11 items-center gap-2 text-sm font-medium text-text-primary hover:underline"
+          >
+            <Mail aria-hidden="true" className="h-4 w-4 shrink-0 text-text-muted" strokeWidth={1.5} />
+            {current.email}
+          </a>
+        ) : (
+          <span className="flex items-center gap-2 text-sm text-text-muted">
+            <Mail aria-hidden="true" className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+            {dataPanel.noValue}
+          </span>
+        )}
+      </div>
+
+      <p className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-muted">
+        <span>
+          {fields.industry}: {current.industry || dataPanel.noValue}
+        </span>
+        <span>
+          {fields.tags}: {current.tags.length > 0 ? current.tags.join(", ") : dataPanel.noValue}
+        </span>
+        <span>
+          {dataPanel.createdAt}: {formatDate(current.created_at)}
+        </span>
+      </p>
+
+      {current.notes ? <DataRow label={fields.notes} value={current.notes} /> : null}
+    </div>
+  );
+}
+
+// Extensión de la Parte 1 con lo que solo vive en prospect_analysis
+// (empieza por la dirección, que no existe en `contacts`). Se muestra
+// SIEMPRE que el dato exista, campo por campo — nunca condicionado a que el
+// resto del análisis (score, carencias) también esté completo. Hoy da lo
+// mismo porque todo sale de la misma fila, pero el día que el análisis
+// llegue parcial o se pueda editar, esta regla es la que evita perder la
+// dirección solo porque el score quedó en null.
+function AnalysisContactFields({ analysis }: { analysis: ProspectAnalysisRow }) {
+  const { analysisTab } = copy.contactos.detail;
+
+  const contactFields: { label: string; value: string; href?: string }[] = [];
+  if (analysis.address) contactFields.push({ label: analysisTab.contactPanel.address, value: analysis.address });
+  if (analysis.phone) contactFields.push({ label: analysisTab.contactPanel.phone, value: analysis.phone, href: `tel:${analysis.phone}` });
+  if (analysis.email) contactFields.push({ label: analysisTab.contactPanel.email, value: analysis.email, href: `mailto:${analysis.email}` });
+  if (analysis.web_note) contactFields.push({ label: analysisTab.contactPanel.web, value: analysis.web_note });
+
+  if (contactFields.length === 0) return null;
+
+  return (
+    <div className="flex flex-col gap-1.5 rounded-[10px] bg-bg-sunken p-3.5 text-sm">
+      {contactFields.map((field) => (
+        <ContactField key={field.label} {...field} />
+      ))}
+    </div>
+  );
+}
+
+// Partes 2 a 5: qué tan buena oportunidad, qué le falta, qué le ofrezco, qué
+// le digo. Todo detrás de un solo `border-t` que separa esto de la Parte 1
+// siempre visible — un único quiebre visual para las cuatro partes que sí
+// dependen del análisis.
+function AnalysisBody({
   analysis,
   ownerFullName,
   contactPhone,
@@ -445,48 +540,30 @@ function AnalysisPanel({
   const complemento = oportunidades.filter((item) => item.alcance === "complemento");
   const gaps = analysis.gaps ?? [];
 
-  const contactFields: { label: string; value: string; href?: string }[] = [];
-  if (analysis.address) contactFields.push({ label: analysisTab.contactPanel.address, value: analysis.address });
-  if (analysis.phone) contactFields.push({ label: analysisTab.contactPanel.phone, value: analysis.phone, href: `tel:${analysis.phone}` });
-  if (analysis.email) contactFields.push({ label: analysisTab.contactPanel.email, value: analysis.email, href: `mailto:${analysis.email}` });
-  if (analysis.web_note) contactFields.push({ label: analysisTab.contactPanel.web, value: analysis.web_note });
-
   return (
-    <div className="flex flex-col gap-4 rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface p-5">
-      <div className="flex items-start justify-between gap-3">
+    <div className="flex flex-col gap-4 border-t border-border-subtle pt-4">
+      {/* Parte 2: qué tan buena oportunidad es */}
+      <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          <h3 className="text-base font-semibold text-text-primary">{analysis.business_name}</h3>
+          {analysis.score !== null ? <ScoreCircle score={analysis.score} /> : null}
           {analysis.is_urgent ? <UrgentBadge /> : null}
         </div>
-        {analysis.score !== null ? <ScoreCircle score={analysis.score} /> : null}
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <h4 className="text-xs font-medium uppercase tracking-[0.06em] text-text-muted">{analysisTab.capabilitiesTitle}</h4>
-        <div className="flex flex-wrap gap-2">
-          {CAPABILITY_ORDER.map((key) => (
-            <CapabilityChip
-              key={key}
-              capacidad={key}
-              value={analysis[key]}
-              title={key === "has_web" ? analysis.web_note : undefined}
-            />
-          ))}
+        <div className="flex flex-col gap-2">
+          <h4 className="text-xs font-medium uppercase tracking-[0.06em] text-text-muted">{analysisTab.capabilitiesTitle}</h4>
+          <div className="flex flex-wrap gap-2">
+            {CAPABILITY_ORDER.map((key) => (
+              <CapabilityChip
+                key={key}
+                capacidad={key}
+                value={analysis[key]}
+                title={key === "has_web" ? analysis.web_note : undefined}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
-      {contactFields.length > 0 ? (
-        <div className="flex flex-col gap-1.5 rounded-[10px] bg-bg-sunken p-3.5 text-sm">
-          {contactFields.map((field) => (
-            <ContactField key={field.label} {...field} />
-          ))}
-        </div>
-      ) : null}
-
-      {/* Primero el diagnóstico, luego la propuesta — en ese orden y uno
-          debajo del otro, nunca lado a lado: es el orden de la conversación
-          de venta, y el bloque de oferta es texto largo que no cabe bien en
-          una columna angosta (menos aún en móvil). */}
+      {/* Parte 3: qué le falta */}
       <div className="flex flex-col gap-2">
         <h4 className="text-xs font-medium uppercase tracking-[0.06em] text-state-negative">
           {analysisTab.gapsTitle(gaps.length)}
@@ -503,8 +580,10 @@ function AnalysisPanel({
         ) : (
           <p className="text-sm text-text-muted">{analysisTab.gapsEmpty}</p>
         )}
+        {analysis.note ? <p className="text-sm italic text-text-secondary">{analysis.note}</p> : null}
       </div>
 
+      {/* Parte 4: qué le ofrezco */}
       <div className="flex flex-col gap-4">
         <h4 className="text-xs font-medium uppercase tracking-[0.06em] text-state-positive">
           {analysisTab.opportunitiesTitle}
@@ -513,70 +592,60 @@ function AnalysisPanel({
         <OportunidadGroup heading={analysisTab.scopeComplemento} emphasis="complemento" items={complemento} />
       </div>
 
-      {analysis.note ? (
-        <div className="border-t border-border-subtle pt-3.5">
-          <p className="text-sm italic text-text-secondary">{analysis.note}</p>
-        </div>
-      ) : null}
-
+      {/* Parte 5: qué le digo */}
       <MensajeSugeridoBlock analysis={analysis} ownerFullName={ownerFullName} contactPhone={contactPhone} industry={industry} />
     </div>
   );
 }
 
-function AnalysisTabPanel({
-  contactId,
-  ownerFullName,
-  contactPhone,
-  industry,
-}: {
-  contactId: string;
-  ownerFullName: string | null;
-  contactPhone: string | null;
-  industry: string | null;
-}) {
-  const { data, isLoading, isError, refetch } = useProspectAnalysis(contactId, true);
+// Orquesta las 5 partes: la 1 se pinta en cuanto hay `current` (prop
+// síncrona), sin esperar al análisis — un análisis lento nunca deja la
+// pantalla entera en blanco. Las partes 2 a 5 tienen su propio
+// loading/error/vacío, con un solo EmptyState cuando no hay análisis en vez
+// de cinco huecos separados.
+function ContactAnalysisTab({ current }: { current: ContactRow }) {
+  const { data, isLoading, isError, refetch } = useProspectAnalysis(current.id, true);
+  const { analysisTab } = copy.contactos.detail;
 
-  if (isLoading) {
-    return (
-      <div className="flex flex-col gap-3">
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
-      </div>
-    );
-  }
+  return (
+    <div className="flex flex-col gap-4">
+      <ContactInfoBlock current={current} />
+      {data ? <AnalysisContactFields analysis={data} /> : null}
 
-  if (isError) {
-    return (
-      <div className="flex flex-col items-center gap-3 py-10 text-center">
-        <TriangleAlert aria-hidden="true" className="h-8 w-8 text-state-negative" strokeWidth={1.5} />
-        <div>
-          <p className="text-sm font-medium text-text-primary">{copy.common.genericErrorTitle}</p>
-          <p className="mt-1 text-sm text-text-secondary">{copy.common.genericErrorDescription}</p>
+      {isLoading ? (
+        <div className="flex flex-col gap-3 border-t border-border-subtle pt-4">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
         </div>
-        <button
-          type="button"
-          onClick={() => refetch()}
-          className="rounded-[var(--radius-control)] border border-border-subtle px-3 py-1.5 text-sm font-medium text-text-primary transition-colors hover:bg-bg-sunken"
-        >
-          {copy.common.retry}
-        </button>
-      </div>
-    );
-  }
-
-  if (!data) {
-    return (
-      <EmptyState
-        icon={Gauge}
-        illustration={<Illustration name="encontrar" size="md" />}
-        title={copy.contactos.detail.analysisTab.emptyTitle}
-        description={copy.contactos.detail.analysisTab.emptyDescription}
-      />
-    );
-  }
-
-  return <AnalysisPanel analysis={data} ownerFullName={ownerFullName} contactPhone={contactPhone} industry={industry} />;
+      ) : isError ? (
+        <div className="flex flex-col items-center gap-3 border-t border-border-subtle pt-8 text-center">
+          <TriangleAlert aria-hidden="true" className="h-8 w-8 text-state-negative" strokeWidth={1.5} />
+          <div>
+            <p className="text-sm font-medium text-text-primary">{copy.common.genericErrorTitle}</p>
+            <p className="mt-1 text-sm text-text-secondary">{copy.common.genericErrorDescription}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="rounded-[var(--radius-control)] border border-border-subtle px-3 py-1.5 text-sm font-medium text-text-primary transition-colors hover:bg-bg-sunken"
+          >
+            {copy.common.retry}
+          </button>
+        </div>
+      ) : !data ? (
+        <div className="border-t border-border-subtle pt-4">
+          <EmptyState
+            icon={Gauge}
+            illustration={<Illustration name="encontrar" size="md" />}
+            title={analysisTab.emptyTitle}
+            description={analysisTab.emptyDescription}
+          />
+        </div>
+      ) : (
+        <AnalysisBody analysis={data} ownerFullName={current.owner_full_name} contactPhone={current.phone} industry={current.industry} />
+      )}
+    </div>
+  );
 }
 
 function AssignmentsPanel({ contactId, enabled }: { contactId: string; enabled: boolean }) {
@@ -800,10 +869,10 @@ export function ContactDetailView({
         </div>
       ) : null}
 
-      <Tabs.Root defaultValue="data">
+      <Tabs.Root defaultValue="analysis">
         <Tabs.List className="flex items-center gap-1 border-b border-border-subtle">
-          <Tabs.Trigger value="data" className={TAB_TRIGGER_CLASSES}>
-            {copy.contactos.detail.tabs.data}
+          <Tabs.Trigger value="analysis" className={TAB_TRIGGER_CLASSES}>
+            {copy.contactos.detail.tabs.analysis}
           </Tabs.Trigger>
           <Tabs.Trigger value="timeline" className={TAB_TRIGGER_CLASSES}>
             {copy.contactos.detail.tabs.timeline}
@@ -814,9 +883,6 @@ export function ContactDetailView({
           <Tabs.Trigger value="opportunities" className={TAB_TRIGGER_CLASSES}>
             {copy.contactos.detail.tabs.opportunities}
           </Tabs.Trigger>
-          <Tabs.Trigger value="analysis" className={TAB_TRIGGER_CLASSES}>
-            {copy.contactos.detail.tabs.analysis}
-          </Tabs.Trigger>
           {isAdmin ? (
             <Tabs.Trigger value="assignments" className={TAB_TRIGGER_CLASSES}>
               {copy.contactos.detail.tabs.assignments}
@@ -824,40 +890,13 @@ export function ContactDetailView({
           ) : null}
         </Tabs.List>
 
-        <Tabs.Content value="data" className="pt-5">
-          <Panel title={copy.contactos.detail.tabs.data}>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <DataRow label={copy.contactos.fields.business} value={current.business_name} />
-              <DataRow
-                label={copy.contactos.fields.contact}
-                value={current.contact_name || copy.contactos.detail.dataPanel.noValue}
-              />
-              <DataRow
-                label={copy.contactos.fields.phone}
-                value={current.phone || copy.contactos.detail.dataPanel.noValue}
-              />
-              <DataRow
-                label={copy.contactos.fields.email}
-                value={current.email || copy.contactos.detail.dataPanel.noValue}
-              />
-              <DataRow
-                label={copy.contactos.fields.industry}
-                value={current.industry || copy.contactos.detail.dataPanel.noValue}
-              />
-              <DataRow
-                label={copy.contactos.fields.tags}
-                value={current.tags.length > 0 ? current.tags.join(", ") : copy.contactos.detail.dataPanel.noValue}
-              />
-              <DataRow
-                label={copy.contactos.detail.dataPanel.createdAt}
-                value={formatDate(current.created_at)}
-              />
-            </div>
-            {current.notes ? (
-              <div className="mt-4">
-                <DataRow label={copy.contactos.fields.notes} value={current.notes} />
-              </div>
-            ) : null}
+        {/* Datos + Análisis fusionados: Datos ya no existe como pestaña
+            aparte. Una sola narrativa — quién es, qué tan buena
+            oportunidad, qué le falta, qué le ofrezco, qué le digo — dentro
+            del mismo Panel que usan las demás pestañas. */}
+        <Tabs.Content value="analysis" className="pt-5">
+          <Panel title={copy.contactos.detail.tabs.analysis}>
+            <ContactAnalysisTab current={current} />
           </Panel>
         </Tabs.Content>
 
@@ -877,18 +916,6 @@ export function ContactDetailView({
           <Panel title={copy.contactos.detail.tabs.opportunities}>
             <OpportunitiesPanel contactId={current.id} />
           </Panel>
-        </Tabs.Content>
-
-        {/* Análisis ya trae su propia superficie del rediseño reciente
-            (tarjeta bg-surface con score, capacidades, oferta...) — meterla
-            en un Panel aquí le pondría un segundo marco encima. */}
-        <Tabs.Content value="analysis" className="pt-5">
-          <AnalysisTabPanel
-            contactId={current.id}
-            ownerFullName={current.owner_full_name}
-            contactPhone={current.phone}
-            industry={current.industry}
-          />
         </Tabs.Content>
 
         {isAdmin ? (
