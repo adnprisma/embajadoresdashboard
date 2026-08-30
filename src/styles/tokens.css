@@ -59,8 +59,13 @@
      énfasis en texto se hace con carbón + peso tipográfico, no con color. */
 
   /* --- Estados funcionales (PROPUESTA — requieren aprobación) ------- */
-  --state-positive:      #2F7A55;
-  --state-positive-soft: rgb(47 122 85 / 0.12);
+  /* Oscurecido de #2F7A55 a #2B6E4D: el original media 4.53:1 sobre beige y
+     5.20:1 sobre blanco (ambos pasan), pero el caso real más común — texto
+     sobre --state-positive-soft compuesto sobre blanco, como en StatCard —
+     media 4.44:1, abajo del 4.5:1 mínimo. Este valor da 5.31:1 sobre beige,
+     6.10:1 sobre blanco y 5.17:1 en el caso compuesto. */
+  --state-positive:      #2B6E4D;
+  --state-positive-soft: rgb(43 110 77 / 0.12);
   /* Oscurecido de #B8791F a #8C5C18: el original media 3.15:1 sobre beige y
      3.63:1 sobre blanco, ambos abajo del 4.5:1 mínimo de texto (CLAUDE.md
      §4). Este valor da 4.99:1 sobre beige y 5.74:1 sobre blanco — el caso
@@ -69,8 +74,14 @@
      token: badges, bordes de pipeline, StatCard, AlertBanner. */
   --state-pending:       #8C5C18;
   --state-pending-soft:  rgb(140 92 24 / 0.12);
+  /* Verificado, sin cambio: 4.96:1 sobre beige, 5.71:1 sobre blanco, 4.84:1
+     en el caso compuesto (texto sobre --state-progress-soft sobre blanco).
+     Los tres pasan 4.5:1 — no hacía falta oscurecerlo. */
   --state-progress:      #3A6B8F;
   --state-progress-soft: rgb(58 107 143 / 0.12);
+  /* Verificado, sin cambio: 5.20:1 sobre beige, 5.97:1 sobre blanco, 4.97:1
+     en el caso compuesto (texto sobre --state-negative-soft sobre blanco).
+     Los tres pasan 4.5:1 — no hacía falta oscurecerlo. */
   --state-negative:      #B3382A;
   --state-negative-soft: rgb(179 56 42 / 0.12);
 

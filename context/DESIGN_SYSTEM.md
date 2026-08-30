@@ -56,7 +56,7 @@ desaturados para no competir con el coral:
 
 | Estado | Valor propuesto | Uso |
 |---|---|---|
-| Positivo | `#2F7A55` | Dinero real, confirmado, completado |
+| Positivo | `#2B6E4D` | Dinero real, confirmado, completado |
 | Pendiente | `#8C5C18` | En validación, requiere acción |
 | En proceso | `#3A6B8F` | En prueba, en curso |
 | Negativo | `#B3382A` | Error, cancelado, vencido |
@@ -64,10 +64,21 @@ desaturados para no competir con el coral:
 **Regla dura:** el coral NO es un color de estado. El coral es acción y foco.
 Si usas coral para "éxito", pierdes el único acento fuerte que tiene la marca.
 
-**Pendiente, corregido:** el valor original (`#B8791F`) medía 3.15:1 sobre
-beige y 3.63:1 sobre blanco, ambos abajo del 4.5:1 mínimo de texto. `#8C5C18`
-da 4.99:1 y 5.74:1 respectivamente — misma familia de color (ámbar), solo
-más oscuro.
+**Contraste verificado sobre las tres superficies reales** — beige (`--bg-base`),
+blanco (`--bg-surface`) y el caso compuesto (texto sobre el fondo `-soft` del
+propio token, compuesto sobre blanco — así aparece en `StatCard`, `Badge`,
+`AlertBanner`):
+
+| Token | Beige | Blanco | Compuesto | Veredicto |
+|---|---|---|---|---|
+| Positivo (`#2B6E4D`, antes `#2F7A55`) | 5.31:1 | 6.10:1 | 5.17:1 | Corregido — el original daba 4.44:1 en el compuesto, abajo de 4.5:1 |
+| Pendiente (`#8C5C18`, antes `#B8791F`) | 4.99:1 | 5.74:1 | 5.02:1 | Corregido — el original daba 3.15:1 / 3.63:1, abajo de 4.5:1 en ambos |
+| En proceso (`#3A6B8F`, sin cambio) | 4.96:1 | 5.71:1 | 4.84:1 | Ya pasaba — no hacía falta oscurecerlo |
+| Negativo (`#B3382A`, sin cambio) | 5.20:1 | 5.97:1 | 4.97:1 | Ya pasaba — no hacía falta oscurecerlo |
+
+Los cuatro se oscurecieron lo mínimo necesario para llegar a 4.5:1 en las tres
+superficies — Positivo y Pendiente sí necesitaron ajuste; En proceso y
+Negativo ya cumplían y se dejaron igual.
 
 ### Acento de etapa en el pipeline — CONFIRMADO
 
