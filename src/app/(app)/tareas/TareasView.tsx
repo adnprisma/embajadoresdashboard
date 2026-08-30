@@ -1,7 +1,8 @@
 "use client";
 
 import * as Collapsible from "@radix-ui/react-collapsible";
-import { AlertTriangle, ChevronDown, ListTodo } from "lucide-react";
+import { AlertTriangle, ChevronDown, ListChecks, ListTodo } from "lucide-react";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Illustration } from "@/components/common/Illustration";
@@ -13,6 +14,9 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useUndoableTaskDelete } from "@/hooks/useUndoableTaskDelete";
 import { useTasks, useToggleTask } from "@/lib/queries/tasks";
 import { cn } from "@/lib/utils/cn";
+
+const PRIMARY_BUTTON_CLASSES =
+  "inline-flex items-center gap-2 rounded-[var(--radius-control)] bg-accent px-3 py-2 text-sm font-medium text-text-on-coral transition-colors hover:opacity-90";
 
 export function TareasView() {
   const { data, isLoading, isError, refetch } = useTasks();
@@ -56,7 +60,15 @@ export function TareasView() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title={copy.shell.nav.tasks} />
+      <PageHeader
+        title={copy.shell.nav.tasks}
+        action={
+          <Link href="/plan-semanal" className={PRIMARY_BUTTON_CLASSES}>
+            <ListChecks aria-hidden="true" className="h-4 w-4" strokeWidth={1.5} />
+            {copy.tareas.weeklyPlan.cta}
+          </Link>
+        }
+      />
 
       {isError ? (
         <div className="flex flex-col items-center gap-3 rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface p-10 text-center">

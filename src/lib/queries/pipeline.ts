@@ -102,6 +102,27 @@ export function useOpportunities() {
   });
 }
 
+// Contact_id de MIS oportunidades (cualquier etapa), para el plan semanal —
+// mismo motivo que useOwnOpenTaskContactIds() en tasks.ts: un admin ve las
+// oportunidades de todo el equipo vía RLS, así que useOpportunities() no
+// sirve para "¿ya tiene oportunidad ESTE usuario?".
+export function useOwnOpportunityContactIds(ownerId: string | undefined, enabled: boolean) {
+  return useQuery({
+    queryKey: [...pipelineKeys.all, "ownOpportunityContactIds", ownerId] as const,
+    queryFn: async (): Promise<Set<string>> => {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("opportunities")
+        .select("contact_id")
+        .eq("owner_id", ownerId as string)
+        .not("contact_id", "is", null);
+      if (error) throw error;
+      return new Set((data as { contact_id: string }[]).map((row) => row.contact_id));
+    },
+    enabled: enabled && Boolean(ownerId),
+  });
+}
+
 // Query separada de useOpportunities() a propósito, con su propia llave de
 // caché: la pestaña "Oportunidades" de la ficha de contacto necesita poder
 // invalidarse sola sin depender de que /pipeline esté montado (o viceversa).

@@ -13,7 +13,8 @@
 //
 // Actualizado a mano también con 0008_prospect_analysis.sql,
 // 0009_roles.sql, 0010_rls_admin.sql, 0011_contact_assignments.sql,
-// 0012_prospect_analysis_capacidades.sql y 0013_import_contacts.sql.
+// 0012_prospect_analysis_capacidades.sql, 0013_import_contacts.sql y
+// 0014_generate_weekly_plan.sql.
 // ---------------------------------------------------------------
 
 export type Json =
@@ -889,6 +890,13 @@ export type Database = {
           p_assigned_by?: string | null;
         };
         Returns: number;
+      };
+      generate_weekly_plan: {
+        Args: {
+          p_items: Json;
+          p_created_by?: string | null;
+        };
+        Returns: Json;
       };
     };
     Enums: {

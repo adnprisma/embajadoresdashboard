@@ -86,6 +86,29 @@ export function useContactTasks(contactId: string) {
   });
 }
 
+// Contact_id de MIS tareas abiertas, para el plan semanal — filtrado
+// explícito por owner_id, sin confiar en RLS: desde 0010_rls_admin.sql un
+// admin ve las tareas de TODO el equipo, así que useTasks() no sirve aquí
+// (mezclaría leads ajenos). `enabled` para no pedirlo hasta tener el propio
+// id de sesión.
+export function useOwnOpenTaskContactIds(ownerId: string | undefined, enabled: boolean) {
+  return useQuery({
+    queryKey: [...tasksKeys.all, "openContactIds", ownerId] as const,
+    queryFn: async (): Promise<Set<string>> => {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("contact_id")
+        .eq("owner_id", ownerId as string)
+        .eq("done", false)
+        .not("contact_id", "is", null);
+      if (error) throw error;
+      return new Set((data as { contact_id: string }[]).map((row) => row.contact_id));
+    },
+    enabled: enabled && Boolean(ownerId),
+  });
+}
+
 export function useCreateTask() {
   const queryClient = useQueryClient();
 
@@ -145,6 +168,33 @@ export function useToggleTask() {
     },
     onSuccess: () => {
       toast.success(copy.tareas.toggleSuccessToast);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: tasksKeys.all });
+    },
+  });
+}
+
+// Plan de acción semanal — un solo RPC para hasta 50 filas, nunca 50
+// inserts desde el cliente (ver 0014_generate_weekly_plan.sql). El RPC
+// decide cuántas insertó de verdad (salta las que ya tenían tarea esa
+// semana) y regresa {created, skipped} — el toast reporta ESE número, no el
+// que se pidió crear, para no mentir si algo se saltó en silencio.
+export function useGenerateWeeklyPlan() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (items: { contact_id: string; title: string; due_at: string }[]) => {
+      const supabase = createClient();
+      const { data, error } = await supabase.rpc("generate_weekly_plan", { p_items: items });
+      if (error) throw error;
+      return data as { created: number; skipped: number };
+    },
+    onError: () => {
+      toast.error(copy.tareas.weeklyPlan.errorToast);
+    },
+    onSuccess: ({ created, skipped }) => {
+      toast.success(copy.tareas.weeklyPlan.resultToast(created, skipped));
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: tasksKeys.all });

@@ -14,6 +14,7 @@ export const copy = {
     thisMonthNote: "Este mes",
     historicNote: "Histórico",
     selectAllLabel: "Seleccionar todo lo filtrado",
+    back: "Volver",
   },
 
   notFound: {
@@ -566,6 +567,32 @@ export const copy = {
       },
       successToast: "Tarea creada.",
       errorToast: "No pudimos crear la tarea. Intenta de nuevo.",
+    },
+    // Plan de acción semanal — (fullscreen)/plan-semanal. Título de cada
+    // tarea generada: corto y accionable, con el nombre del negocio.
+    weeklyPlan: {
+      cta: "Generar plan de la semana",
+      pageTitle: "Plan de la semana",
+      taskTitle: (businessName: string) => `Contactar a ${businessName}`,
+      step1Title: "Revisa la propuesta",
+      step1Description: "Quita los contactos que no quieras trabajar esta semana. El resto se convierte en una tarea por contacto, en el día que le toque.",
+      removeRowLabel: (businessName: string) => `Quitar ${businessName} del plan`,
+      dayTaskCount: (n: number) => (n === 1 ? "1 tarea" : `${n} tareas`),
+      dayEmpty: "Sin candidatos para este día.",
+      totalCount: (n: number) => (n === 1 ? "1 tarea en total" : `${n} tareas en total`),
+      confirmButton: (n: number) => (n === 1 ? "Crear 1 tarea" : `Crear ${n} tareas`),
+      confirming: "Creando…",
+      resultToast: (created: number, skipped: number) =>
+        skipped === 0
+          ? created === 1
+            ? "Se creó 1 tarea."
+            : `Se crearon ${created} tareas.`
+          : `Se crearon ${created} de ${created + skipped} — ${skipped} ya tenían tarea esta semana.`,
+      errorToast: "No pudimos generar el plan. Intenta de nuevo.",
+      emptyNoAnalysisTitle: "Todavía no tienes prospectos analizados",
+      emptyNoAnalysisDescription: "El plan se arma sobre contactos con análisis de prospección. Carga un lote o pide que se analicen los tuyos.",
+      emptyAllWorkedTitle: "Ya trabajaste todos tus prospectos",
+      emptyAllWorkedDescription: "Ninguno de tus contactos con análisis está libre esta semana: ya tienen tarea abierta o ya están en el pipeline.",
     },
   },
 
