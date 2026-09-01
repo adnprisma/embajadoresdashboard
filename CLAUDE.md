@@ -109,3 +109,11 @@ Reglas que no se negocian:
   primero, o corre el build con un `distDir` distinto. Esto ya causó un falso
   reporte de bug en el botón de "Nueva oportunidad" y dos sesiones de
   desarrollo corrompidas.
+- **Si el código nuevo depende de una migración, corre la migración antes de
+  hacer push, no después.** Push primero deja una ventana en la que main ya
+  está desplegado y la base todavía no cambió — en esa ventana la app está
+  rota en producción, no en local. Si correr la migración antes no es
+  posible, avísalo en la PRIMERA línea del reporte del push, no al final
+  entre otras confirmaciones: de eso depende que alguien corra a arreglarlo.
+  Ya pasó: un `SELECT` pidió una columna que la migración todavía no había
+  creado y tumbó `/contactos` para las dos vendedoras.
