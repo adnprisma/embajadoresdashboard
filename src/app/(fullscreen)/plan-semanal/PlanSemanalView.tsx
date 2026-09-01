@@ -32,13 +32,22 @@ function UrgentMark() {
   );
 }
 
-function CandidateRow({ candidate, onRemove }: { candidate: WeeklyPlanCandidate; onRemove: () => void }) {
+function CandidateRow({
+  candidate,
+  time,
+  onRemove,
+}: {
+  candidate: WeeklyPlanCandidate;
+  time: Date;
+  onRemove: () => void;
+}) {
   return (
     <li className="flex items-start justify-between gap-2 border-t border-border-subtle py-2.5 first:border-t-0">
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-text-primary">{candidate.businessName}</p>
         <p className="truncate text-xs text-text-secondary">{candidate.colonia ?? copy.contactos.detail.dataPanel.noValue}</p>
         <div className="mt-1 flex flex-wrap items-center gap-1.5">
+          <span className="numeric text-xs text-text-muted">{format(time, "h:mm a", { locale: es })}</span>
           <span className="text-xs font-semibold text-text-primary">
             {candidate.score !== null ? candidate.score : copy.contactos.comparativa.scoreNone}
           </span>
@@ -68,10 +77,11 @@ function DayColumn({ day, dayIndex, onRemove }: { day: WeeklyPlanDay; dayIndex: 
         <p className="py-4 text-center text-xs text-text-muted">{copy.tareas.weeklyPlan.dayEmpty}</p>
       ) : (
         <ul className="flex flex-col">
-          {day.candidates.map((candidate) => (
+          {day.candidates.map((candidate, index) => (
             <CandidateRow
               key={candidate.contactId}
               candidate={candidate}
+              time={timeForSlot(day.date, index)}
               onRemove={() => onRemove(dayIndex, candidate.contactId)}
             />
           ))}
