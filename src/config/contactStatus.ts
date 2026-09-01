@@ -19,6 +19,15 @@ export type ContactStatus = (typeof CONTACT_STATUSES)[number];
 // lista.
 export const TERMINAL_STATUSES: ReadonlySet<ContactStatus> = new Set(["no_interesado", "ilocalizable"]);
 
+// Estados que cuentan como "se llegó a algo" en el embudo semanal (bloque
+// 3, weekly_status_funnel() en 0019_weekly_status_funnel.sql) —
+// sin_contactar es el default/reset, no una meta alcanzada. El RPC aplica
+// el mismo criterio en SQL (to_status <> 'sin_contactar'); si algún día se
+// agrega un estado nuevo, hay que revisar los dos lugares.
+export const FUNNEL_STATUSES: readonly ContactStatus[] = CONTACT_STATUSES.filter(
+  (status) => status !== "sin_contactar",
+);
+
 // El color codifica desenlace, no identidad — misma regla que los acentos
 // de etapa del pipeline (DESIGN_SYSTEM.md). "Ilocalizable" es neutro, no
 // negativo: a diferencia de "no interesado" (una respuesta real), acá no

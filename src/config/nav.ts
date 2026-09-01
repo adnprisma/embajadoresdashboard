@@ -7,6 +7,7 @@ import {
   Kanban,
   LayoutDashboard,
   ListTodo,
+  UsersRound,
   Users,
   Wallet,
   type LucideIcon,
@@ -17,6 +18,9 @@ export type NavItem = {
   label: string;
   href: string;
   icon: LucideIcon;
+  // Filtrado en SidebarContent según profile.role — el resto de la
+  // navegación es igual para todos, esta es la primera excepción.
+  adminOnly?: boolean;
 };
 
 export type ExternalNavItem = {
@@ -37,6 +41,7 @@ export const NAV_GROUPS: NavGroup[] = [
   [
     { label: copy.shell.nav.pipeline, href: "/pipeline", icon: Kanban },
     { label: copy.shell.nav.contacts, href: "/contactos", icon: Contact },
+    { label: copy.shell.nav.team, href: "/equipo", icon: UsersRound, adminOnly: true },
     { label: copy.shell.nav.calendar, href: "/calendario", icon: Calendar },
     { label: copy.shell.nav.tasks, href: "/tareas", icon: ListTodo },
   ],

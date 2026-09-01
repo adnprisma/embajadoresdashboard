@@ -14,6 +14,14 @@ export default async function AppGroupLayout({ children }: { children: ReactNode
   }
 
   return (
-    <AppShell profile={{ fullName: profile.full_name, email: profile.email }}>{children}</AppShell>
+    <AppShell
+      profile={{
+        fullName: profile.full_name,
+        email: profile.email,
+        role: profile.role === "admin" ? "admin" : "seller",
+      }}
+    >
+      {children}
+    </AppShell>
   );
 }

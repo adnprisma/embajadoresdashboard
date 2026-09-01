@@ -24,6 +24,7 @@ import {
 import { copy } from "@/config/copy";
 import { useRealtimeInvalidate } from "@/hooks/useRealtimeInvalidate";
 import { dashboardKeys, useDashboardSummary } from "@/lib/queries/dashboard";
+import { WeeklyRhythmPanel } from "./WeeklyRhythmPanel";
 
 function useSecondsAgo(timestamp: number | undefined) {
   const [seconds, setSeconds] = useState(0);
@@ -61,9 +62,15 @@ function getMiniCardHint(status: CommissionStatus) {
 export function DashboardView({
   greetingName,
   billingComplete,
+  isSeller = false,
 }: {
   greetingName: string;
   billingComplete: boolean;
+  // "Tu ritmo esta semana" es solo para vendedoras — admin no trabaja
+  // leads propios, y meter ahí el embudo del equipo rompería otra vez la
+  // regla de que el dashboard es personal (ver CLAUDE.md §3, /equipo es la
+  // pantalla comparativa).
+  isSeller?: boolean;
 }) {
   const { data, isLoading, isError, dataUpdatedAt, refetch } = useDashboardSummary();
   useRealtimeInvalidate("commissions", dashboardKeys.summary());
@@ -192,6 +199,8 @@ export function DashboardView({
               </div>
             )}
           </Panel>
+
+          {isSeller ? <WeeklyRhythmPanel /> : null}
 
           <Panel title={copy.dashboard.commissionsChart.title}>
             {isLoading || !data ? (

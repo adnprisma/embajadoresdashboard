@@ -13,6 +13,7 @@ import { getDisplayName } from "@/lib/utils/display-name";
 export type SidebarProfile = {
   fullName: string;
   email: string;
+  role: "admin" | "seller";
 };
 
 export function UserMenu({ profile }: { profile: SidebarProfile }) {

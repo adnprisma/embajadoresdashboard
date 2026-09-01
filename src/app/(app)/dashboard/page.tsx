@@ -9,6 +9,7 @@ export default async function DashboardPage() {
     <DashboardView
       greetingName={profile ? getDisplayName(profile.full_name, profile.email) : ""}
       billingComplete={profile?.billing_complete ?? true}
+      isSeller={profile?.role === "seller"}
     />
   );
 }

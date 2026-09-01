@@ -15,7 +15,8 @@
 // 0009_roles.sql, 0010_rls_admin.sql, 0011_contact_assignments.sql,
 // 0012_prospect_analysis_capacidades.sql, 0013_import_contacts.sql,
 // 0014_generate_weekly_plan.sql, 0015_contact_status.sql,
-// 0016_opportunity_value_split.sql y 0017_opportunity_delete_guard.sql.
+// 0016_opportunity_value_split.sql, 0017_opportunity_delete_guard.sql,
+// 0018_interactions_attribution_fix.sql y 0019_weekly_status_funnel.sql.
 // ---------------------------------------------------------------
 
 export type Json =
@@ -937,6 +938,16 @@ export type Database = {
           p_changed_by?: string | null;
         };
         Returns: undefined;
+      };
+      weekly_status_funnel: {
+        Args: {
+          p_weeks_ago?: number;
+        };
+        Returns: {
+          owner_id: string;
+          to_status: string;
+          contact_count: number;
+        }[];
       };
     };
     Enums: {

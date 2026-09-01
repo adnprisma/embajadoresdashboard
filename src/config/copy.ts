@@ -106,6 +106,7 @@ export const copy = {
       clients: "Mis clientes",
       pipeline: "Pipeline",
       contacts: "Contactos",
+      team: "Equipo",
       calendar: "Calendario",
       tasks: "Mis tareas",
       resources: "Recursos",
@@ -159,6 +160,16 @@ export const copy = {
       newMonth: "Nuevas este mes",
       closesMonth: "Cerradas este mes",
       closeRate: "Tasa de cierre",
+    },
+    // Solo para vendedoras (DashboardView lo gatea) — el mismo embudo de
+    // /equipo (bloque 3), pero solo lo propio y presentado como ritmo, no
+    // como calificación. Sin porcentajes, absolutos nada más.
+    weeklyRhythm: {
+      title: "Tu ritmo esta semana",
+      subtitle: "Contactos distintos que llegaste a cada estado esta semana. No es una calificación.",
+      previousWeekLabel: "Semana pasada",
+      emptyTitle: "Todavía no has cambiado ningún estado esta semana",
+      emptyDescription: "En cuanto cambies el estado de un contacto, aparecerá aquí.",
     },
     commissionsChart: {
       title: "Comisiones",
@@ -499,6 +510,27 @@ export const copy = {
         done: "Listo",
         rowError: (row: number, message: string) => `Fila ${row}: ${message}`,
       },
+    },
+  },
+
+  // Pantalla admin-only (bloque 3). Reutiliza copy.contactos.status.labels
+  // para los nombres de estado — una sola fuente de texto para eso.
+  equipo: {
+    title: "Actividad del equipo",
+    funnel: {
+      title: "Embudo semanal",
+      subtitle: "Contactos distintos que llegaron a cada estado esta semana. Semana de lunes a domingo.",
+      columnSeller: "Vendedora",
+      previousWeekLabel: "Semana pasada",
+      emptyTitle: "Todavía no hay cambios de estado esta semana",
+      emptyDescription: "En cuanto una vendedora cambie el estado de un contacto, aparecerá aquí.",
+    },
+    snapshot: {
+      title: "Foto del universo",
+      subtitle: "Cómo están repartidos hoy los contactos de cada vendedora entre los seis estados.",
+      columnTotal: "Total",
+      emptyTitle: "Todavía no hay contactos asignados",
+      emptyDescription: "En cuanto se asignen contactos a una vendedora, aparecerán aquí.",
     },
   },
 
