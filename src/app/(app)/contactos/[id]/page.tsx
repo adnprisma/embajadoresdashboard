@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
+import type { ContactStatus } from "@/config/contactStatus";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/supabase/get-current-profile";
 import { ContactDetailView } from "./ContactDetailView";
 
 const CONTACT_SELECT =
-  "id, owner_id, business_name, contact_name, phone, email, industry, tags, notes, created_at, profiles(full_name)";
+  "id, owner_id, business_name, contact_name, phone, email, industry, tags, notes, status, created_at, profiles(full_name)";
 
 type ContactQueryRow = {
   id: string;
@@ -16,6 +17,7 @@ type ContactQueryRow = {
   industry: string | null;
   tags: string[];
   notes: string | null;
+  status: ContactStatus;
   created_at: string;
   profiles: { full_name: string } | { full_name: string }[] | null;
 };
@@ -57,6 +59,7 @@ export default async function ContactoDetailPage({
         industry: row.industry,
         tags: row.tags,
         notes: row.notes,
+        status: row.status,
         created_at: row.created_at,
       }}
       isAdmin={profile?.role === "admin"}

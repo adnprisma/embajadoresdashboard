@@ -13,8 +13,8 @@
 //
 // Actualizado a mano también con 0008_prospect_analysis.sql,
 // 0009_roles.sql, 0010_rls_admin.sql, 0011_contact_assignments.sql,
-// 0012_prospect_analysis_capacidades.sql, 0013_import_contacts.sql y
-// 0014_generate_weekly_plan.sql.
+// 0012_prospect_analysis_capacidades.sql, 0013_import_contacts.sql,
+// 0014_generate_weekly_plan.sql y 0015_contact_status.sql.
 // ---------------------------------------------------------------
 
 export type Json =
@@ -91,6 +91,7 @@ export type Database = {
           industry: string | null;
           tags: string[];
           notes: string | null;
+          status: string;
           created_at: string;
           updated_at: string;
         };
@@ -104,6 +105,7 @@ export type Database = {
           industry?: string | null;
           tags?: string[];
           notes?: string | null;
+          status?: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -117,6 +119,7 @@ export type Database = {
           industry?: string | null;
           tags?: string[];
           notes?: string | null;
+          status?: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -283,6 +286,8 @@ export type Database = {
           contact_id: string;
           kind: string;
           body: string | null;
+          from_status: string | null;
+          to_status: string | null;
           occurred_at: string;
         };
         Insert: {
@@ -291,6 +296,8 @@ export type Database = {
           contact_id: string;
           kind: string;
           body?: string | null;
+          from_status?: string | null;
+          to_status?: string | null;
           occurred_at?: string;
         };
         Update: {
@@ -299,6 +306,8 @@ export type Database = {
           contact_id?: string;
           kind?: string;
           body?: string | null;
+          from_status?: string | null;
+          to_status?: string | null;
           occurred_at?: string;
         };
         Relationships: [
@@ -897,6 +906,14 @@ export type Database = {
           p_created_by?: string | null;
         };
         Returns: Json;
+      };
+      change_contact_status: {
+        Args: {
+          p_contact_id: string;
+          p_new_status: string;
+          p_changed_by?: string | null;
+        };
+        Returns: boolean;
       };
     };
     Enums: {

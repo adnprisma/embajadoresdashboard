@@ -19,6 +19,8 @@ import { CapabilityChip, CapabilityIcon, CAPABILITY_ORDER } from "@/components/c
 import { ContactFormDialog } from "@/components/contactos/ContactFormDialog";
 import { ImportDialog } from "@/components/contactos/ImportDialog";
 import { ReassignDialog } from "@/components/contactos/ReassignDialog";
+import { StatusBadge } from "@/components/contactos/StatusBadge";
+import { CONTACT_STATUSES, type ContactStatus } from "@/config/contactStatus";
 import { copy } from "@/config/copy";
 import type { Capacidad } from "@/config/oferta";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
@@ -51,6 +53,7 @@ function ContactCard({
       >
         {contact.business_name}
       </Link>
+      <StatusBadge status={contact.status} className="mt-0.5" />
       {isAdmin ? (
         <p className="text-sm text-text-secondary">
           {contact.owner_full_name ?? copy.contactos.reassignDialog.currentOwnerNone}
@@ -298,6 +301,7 @@ export function ContactosView({ isAdmin = false }: { isAdmin?: boolean }) {
   const [industryFilter, setIndustryFilter] = useState("all");
   const [tagFilter, setTagFilter] = useState("all");
   const [ownerFilter, setOwnerFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | ContactStatus>("all");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [reassignDialogOpen, setReassignDialogOpen] = useState(false);
 
@@ -328,8 +332,8 @@ export function ContactosView({ isAdmin = false }: { isAdmin?: boolean }) {
     return Array.from(map.entries()).sort((a, b) => a[1].localeCompare(b[1], "es"));
   }, [contacts]);
 
-  // Los 4 filtros (búsqueda, giro, etiqueta, vendedora) combinan en AND, en
-  // un solo useMemo — nada de esto pega a la red, todo corre sobre
+  // Los 5 filtros (búsqueda, giro, etiqueta, vendedora, estado) combinan en
+  // AND, en un solo useMemo — nada de esto pega a la red, todo corre sobre
   // `contacts` ya cargado por completo.
   const filteredContacts = useMemo(() => {
     const normalizedSearch = normalizeText(debouncedSearch.trim());
@@ -338,6 +342,7 @@ export function ContactosView({ isAdmin = false }: { isAdmin?: boolean }) {
       if (industryFilter !== "all" && contact.industry !== industryFilter) return false;
       if (tagFilter !== "all" && !contact.tags.includes(tagFilter)) return false;
       if (isAdmin && ownerFilter !== "all" && contact.owner_id !== ownerFilter) return false;
+      if (statusFilter !== "all" && contact.status !== statusFilter) return false;
 
       if (normalizedSearch) {
         const haystack = normalizeText(
@@ -350,7 +355,7 @@ export function ContactosView({ isAdmin = false }: { isAdmin?: boolean }) {
 
       return true;
     });
-  }, [contacts, industryFilter, tagFilter, ownerFilter, isAdmin, debouncedSearch]);
+  }, [contacts, industryFilter, tagFilter, ownerFilter, statusFilter, isAdmin, debouncedSearch]);
 
   // Cruza filteredContacts (mismos 4 filtros que la Lista) contra el mapa de
   // análisis, descarta los que no tienen análisis, y ordena: score
@@ -421,13 +426,18 @@ export function ContactosView({ isAdmin = false }: { isAdmin?: boolean }) {
   ];
 
   const hasActiveFilters =
-    searchInput.trim() !== "" || industryFilter !== "all" || tagFilter !== "all" || ownerFilter !== "all";
+    searchInput.trim() !== "" ||
+    industryFilter !== "all" ||
+    tagFilter !== "all" ||
+    ownerFilter !== "all" ||
+    statusFilter !== "all";
 
   const clearFilters = () => {
     setSearchInput("");
     setIndustryFilter("all");
     setTagFilter("all");
     setOwnerFilter("all");
+    setStatusFilter("all");
   };
 
   const selectedContacts = useMemo(
@@ -466,6 +476,12 @@ export function ContactosView({ isAdmin = false }: { isAdmin?: boolean }) {
   // sola línea (truncate) — alto de fila fijo, sin medición dinámica.
   const columns: DataTableColumn<ContactRow>[] = [
     { key: "business_name", header: copy.contactos.fields.business, className: "w-72" },
+    {
+      key: "status",
+      header: copy.contactos.fields.status,
+      className: "w-36",
+      render: (row) => <StatusBadge status={row.status} />,
+    },
     { key: "contact_name", header: copy.contactos.fields.contact, className: "w-28" },
     { key: "phone", header: copy.contactos.fields.phone, className: "w-32" },
     { key: "email", header: copy.contactos.fields.email, className: "w-28" },
@@ -588,6 +604,19 @@ export function ContactosView({ isAdmin = false }: { isAdmin?: boolean }) {
               {tagOptions.map((tag) => (
                 <option key={tag} value={tag}>
                   {tag}
+                </option>
+              ))}
+            </select>
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value as "all" | ContactStatus)}
+              aria-label={copy.contactos.filters.statusLabel}
+              className={SELECT_CLASSES}
+            >
+              <option value="all">{copy.contactos.filters.statusAll}</option>
+              {CONTACT_STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {copy.contactos.status.labels[status]}
                 </option>
               ))}
             </select>

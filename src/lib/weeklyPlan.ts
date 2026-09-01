@@ -1,4 +1,5 @@
 import { addDays, isWeekend, nextMonday, startOfDay, startOfWeek } from "date-fns";
+import { TERMINAL_STATUSES } from "@/config/contactStatus";
 import type { ContactRow } from "@/lib/queries/contacts";
 import type { ProspectAnalysisRow } from "@/lib/queries/prospectAnalysis";
 
@@ -41,7 +42,10 @@ export type WeeklyPlanCandidate = {
 
 /**
  * Candidatos = contactos del usuario con análisis de prospección, sin tarea
- * ABIERTA y sin ninguna oportunidad en el pipeline (cualquier etapa).
+ * ABIERTA, sin ninguna oportunidad en el pipeline (cualquier etapa) y sin
+ * un estado terminal (no_interesado/ilocalizable — ver
+ * src/config/contactStatus.ts, única fuente de esa lista). "Contactado" y
+ * "respondió" SÍ siguen siendo candidatos: están en proceso, no cerrados.
  * Orden idéntico a la vista Comparativa: score descendente y, a empate, más
  * carencias primero — para que la prioridad se lea igual en las dos
  * pantallas.
@@ -59,6 +63,7 @@ export function buildWeeklyPlanCandidates(
     if (!analysis) continue;
     if (contactIdsWithOpenTask.has(contact.id)) continue;
     if (contactIdsWithOpportunity.has(contact.id)) continue;
+    if (TERMINAL_STATUSES.has(contact.status)) continue;
 
     candidates.push({
       contactId: contact.id,

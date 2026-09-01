@@ -30,9 +30,11 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import type { ContactStatus } from "@/config/contactStatus";
 import { copy } from "@/config/copy";
 import { createClient } from "@/lib/supabase/client";
 import { getOwnerId } from "@/lib/supabase/get-owner-id";
+import { interactionsKeys } from "./interactions";
 
 export type ContactRow = {
   id: string;
@@ -45,6 +47,7 @@ export type ContactRow = {
   industry: string | null;
   tags: string[];
   notes: string | null;
+  status: ContactStatus;
   created_at: string;
 };
 
@@ -62,6 +65,7 @@ type ContactQueryRow = {
   industry: string | null;
   tags: string[];
   notes: string | null;
+  status: ContactStatus;
   created_at: string;
   profiles: { full_name: string } | { full_name: string }[] | null;
 };
@@ -79,10 +83,15 @@ function toContactRow(row: ContactQueryRow): ContactRow {
     industry: row.industry,
     tags: row.tags,
     notes: row.notes,
+    status: row.status,
     created_at: row.created_at,
   };
 }
 
+// `status` no está aquí a propósito: nunca se toca vía update genérico de
+// contactos. Cambia solo por change_contact_status() (ver useChangeContactStatus
+// más abajo), que además dejar registro en interactions — el mismo update
+// de "editar contacto" no puede tocar el estado sin dejar rastro.
 export type ContactInput = {
   business_name: string;
   contact_name?: string | null;
@@ -100,7 +109,7 @@ export const contactsKeys = {
 };
 
 const CONTACTS_SELECT =
-  "id, owner_id, business_name, contact_name, phone, email, industry, tags, notes, created_at, profiles(full_name)";
+  "id, owner_id, business_name, contact_name, phone, email, industry, tags, notes, status, created_at, profiles(full_name)";
 
 // PAGE_SIZE es el tamaño de bloque de .range(), no una página de UI: existe
 // porque un select() sin rango tiene un tope por defecto en PostgREST, y
@@ -191,6 +200,7 @@ export function useCreateContact() {
         industry: input.industry ?? null,
         tags: input.tags ?? [],
         notes: input.notes ?? null,
+        status: "sin_contactar",
         created_at: new Date().toISOString(),
       };
 
@@ -360,6 +370,37 @@ export function useUpdateContact(id: string) {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: contactsKeys.detail(id) });
       queryClient.invalidateQueries({ queryKey: contactsKeys.list() });
+    },
+  });
+}
+
+// change_contact_status() cambia el estado Y escribe su registro en
+// interactions en una sola llamada (ver 0015_contact_status.sql) — nunca
+// dos pasos separados desde el cliente. Devuelve `false` cuando el estado
+// nuevo es igual al actual (no-op, no escribió nada): el caller decide no
+// mostrar ningún toast en ese caso — un "guardado" cuando no se guardó
+// nada entrena a desconfiar de los toasts.
+export function useChangeContactStatus(contactId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (status: ContactStatus) => {
+      const supabase = createClient();
+      const { data, error } = await supabase.rpc("change_contact_status", {
+        p_contact_id: contactId,
+        p_new_status: status,
+      });
+      if (error) throw error;
+      return data as boolean;
+    },
+    onError: () => {
+      toast.error(copy.contactos.status.errorToast);
+    },
+    onSettled: (changed) => {
+      if (!changed) return;
+      queryClient.invalidateQueries({ queryKey: contactsKeys.detail(contactId) });
+      queryClient.invalidateQueries({ queryKey: contactsKeys.list() });
+      queryClient.invalidateQueries({ queryKey: interactionsKeys.forContact(contactId) });
     },
   });
 }

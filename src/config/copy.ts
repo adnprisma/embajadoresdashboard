@@ -208,6 +208,7 @@ export const copy = {
       tags: "Etiquetas",
       notes: "Notas",
       owner: "Vendedora",
+      status: "Estado",
     },
     actions: {
       import: "Importar",
@@ -223,7 +224,28 @@ export const copy = {
       tagAll: "Todas las etiquetas",
       ownerLabel: "Vendedora",
       ownerAll: "Todas",
+      statusLabel: "Estado",
+      statusAll: "Todos los estados",
       clearFilters: "Limpiar filtros",
+    },
+    // Estado del contacto — lista cerrada (ver src/config/contactStatus.ts,
+    // que es la fuente de verdad de los valores; esto es solo su texto).
+    status: {
+      labels: {
+        sin_contactar: "Sin contactar",
+        contactado: "Contactado",
+        respondio: "Respondió",
+        interesado: "Interesado",
+        no_interesado: "No interesado",
+        ilocalizable: "Ilocalizable",
+      },
+      changeLabel: "Cambiar estado",
+      // Generado al vuelo desde from_status/to_status, nunca guardado como
+      // texto — si cambia la redacción de un estado, las entradas viejas
+      // de la línea de tiempo se leen con el texto actual.
+      timelineEntry: (fromLabel: string, toLabel: string) => `Cambió de ${fromLabel} a ${toLabel}.`,
+      suggestOpportunity: "Crear oportunidad",
+      errorToast: "No pudimos cambiar el estado. Intenta de nuevo.",
     },
     card: {
       nextTask: (title: string, date?: string) =>

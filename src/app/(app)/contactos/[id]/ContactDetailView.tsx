@@ -8,6 +8,7 @@ import { es } from "date-fns/locale";
 import {
   Briefcase,
   Check,
+  ChevronDown,
   Copy,
   Gauge,
   History,
@@ -36,14 +37,17 @@ import { Skeleton } from "@/components/common/Skeleton";
 import { CapabilityChip, CAPABILITY_ORDER } from "@/components/contactos/CapabilityChip";
 import { ContactFormDialog } from "@/components/contactos/ContactFormDialog";
 import { OpportunityDialog } from "@/components/pipeline/OpportunityDialog";
+import { StatusBadge, STATUS_ICON } from "@/components/contactos/StatusBadge";
 import { TaskDialog } from "@/components/tareas/TaskDialog";
 import { TaskRow } from "@/components/tareas/TaskRow";
+import { CONTACT_STATUSES } from "@/config/contactStatus";
 import { copy } from "@/config/copy";
 import { generarMensajeContacto } from "@/config/mensajeContacto";
 import { OFERTA_ADICIONAL, ofertaParaCarencias, type OfertaItem } from "@/config/oferta";
 import { useContactAssignments } from "@/lib/queries/contactAssignments";
-import { useContactInteractions } from "@/lib/queries/interactions";
+import { useContactInteractions, type InteractionRow } from "@/lib/queries/interactions";
 import {
+  useChangeContactStatus,
   useContact,
   useContactRelatedCounts,
   useDeleteContact,
@@ -100,6 +104,32 @@ function DataRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+// Fallback defensivo: el CHECK de la base ya garantiza que from_status/
+// to_status solo traigan uno de los 6 valores conocidos, esto es solo para
+// no reventar si algún día aparece uno que la UI todavía no conoce.
+function statusLabel(status: string): string {
+  return (copy.contactos.status.labels as Record<string, string>)[status] ?? status;
+}
+
+// call/message/meeting/note (los kinds originales de 0001) no tienen
+// mutación de creación en toda la app — nadie los genera todavía, así que
+// se quedan mostrando el valor crudo hasta que exista esa pantalla. Este
+// mapa es solo para el kind nuevo que sí se genera de verdad.
+const INTERACTION_KIND_LABEL: Partial<Record<string, string>> = {
+  status_change: "Estado",
+};
+
+function TimelineEntry({ interaction }: { interaction: InteractionRow }) {
+  if (interaction.kind === "status_change" && interaction.from_status && interaction.to_status) {
+    return (
+      <p className="mt-1 text-sm text-text-primary">
+        {copy.contactos.status.timelineEntry(statusLabel(interaction.from_status), statusLabel(interaction.to_status))}
+      </p>
+    );
+  }
+  return interaction.body ? <p className="mt-1 text-sm text-text-primary">{interaction.body}</p> : null;
+}
+
 function TimelinePanel({ contactId }: { contactId: string }) {
   const { data, isLoading } = useContactInteractions(contactId);
   const interactions = data ?? [];
@@ -129,9 +159,9 @@ function TimelinePanel({ contactId }: { contactId: string }) {
       {interactions.map((interaction) => (
         <li key={interaction.id} className="py-3">
           <p className="text-xs font-medium uppercase tracking-[0.06em] text-text-muted">
-            {interaction.kind} · {formatDate(interaction.occurred_at)}
+            {INTERACTION_KIND_LABEL[interaction.kind] ?? interaction.kind} · {formatDate(interaction.occurred_at)}
           </p>
-          {interaction.body ? <p className="mt-1 text-sm text-text-primary">{interaction.body}</p> : null}
+          <TimelineEntry interaction={interaction} />
         </li>
       ))}
     </ul>
@@ -598,6 +628,71 @@ function AnalysisBody({
   );
 }
 
+// Estado del contacto — arriba de la Parte 2, antes del score: lo primero
+// que hace falta saber al abrir la ficha no es qué tan buena oportunidad
+// es, sino si ya se le escribió. Siempre visible, independiente de si hay
+// análisis (viene de `contacts`, no de prospect_analysis). El color nunca
+// es el único portador — ícono y texto siempre acompañan.
+function ContactStatusBlock({ current }: { current: ContactRow }) {
+  const changeStatus = useChangeContactStatus(current.id);
+  const { data: stagesData } = usePipelineStages();
+  const stages = stagesData ?? [];
+  const { status: statusCopy } = copy.contactos;
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger asChild>
+          <button
+            type="button"
+            aria-label={statusCopy.changeLabel}
+            disabled={changeStatus.isPending}
+            className="disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <StatusBadge status={current.status} className="cursor-pointer py-1.5 pr-2 text-sm transition-colors">
+              <ChevronDown aria-hidden="true" className="ml-0.5 h-3.5 w-3.5 shrink-0 opacity-70" strokeWidth={1.75} />
+            </StatusBadge>
+          </button>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Portal>
+          <DropdownMenu.Content
+            align="start"
+            sideOffset={8}
+            className="z-50 w-56 rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface p-1 shadow-[var(--shadow-raised)]"
+          >
+            {CONTACT_STATUSES.filter((status) => status !== current.status).map((status) => {
+              const OptionIcon = STATUS_ICON[status];
+              return (
+                <DropdownMenu.Item
+                  key={status}
+                  onSelect={() => changeStatus.mutate(status)}
+                  className="flex cursor-pointer items-center gap-2 rounded-[var(--radius-control)] px-2 py-1.5 text-sm text-text-primary outline-none data-[highlighted]:bg-bg-sunken"
+                >
+                  <OptionIcon aria-hidden="true" className="h-4 w-4 shrink-0 text-text-muted" strokeWidth={1.75} />
+                  {statusCopy.labels[status]}
+                </DropdownMenu.Item>
+              );
+            })}
+          </DropdownMenu.Content>
+        </DropdownMenu.Portal>
+      </DropdownMenu.Root>
+
+      {current.status === "interesado" ? (
+        <OpportunityDialog
+          stages={stages}
+          lockedContact={{ id: current.id, business_name: current.business_name }}
+          trigger={
+            <button type="button" className={SECONDARY_BUTTON_CLASSES}>
+              <Kanban aria-hidden="true" className="h-4 w-4" strokeWidth={1.5} />
+              {statusCopy.suggestOpportunity}
+            </button>
+          }
+        />
+      ) : null}
+    </div>
+  );
+}
+
 // Orquesta las 5 partes: la 1 se pinta en cuanto hay `current` (prop
 // síncrona), sin esperar al análisis — un análisis lento nunca deja la
 // pantalla entera en blanco. Las partes 2 a 5 tienen su propio
@@ -611,6 +706,8 @@ function ContactAnalysisTab({ current }: { current: ContactRow }) {
     <div className="flex flex-col gap-4">
       <ContactInfoBlock current={current} />
       {data ? <AnalysisContactFields analysis={data} /> : null}
+
+      <ContactStatusBlock current={current} />
 
       {isLoading ? (
         <div className="flex flex-col gap-3 border-t border-border-subtle pt-4">
