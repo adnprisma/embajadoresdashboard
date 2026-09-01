@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { copy } from "@/config/copy";
 import { createClient } from "@/lib/supabase/client";
+import { getLoginErrorMessage } from "@/lib/utils/auth-error-message";
 
 const schema = z.object({
   email: z
@@ -37,10 +38,11 @@ export function LoginForm() {
     const { error } = await supabase.auth.signInWithPassword(values);
 
     if (error) {
-      // Credenciales inválidas es, con mucho, el caso más común de error aquí.
-      // Cualquier otra cosa (rate limit, red) usa el mismo banner: no hay un
-      // tercer estado definido en el roadmap para distinguirlos en la UI.
-      setFormError(copy.auth.login.credentialsErrorBanner);
+      // Credenciales inválidas sigue siendo el genérico — nunca revela si
+      // el correo existe. Solo el rate limit se distingue (no depende de
+      // si la cuenta existe, así que no abre esa puerta). Ver
+      // auth-error-message.ts.
+      setFormError(getLoginErrorMessage(error));
       return;
     }
 

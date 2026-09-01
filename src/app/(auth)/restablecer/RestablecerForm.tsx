@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { copy } from "@/config/copy";
 import { createClient } from "@/lib/supabase/client";
+import { getRestablecerErrorMessage } from "@/lib/utils/auth-error-message";
 
 const schema = z
   .object({
@@ -68,8 +69,13 @@ export function RestablecerForm() {
     const { error } = await supabase.auth.updateUser({ password: values.password });
 
     if (error) {
-      setFormError(copy.auth.restablecer.genericErrorBanner);
-      toast.error(copy.auth.restablecer.genericErrorBanner);
+      // Aquí ya hay una sesión de recuperación activa — no hay nada que
+      // enumerar, así que sí se muestra el motivo real cuando Supabase lo
+      // da (contraseña repetida, débil, sesión expirada). Ver
+      // auth-error-message.ts.
+      const message = getRestablecerErrorMessage(error);
+      setFormError(message);
+      toast.error(message);
       return;
     }
 

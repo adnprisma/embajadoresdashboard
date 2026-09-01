@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { copy } from "@/config/copy";
 import { createClient } from "@/lib/supabase/client";
+import { getRecuperarErrorMessage } from "@/lib/utils/auth-error-message";
 
 const schema = z.object({
   email: z
@@ -35,12 +36,15 @@ export default function RecuperarPage() {
       redirectTo: `${window.location.origin}/restablecer`,
     });
 
-    // Regla dura: nunca reveles si el correo existe. Supabase ya no filtra
-    // eso en su respuesta; el único caso que sí vale la pena distinguir es
-    // un rate limit real (no depende de si la cuenta existe o no).
-    if (error?.status === 429) {
-      setFormError(copy.auth.recuperar.genericErrorBanner);
-      toast.error(copy.auth.recuperar.genericErrorBanner);
+    // Regla dura: nunca reveles si el correo existe. Cualquier error que NO
+    // sea rate limit cae al "listo" de abajo a propósito — mostrar un error
+    // distinto solo para algunos casos podría filtrar cuál correo sí tiene
+    // cuenta. El rate limit es la única excepción segura: pasa igual exista
+    // o no la cuenta. Ver auth-error-message.ts.
+    if (error?.code === "over_email_send_rate_limit" || error?.status === 429) {
+      const message = getRecuperarErrorMessage(error);
+      setFormError(message);
+      toast.error(message);
       return;
     }
 

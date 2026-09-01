@@ -41,6 +41,10 @@ export const copy = {
       submit: "Iniciar sesión",
       submitLoading: "Iniciando sesión…",
       credentialsErrorBanner: "Correo o contraseña incorrectos.",
+      // Aparte del genérico a propósito: distinguirlo no revela quién tiene
+      // cuenta (aplica igual exista o no el correo), así que sí se puede
+      // mostrar — ver src/lib/utils/auth-error-message.ts.
+      rateLimitErrorBanner: "Demasiados intentos. Espera unos minutos e intenta de nuevo.",
       genericErrorBanner: "No pudimos iniciar sesión. Intenta de nuevo.",
       errors: {
         emailRequired: "Ingresa tu correo electrónico.",
@@ -60,6 +64,7 @@ export const copy = {
       successDescription:
         "Si ese correo está registrado, te llegará un enlace para restablecer tu contraseña.",
       backToLogin: "Volver a iniciar sesión",
+      rateLimitErrorBanner: "Demasiadas solicitudes. Espera unos minutos e intenta de nuevo.",
       genericErrorBanner: "No pudimos procesar tu solicitud. Intenta de nuevo.",
       errors: {
         emailRequired: "Ingresa tu correo electrónico.",
@@ -90,6 +95,14 @@ export const copy = {
         passwordMin: "La contraseña debe tener al menos 8 caracteres.",
         confirmRequired: "Confirma tu nueva contraseña.",
         passwordsDontMatch: "Las contraseñas no coinciden.",
+        // Estos tres SÍ se muestran tal cual cuando Supabase los devuelve —
+        // aquí ya hay una sesión de recuperación activa, no hay nada que
+        // enumerar (ver src/lib/utils/auth-error-message.ts).
+        samePassword: "La nueva contraseña debe ser distinta a la anterior.",
+        weakPassword:
+          "Esa contraseña es muy débil. Usa al menos 8 caracteres, con mayúsculas, números o símbolos.",
+        sessionExpired: "Tu sesión para restablecer la contraseña expiró. Pide un enlace nuevo.",
+        rateLimit: "Demasiados intentos. Espera unos minutos e intenta de nuevo.",
       },
     },
   },
