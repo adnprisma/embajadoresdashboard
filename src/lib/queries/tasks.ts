@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { copy } from "@/config/copy";
+import type { TaskStatus } from "@/config/taskStatus";
 import { createClient } from "@/lib/supabase/client";
 import { getOwnerId } from "@/lib/supabase/get-owner-id";
 
@@ -11,7 +12,7 @@ export type TaskRow = {
   contact_id: string | null;
   title: string;
   due_at: string | null;
-  done: boolean;
+  status: TaskStatus;
   created_at: string;
   contact_business_name: string | null;
 };
@@ -31,14 +32,17 @@ export const tasksKeys = {
 
 // `contacts(business_name)` es un embed de PostgREST vía la FK
 // tasks.contact_id -> contacts.id — un solo round trip, sin segunda query.
-const TASKS_SELECT = "id, contact_id, title, due_at, done, created_at, contacts(business_name)";
+// `done` (booleano) sigue en la tabla (migración B pendiente, ver
+// 0020_task_status.sql) pero ya no se selecciona: el cliente solo lee y
+// escribe status.
+const TASKS_SELECT = "id, contact_id, title, due_at, status, created_at, contacts(business_name)";
 
 type TaskQueryRow = {
   id: string;
   contact_id: string | null;
   title: string;
   due_at: string | null;
-  done: boolean;
+  status: TaskStatus;
   created_at: string;
   contacts: { business_name: string } | { business_name: string }[] | null;
 };
@@ -50,7 +54,7 @@ function toTaskRow(row: TaskQueryRow): TaskRow {
     contact_id: row.contact_id,
     title: row.title,
     due_at: row.due_at,
-    done: row.done,
+    status: row.status,
     created_at: row.created_at,
     contact_business_name: contact?.business_name ?? null,
   };
@@ -116,8 +120,9 @@ export function useContactTasks(contactId: string) {
 // Contact_id de MIS tareas abiertas, para el plan semanal — filtrado
 // explícito por owner_id, sin confiar en RLS: desde 0010_rls_admin.sql un
 // admin ve las tareas de TODO el equipo, así que useTasks() no sirve aquí
-// (mezclaría leads ajenos). `enabled` para no pedirlo hasta tener el propio
-// id de sesión.
+// (mezclaría leads ajenos). "Abierta" = status distinto de 'done' — "en
+// proceso" sigue contando como abierta, igual que "pendiente". `enabled`
+// para no pedirlo hasta tener el propio id de sesión.
 export function useOwnOpenTaskContactIds(ownerId: string | undefined, enabled: boolean) {
   return useQuery({
     queryKey: [...tasksKeys.all, "openContactIds", ownerId] as const,
@@ -127,7 +132,7 @@ export function useOwnOpenTaskContactIds(ownerId: string | undefined, enabled: b
         .from("tasks")
         .select("contact_id")
         .eq("owner_id", ownerId as string)
-        .eq("done", false)
+        .neq("status", "done")
         .not("contact_id", "is", null);
       if (error) throw error;
       return new Set((data as { contact_id: string }[]).map((row) => row.contact_id));
@@ -165,37 +170,74 @@ export function useCreateTask() {
   });
 }
 
-// El toggle de "hecho" puede estar montado a la vez en /tareas (lista
-// global) y en la pestaña Tareas de la ficha de un contacto — ambas cachés
-// tienen la misma forma (TaskRow[]), así que se actualizan las dos con
-// setQueriesData sobre el prefijo tasksKeys.all en vez de adivinar cuál
-// está montada.
-export function useToggleTask() {
+// Puede estar montado a la vez en /tareas (tablero) y en la pestaña Tareas
+// de la ficha de un contacto — ambas cachés tienen la misma forma
+// (TaskRow[]), así que se actualizan las dos con setQueriesData sobre el
+// prefijo tasksKeys.all en vez de adivinar cuál está montada.
+export function useUpdateTaskStatus() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, done }: { id: string; done: boolean }) => {
+    mutationFn: async ({ id, status }: { id: string; status: TaskStatus }) => {
       const supabase = createClient();
-      const { error } = await supabase.from("tasks").update({ done }).eq("id", id);
+      const { error } = await supabase.from("tasks").update({ status }).eq("id", id);
       if (error) throw error;
-      return { id, done };
+      return { id, status };
     },
-    onMutate: async ({ id, done }) => {
+    onMutate: async ({ id, status }) => {
       await queryClient.cancelQueries({ queryKey: tasksKeys.all });
       const previous = queryClient.getQueriesData<TaskRow[]>({ queryKey: tasksKeys.all });
 
       queryClient.setQueriesData<TaskRow[]>({ queryKey: tasksKeys.all }, (old) =>
-        old ? old.map((task) => (task.id === id ? { ...task, done } : task)) : old,
+        old ? old.map((task) => (task.id === id ? { ...task, status } : task)) : old,
       );
 
       return { previous };
     },
     onError: (_error, _variables, context) => {
       context?.previous?.forEach(([key, data]) => queryClient.setQueryData(key, data));
-      toast.error(copy.tareas.toggleErrorToast);
+      toast.error(copy.tareas.board.statusUpdateErrorToast);
     },
     onSuccess: () => {
-      toast.success(copy.tareas.toggleSuccessToast);
+      toast.success(copy.tareas.board.statusUpdateSuccessToast);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: tasksKeys.all });
+    },
+  });
+}
+
+// Cambiar de fecha/hora — el arrastre entre columnas del tablero (solo
+// due_at, la hora se conserva) y el diálogo "Editar tarea" (due_at y/o
+// title) pasan por aquí. Update directo, sin RPC: mismo dueño de principio
+// a fin, sin dinero de por medio — no aplica la regla de CLAUDE.md §3 sobre
+// RPC security definer (esa es para dinero/puntos/permisos).
+export function useUpdateTask() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...fields }: { id: string; title?: string; due_at?: string | null }) => {
+      const supabase = createClient();
+      const { error } = await supabase.from("tasks").update(fields).eq("id", id);
+      if (error) throw error;
+      return { id, ...fields };
+    },
+    onMutate: async ({ id, ...fields }) => {
+      await queryClient.cancelQueries({ queryKey: tasksKeys.all });
+      const previous = queryClient.getQueriesData<TaskRow[]>({ queryKey: tasksKeys.all });
+
+      queryClient.setQueriesData<TaskRow[]>({ queryKey: tasksKeys.all }, (old) =>
+        old ? old.map((task) => (task.id === id ? { ...task, ...fields } : task)) : old,
+      );
+
+      return { previous };
+    },
+    onError: (_error, _variables, context) => {
+      context?.previous?.forEach(([key, data]) => queryClient.setQueryData(key, data));
+      toast.error(copy.tareas.board.moveErrorToast);
+    },
+    onSuccess: () => {
+      toast.success(copy.tareas.board.taskUpdatedToast);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: tasksKeys.all });

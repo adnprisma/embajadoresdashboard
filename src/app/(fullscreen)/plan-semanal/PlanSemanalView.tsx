@@ -18,6 +18,7 @@ import {
   buildWeeklyPlanCandidates,
   distributeIntoDays,
   remainingBusinessDays,
+  timeForSlot,
   type WeeklyPlanCandidate,
   type WeeklyPlanDay,
 } from "@/lib/weeklyPlan";
@@ -145,10 +146,10 @@ export function PlanSemanalView() {
   const handleConfirm = () => {
     if (!planDays) return;
     const items = planDays.flatMap((day) =>
-      day.candidates.map((candidate) => ({
+      day.candidates.map((candidate, index) => ({
         contact_id: candidate.contactId,
         title: copy.tareas.weeklyPlan.taskTitle(candidate.businessName),
-        due_at: day.date.toISOString(),
+        due_at: timeForSlot(day.date, index).toISOString(),
       })),
     );
     generatePlan.mutate(items, {

@@ -5,8 +5,9 @@ import { format, isPast, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { AlertCircle, MoreHorizontal, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { Checkbox } from "@/components/common/Checkbox";
+import { TaskStatusControl } from "@/components/tareas/TaskStatusControl";
 import { copy } from "@/config/copy";
+import type { TaskStatus } from "@/config/taskStatus";
 import type { TaskRow as TaskRowData } from "@/lib/queries/tasks";
 import { cn } from "@/lib/utils/cn";
 
@@ -16,33 +17,29 @@ function formatDue(date: string) {
 
 export function TaskRow({
   task,
-  onToggle,
+  onStatusChange,
   onDelete,
   showContact = false,
   fadingOut = false,
 }: {
   task: TaskRowData;
-  onToggle: (id: string, done: boolean) => void;
+  onStatusChange: (id: string, status: TaskStatus) => void;
   onDelete: (task: TaskRowData) => void;
   showContact?: boolean;
   fadingOut?: boolean;
 }) {
-  const overdue = !task.done && !!task.due_at && isPast(parseISO(task.due_at));
+  const overdue = task.status !== "done" && !!task.due_at && isPast(parseISO(task.due_at));
 
   return (
     <li
       className={cn("task-row-fade flex items-center gap-3 py-3", fadingOut ? "opacity-0" : "opacity-100")}
     >
-      <Checkbox
-        checked={task.done}
-        onCheckedChange={(checked) => onToggle(task.id, checked)}
-        ariaLabel={task.title}
-      />
+      <TaskStatusControl value={task.status} onChange={(status) => onStatusChange(task.id, status)} />
       <div className="min-w-0 flex-1">
         <p
           className={cn(
             "truncate text-sm text-text-primary",
-            task.done ? "text-text-muted line-through" : "",
+            task.status === "done" ? "text-text-muted line-through" : "",
           )}
         >
           {task.title}

@@ -290,7 +290,7 @@ export function ContactosView({ isAdmin = false }: { isAdmin?: boolean }) {
   const nextTaskByContact = useMemo(() => {
     const map = new Map<string, TaskRow>();
     for (const task of tasksData ?? []) {
-      if (task.done || !task.contact_id || map.has(task.contact_id)) continue;
+      if (task.status === "done" || !task.contact_id || map.has(task.contact_id)) continue;
       map.set(task.contact_id, task);
     }
     return map;

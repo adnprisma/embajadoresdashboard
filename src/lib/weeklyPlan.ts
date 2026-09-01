@@ -89,6 +89,23 @@ export type WeeklyPlanDay = {
   candidates: WeeklyPlanCandidate[];
 };
 
+// Punto de partida editable, no una agenda real — mismo criterio que usa
+// supabase/test-data/20-asigna-horas-tareas-existentes.sql para repartir
+// las tareas que ya existían, para no tener dos reglas de horario
+// distintas conviviendo.
+export const TASK_SLOT_START_HOUR = 9;
+export const TASK_SLOT_INTERVAL_MINUTES = 30;
+
+// index = posición del candidato dentro de su día (0 = primero). Hora
+// local del navegador — igual que remainingBusinessDays(), que ya trabaja
+// en tiempo local sin pasar por UTC a propósito.
+export function timeForSlot(day: Date, index: number): Date {
+  const totalMinutes = TASK_SLOT_START_HOUR * 60 + index * TASK_SLOT_INTERVAL_MINUTES;
+  const result = new Date(day);
+  result.setHours(Math.floor(totalMinutes / 60), totalMinutes % 60, 0, 0);
+  return result;
+}
+
 /**
  * Reparte TASKS_PER_DAY candidatos por día, en el orden ya calculado. Si
  * hay menos candidatos que espacios, los días de más quedan con menos (o

@@ -57,7 +57,7 @@ import {
 import { useContactOpportunities, usePipelineStages } from "@/lib/queries/pipeline";
 import { useProspectAnalysis, type ProspectAnalysisRow } from "@/lib/queries/prospectAnalysis";
 import { useUndoableTaskDelete } from "@/hooks/useUndoableTaskDelete";
-import { useContactTasks, useToggleTask } from "@/lib/queries/tasks";
+import { useContactTasks, useUpdateTaskStatus } from "@/lib/queries/tasks";
 import { cn } from "@/lib/utils/cn";
 
 const SECONDARY_BUTTON_CLASSES =
@@ -171,7 +171,7 @@ function TimelinePanel({ contactId }: { contactId: string }) {
 function TasksPanel({ contactId }: { contactId: string }) {
   const { data, isLoading } = useContactTasks(contactId);
   const tasks = data ?? [];
-  const toggleTask = useToggleTask();
+  const updateTaskStatus = useUpdateTaskStatus();
   const { remove: deleteTask } = useUndoableTaskDelete();
 
   if (isLoading) {
@@ -200,7 +200,7 @@ function TasksPanel({ contactId }: { contactId: string }) {
         <TaskRow
           key={task.id}
           task={task}
-          onToggle={(id, done) => toggleTask.mutate({ id, done })}
+          onStatusChange={(id, status) => updateTaskStatus.mutate({ id, status })}
           onDelete={deleteTask}
         />
       ))}
