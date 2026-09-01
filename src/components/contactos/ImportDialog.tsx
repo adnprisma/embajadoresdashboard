@@ -75,10 +75,16 @@ function rowToInput(row: Record<string, string>, mapping: Record<DestField, stri
     phone: (mapping.phone ? row[mapping.phone] : "")?.trim() || null,
     email: email || null,
     industry: (mapping.industry ? row[mapping.industry] : "")?.trim() || null,
+    // "prospecto|" es un prefijo del origen de los leads (identifica el
+    // lote/alcaldía en el CSV), no dato del negocio — se quita aquí para
+    // que la etiqueta útil sea solo "miguelhidalgo", no
+    // "prospecto|miguelhidalgo". Sin este strip, cada lote nuevo
+    // reintroduce el prefijo que 12-limpia-prefijo-etiquetas.sql ya limpió
+    // de los 187 existentes.
     tags: tagsRaw
       ? tagsRaw
           .split(",")
-          .map((tag) => tag.trim())
+          .map((tag) => tag.trim().replace(/^prospecto\|/, ""))
           .filter(Boolean)
       : [],
     notes: (mapping.notes ? row[mapping.notes] : "")?.trim() || null,
