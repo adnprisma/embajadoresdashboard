@@ -136,3 +136,13 @@ Reglas que no se negocian:
   entre otras confirmaciones: de eso depende que alguien corra a arreglarlo.
   Ya pasó: un `SELECT` pidió una columna que la migración todavía no había
   creado y tumbó `/contactos` para las dos vendedoras.
+- **Verificar en vivo sobre un contacto real dentro de una función que mide
+  FLUJO histórico (no solo estado actual) ensucia el reporte, no solo la
+  pantalla.** Revertir el estado visible a como estaba antes NO limpia el
+  rastro si algo más queda guardado con marca de tiempo (`interactions`,
+  bitácoras, lo que sea) — ese rastro sigue ahí para cualquier reporte que
+  cuente "llegó a X en la semana" en vez de "está en X ahora". Borrar ese
+  rastro es parte de la verificación, no un paso opcional al final. Ya pasó:
+  la prueba en vivo del bloque 1 dejó `interactions` de status_change en 3
+  contactos reales de Valeria, y eso infló "Foto del universo" del bloque 3
+  con un "interesado" que no era real.
