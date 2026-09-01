@@ -518,16 +518,20 @@ export const copy = {
       emptyColumn: "Sin oportunidades",
     },
     card: {
-      valueLabel: "Valor",
+      estimatedLabel: "Estimado",
+      closedLabel: "Cerrado",
+      noEstimate: "Sin estimar",
       mrrLabel: "MRR",
       moveToLabel: "Mover a…",
       moveToCurrentHint: "Etapa actual",
       deleteLabel: "Eliminar oportunidad",
+      wonBadge: "Ganada",
+      wonDragDisabledHint: "Oportunidad ganada: es un estado terminal, no se puede mover.",
     },
     deleteDialog: {
       title: (businessName: string) => `¿Eliminar "${businessName}"?`,
       description: (value: string, mrr: string) =>
-        `Se perderá el registro de ${value} en valor y ${mrr} de MRR — esto también cambia las métricas del tablero. No se puede deshacer.`,
+        `Se perderá el registro de ${value} y ${mrr} de MRR — esto también cambia las métricas del tablero. No se puede deshacer.`,
       cancel: "Cancelar",
       confirm: "Eliminar oportunidad",
       confirming: "Eliminando…",
@@ -542,7 +546,7 @@ export const copy = {
       contactPlaceholder: "Buscar contacto…",
       contactNoResults: "Sin coincidencias",
       contactClear: "Quitar contacto",
-      valueLabel: "Valor",
+      estimatedValueLabel: "Valor estimado",
       mrrLabel: "MRR",
       stageLabel: "Etapa",
       notesLabel: "Notas",
@@ -555,6 +559,20 @@ export const copy = {
       },
       errorToast: "No pudimos crear la oportunidad. Intenta de nuevo.",
       successToast: "Oportunidad creada.",
+    },
+    // Se captura al mover una oportunidad a una etapa ganada — en el
+    // arrastre del kanban y en "Mover a…" por igual, es el mismo diálogo.
+    // Una vez ganada, este valor no se vuelve a editar desde la interfaz.
+    closeDialog: {
+      title: (businessName: string) => `Ganar "${businessName}"`,
+      description: "Antes de mover a Ganada hace falta capturar cuánto se cerró. Este monto no se podrá editar después desde aquí.",
+      closedValueLabel: "Valor cerrado",
+      cancel: "Cancelar",
+      confirm: "Marcar como ganada",
+      confirming: "Guardando…",
+      errors: {
+        required: "Captura el valor cerrado para continuar.",
+      },
     },
   },
 

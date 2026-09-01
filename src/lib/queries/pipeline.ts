@@ -22,7 +22,14 @@ export type OpportunityRow = {
   contact_id: string | null;
   business_name: string;
   stage_id: string;
-  value: number;
+  // Valor estimado: libre mientras la oportunidad esté abierta, puede
+  // quedar vacío ("Sin estimar", nunca $0 — ver MoneyValue). Valor cerrado:
+  // solo existe una vez ganada, y desde ahí es inmutable desde la UI (ver
+  // update_opportunity_stage en 0016_opportunity_value_split.sql). Nunca se
+  // suman entre sí — si aparecen juntos en una pantalla, van etiquetados
+  // por separado.
+  estimated_value: number | null;
+  closed_value: number | null;
   mrr: number;
   position: number;
   closed_at: string | null;
@@ -35,7 +42,7 @@ export type OpportunityInput = {
   business_name: string;
   contact_id?: string | null;
   stage_id: string;
-  value?: number;
+  estimated_value?: number | null;
   mrr?: number;
   notes?: string | null;
 };
@@ -67,7 +74,7 @@ export const pipelineKeys = {
 };
 
 const OPPORTUNITIES_SELECT =
-  "id, contact_id, business_name, stage_id, value, mrr, position, closed_at, notes, created_at, updated_at";
+  "id, contact_id, business_name, stage_id, estimated_value, closed_value, mrr, position, closed_at, notes, created_at, updated_at";
 
 // Etapas de referencia: casi no cambian, pero se leen con el mismo staleTime
 // global (30s) que todo lo demás — no hay razón para un caso especial aquí.
@@ -191,11 +198,13 @@ export function useCreateOpportunity() {
   });
 }
 
-// Mover una tarjeta de columna es el mismo tipo de escritura directa que ya
-// usa contacts.ts (RLS por owner_id, sin cálculo de dinero ni permisos) —
-// no necesita pasar por una RPC. `closed_at` se marca/limpia aquí porque
-// my_pipeline_metrics() depende de esa columna para volume_month/closes_month:
-// dejarla desincronizada rompería las métricas de esta misma pantalla.
+// Mover una tarjeta de columna pasa por update_opportunity_stage() (RPC
+// security definer, ver 0016_opportunity_value_split.sql) y ya no por una
+// escritura directa: la validación de "ganar exige closed_value" y "ganar
+// es terminal" es dinero/permiso, y CLAUDE.md §3 prohíbe que eso viva en el
+// cliente. `closedValue` solo se manda cuando la etapa destino es is_won —
+// el capture dialog (CloseOpportunityDialog) es quien la pide antes de
+// llegar aquí.
 export function useUpdateOpportunityStage() {
   const queryClient = useQueryClient();
 
@@ -203,26 +212,33 @@ export function useUpdateOpportunityStage() {
     mutationFn: async ({
       id,
       stageId,
-      isTerminal,
+      closedValue,
     }: {
       id: string;
       stageId: string;
-      isTerminal: boolean;
+      closedValue?: number;
     }) => {
       const supabase = createClient();
-      const { error } = await supabase
-        .from("opportunities")
-        .update({ stage_id: stageId, closed_at: isTerminal ? new Date().toISOString() : null })
-        .eq("id", id);
+      const { error } = await supabase.rpc("update_opportunity_stage", {
+        p_opportunity_id: id,
+        p_stage_id: stageId,
+        p_closed_value: closedValue ?? null,
+      });
       if (error) throw error;
       return { id, stageId };
     },
-    onMutate: async ({ id, stageId }) => {
+    onMutate: async ({ id, stageId, closedValue }) => {
       await queryClient.cancelQueries({ queryKey: pipelineKeys.opportunities() });
       const previous = queryClient.getQueryData<OpportunityRow[]>(pipelineKeys.opportunities());
 
       queryClient.setQueryData<OpportunityRow[]>(pipelineKeys.opportunities(), (old) =>
-        old ? old.map((opportunity) => (opportunity.id === id ? { ...opportunity, stage_id: stageId } : opportunity)) : old,
+        old
+          ? old.map((opportunity) =>
+              opportunity.id === id
+                ? { ...opportunity, stage_id: stageId, closed_value: closedValue ?? opportunity.closed_value }
+                : opportunity,
+            )
+          : old,
       );
 
       return { previous };

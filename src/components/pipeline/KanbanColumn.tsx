@@ -26,7 +26,7 @@ export function KanbanColumn({
   stages: PipelineStage[];
   opportunities: OpportunityRow[];
   contactsById: Map<string, ContactRow>;
-  onMoveToStage: (opportunity: OpportunityRow, stage: PipelineStage) => void;
+  onMoveToStage: (opportunity: OpportunityRow, stage: PipelineStage, closedValue?: number) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: stage.id });
   const accent = resolveStageAccent(stage.accent);

@@ -53,8 +53,8 @@ export function PipelineView() {
 
   const contactsById = useMemo(() => new Map(contacts.map((contact) => [contact.id, contact])), [contacts]);
 
-  const handleMoveToStage = (opportunity: OpportunityRow, stage: PipelineStage) => {
-    updateStage.mutate({ id: opportunity.id, stageId: stage.id, isTerminal: stage.is_won || stage.is_lost });
+  const handleMoveToStage = (opportunity: OpportunityRow, stage: PipelineStage, closedValue?: number) => {
+    updateStage.mutate({ id: opportunity.id, stageId: stage.id, closedValue });
   };
 
   const metrics = metricsQuery.data;
@@ -161,6 +161,7 @@ export function PipelineView() {
           opportunities={opportunities}
           contactsById={contactsById}
           onMoveToStage={handleMoveToStage}
+          isMovingStage={updateStage.isPending}
         />
       )}
     </div>

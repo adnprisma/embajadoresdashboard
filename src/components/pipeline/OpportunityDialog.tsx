@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils/cn";
 const formSchema = z.object({
   business_name: z.string().min(1, copy.pipeline.dialog.errors.businessRequired),
   contact_id: z.string().nullable(),
-  value: z.string().optional(),
+  estimated_value: z.string().optional(),
   mrr: z.string().optional(),
   stage_id: z.string().min(1),
   notes: z.string().optional(),
@@ -30,7 +30,7 @@ function defaultValues(stages: PipelineStage[], lockedContact?: LockedContact): 
   return {
     business_name: lockedContact?.business_name ?? "",
     contact_id: lockedContact?.id ?? null,
-    value: "",
+    estimated_value: "",
     mrr: "",
     stage_id: stages[0]?.id ?? "",
     notes: "",
@@ -42,7 +42,9 @@ function formValuesToInput(values: FormValues): OpportunityInput {
     business_name: values.business_name.trim(),
     contact_id: values.contact_id,
     stage_id: values.stage_id,
-    value: values.value ? Number(values.value) : 0,
+    // Vacío se queda null ("Sin estimar"), nunca se coacciona a 0 — cero es
+    // una afirmación, no una ausencia (CLAUDE.md / ver MoneyValue).
+    estimated_value: values.estimated_value ? Number(values.estimated_value) : null,
     mrr: values.mrr ? Number(values.mrr) : 0,
     notes: values.notes?.trim() || null,
   };
@@ -157,18 +159,18 @@ export function OpportunityDialog({
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="value" className="text-sm font-medium text-text-primary">
-                  {copy.pipeline.dialog.valueLabel}
+                <label htmlFor="estimated_value" className="text-sm font-medium text-text-primary">
+                  {copy.pipeline.dialog.estimatedValueLabel}
                 </label>
                 <input
-                  id="value"
+                  id="estimated_value"
                   type="number"
                   step="0.01"
                   min="0"
                   inputMode="decimal"
                   placeholder="0.00"
                   className={INPUT_CLASSES}
-                  {...register("value")}
+                  {...register("estimated_value")}
                 />
               </div>
               <div className="flex flex-col gap-1.5">

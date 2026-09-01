@@ -17,6 +17,7 @@ import { useMemo, useState } from "react";
 import type { ContactRow } from "@/lib/queries/contacts";
 import type { OpportunityRow, PipelineStage } from "@/lib/queries/pipeline";
 import { groupBy } from "@/lib/utils/group-by";
+import { CloseOpportunityDialog } from "./CloseOpportunityDialog";
 import { KanbanCard } from "./KanbanCard";
 import { KanbanColumn } from "./KanbanColumn";
 
@@ -25,13 +26,24 @@ export function KanbanBoard({
   opportunities,
   contactsById,
   onMoveToStage,
+  isMovingStage = false,
 }: {
   stages: PipelineStage[];
   opportunities: OpportunityRow[];
   contactsById: Map<string, ContactRow>;
-  onMoveToStage: (opportunity: OpportunityRow, stage: PipelineStage) => void;
+  onMoveToStage: (opportunity: OpportunityRow, stage: PipelineStage, closedValue?: number) => void;
+  isMovingStage?: boolean;
 }) {
   const [activeId, setActiveId] = useState<string | null>(null);
+  // Mover a una etapa is_won se intercepta aquí, antes de llegar a
+  // onMoveToStage — tanto el arrastre (handleDragEnd) como "Mover a…"
+  // (que baja hasta KanbanCard) pasan por requestMoveToStage, así que el
+  // mismo diálogo de captura sirve para las dos rutas sin duplicar la
+  // regla en dos lugares.
+  const [pendingWinCapture, setPendingWinCapture] = useState<{
+    opportunity: OpportunityRow;
+    stage: PipelineStage;
+  } | null>(null);
 
   const grouped = useMemo(() => groupBy(opportunities, "stage_id"), [opportunities]);
   const activeOpportunity = useMemo(
@@ -61,6 +73,14 @@ export function KanbanBoard({
     setActiveId(String(event.active.id));
   };
 
+  const requestMoveToStage = (opportunity: OpportunityRow, stage: PipelineStage) => {
+    if (stage.is_won) {
+      setPendingWinCapture({ opportunity, stage });
+      return;
+    }
+    onMoveToStage(opportunity, stage);
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveId(null);
     const { active, over } = event;
@@ -70,7 +90,13 @@ export function KanbanBoard({
     const targetStage = stages.find((stage) => stage.id === over.id);
     if (!opportunity || !targetStage || targetStage.id === opportunity.stage_id) return;
 
-    onMoveToStage(opportunity, targetStage);
+    requestMoveToStage(opportunity, targetStage);
+  };
+
+  const handleConfirmWin = (closedValue: number) => {
+    if (!pendingWinCapture) return;
+    onMoveToStage(pendingWinCapture.opportunity, pendingWinCapture.stage, closedValue);
+    setPendingWinCapture(null);
   };
 
   return (
@@ -89,7 +115,7 @@ export function KanbanBoard({
             stages={stages}
             opportunities={grouped[stage.id] ?? []}
             contactsById={contactsById}
-            onMoveToStage={onMoveToStage}
+            onMoveToStage={requestMoveToStage}
           />
         ))}
       </div>
@@ -105,6 +131,16 @@ export function KanbanBoard({
           />
         ) : null}
       </DragOverlay>
+
+      <CloseOpportunityDialog
+        opportunity={pendingWinCapture?.opportunity ?? null}
+        open={pendingWinCapture !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingWinCapture(null);
+        }}
+        onConfirm={handleConfirmWin}
+        isSubmitting={isMovingStage}
+      />
     </DndContext>
   );
 }

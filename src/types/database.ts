@@ -14,7 +14,8 @@
 // Actualizado a mano también con 0008_prospect_analysis.sql,
 // 0009_roles.sql, 0010_rls_admin.sql, 0011_contact_assignments.sql,
 // 0012_prospect_analysis_capacidades.sql, 0013_import_contacts.sql,
-// 0014_generate_weekly_plan.sql y 0015_contact_status.sql.
+// 0014_generate_weekly_plan.sql, 0015_contact_status.sql y
+// 0016_opportunity_value_split.sql.
 // ---------------------------------------------------------------
 
 export type Json =
@@ -172,7 +173,9 @@ export type Database = {
           contact_id: string | null;
           business_name: string;
           stage_id: string;
-          value: number;
+          value_legacy: number;
+          estimated_value: number | null;
+          closed_value: number | null;
           mrr: number;
           position: number;
           closed_at: string | null;
@@ -186,7 +189,9 @@ export type Database = {
           contact_id?: string | null;
           business_name: string;
           stage_id: string;
-          value?: number;
+          value_legacy?: number;
+          estimated_value?: number | null;
+          closed_value?: number | null;
           mrr?: number;
           position?: number;
           closed_at?: string | null;
@@ -200,7 +205,9 @@ export type Database = {
           contact_id?: string | null;
           business_name?: string;
           stage_id?: string;
-          value?: number;
+          value_legacy?: number;
+          estimated_value?: number | null;
+          closed_value?: number | null;
           mrr?: number;
           position?: number;
           closed_at?: string | null;
@@ -914,6 +921,15 @@ export type Database = {
           p_changed_by?: string | null;
         };
         Returns: boolean;
+      };
+      update_opportunity_stage: {
+        Args: {
+          p_opportunity_id: string;
+          p_stage_id: string;
+          p_closed_value?: number | null;
+          p_changed_by?: string | null;
+        };
+        Returns: undefined;
       };
     };
     Enums: {

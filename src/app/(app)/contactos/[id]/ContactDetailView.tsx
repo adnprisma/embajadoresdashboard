@@ -213,6 +213,7 @@ function OpportunitiesPanel({ contactId }: { contactId: string }) {
   const { data: stagesData } = usePipelineStages();
   const opportunities = data ?? [];
   const stageName = (stageId: string) => stagesData?.find((stage) => stage.id === stageId)?.name ?? stageId;
+  const stageIsWon = (stageId: string) => stagesData?.find((stage) => stage.id === stageId)?.is_won ?? false;
 
   if (isLoading) {
     return (
@@ -262,7 +263,10 @@ function OpportunitiesPanel({ contactId }: { contactId: string }) {
             <p className="text-xs text-text-muted">{copy.contactos.detail.opportunitiesTab.stageLabel(stageName(opportunity.stage_id))}</p>
           </div>
           <div className="shrink-0 text-right">
-            <MoneyValue amount={opportunity.value} />
+            <MoneyValue
+              amount={stageIsWon(opportunity.stage_id) ? opportunity.closed_value : opportunity.estimated_value}
+              emptyLabel={copy.pipeline.card.noEstimate}
+            />
             {opportunity.mrr > 0 ? (
               <p className="text-xs text-text-muted">{copy.pipeline.card.mrrLabel} <MoneyValue amount={opportunity.mrr} /></p>
             ) : null}
