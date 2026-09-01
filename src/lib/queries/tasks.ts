@@ -25,6 +25,7 @@ export type TaskInput = {
 export const tasksKeys = {
   all: ["tasks"] as const,
   list: () => [...tasksKeys.all, "list"] as const,
+  mine: () => [...tasksKeys.all, "mine"] as const,
   forContact: (contactId: string) => [...tasksKeys.all, "contact", contactId] as const,
 };
 
@@ -55,6 +56,11 @@ function toTaskRow(row: TaskQueryRow): TaskRow {
   };
 }
 
+// Team-wide a propósito — RLS le da a admin `owner_id = auth.uid() or
+// is_admin()`, así que sin filtro esto muestra las tareas de TODO el
+// equipo. Correcto para /contactos (badge de "próxima tarea" por contacto,
+// que admin necesita ver de cualquier vendedora). Para /tareas ("Mis
+// tareas", pantalla personal) usa useMyTasks(), no esta — ver CLAUDE.md §3.
 export function useTasks() {
   return useQuery({
     queryKey: tasksKeys.list(),
@@ -63,6 +69,27 @@ export function useTasks() {
       const { data, error } = await supabase
         .from("tasks")
         .select(TASKS_SELECT)
+        .order("due_at", { ascending: true, nullsFirst: false });
+      if (error) throw error;
+      return (data as TaskQueryRow[]).map(toTaskRow);
+    },
+  });
+}
+
+// /tareas ("Mis tareas") es una pantalla personal: admin no es excepción,
+// nunca debe mezclar las tareas de todo el equipo aquí. Filtro explícito
+// por owner_id, sin confiar en RLS — mismo motivo que
+// useOwnOpenTaskContactIds() más abajo.
+export function useMyTasks() {
+  return useQuery({
+    queryKey: tasksKeys.mine(),
+    queryFn: async (): Promise<TaskRow[]> => {
+      const ownerId = await getOwnerId();
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("tasks")
+        .select(TASKS_SELECT)
+        .eq("owner_id", ownerId)
         .order("due_at", { ascending: true, nullsFirst: false });
       if (error) throw error;
       return (data as TaskQueryRow[]).map(toTaskRow);
@@ -132,6 +159,7 @@ export function useCreateTask() {
     },
     onSettled: (_data, _error, variables) => {
       queryClient.invalidateQueries({ queryKey: tasksKeys.list() });
+      queryClient.invalidateQueries({ queryKey: tasksKeys.mine() });
       queryClient.invalidateQueries({ queryKey: tasksKeys.forContact(variables.contact_id) });
     },
   });

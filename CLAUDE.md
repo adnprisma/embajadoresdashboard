@@ -69,6 +69,25 @@ Reglas que no se negocian:
   donde no hay sesión y `auth.uid()` es `null`. Ya pasó dos veces (el trigger
   de cambio de rol en `profiles` y `reassign_contacts()`): sin el respaldo, la
   función simplemente no se puede ejecutar a mano cuando hace falta.
+- **Alcance de datos para admin, por tipo de pantalla — RLS por sí sola no lo
+  resuelve.** Desde `0010_rls_admin.sql` casi todas las políticas le dan a
+  admin `owner_id = auth.uid() or is_admin()`, así que cualquier query sin
+  filtro explícito de `owner_id` le muestra a admin la fila de cualquiera.
+  La regla:
+  - `/contactos`, `/pipeline` y vistas de seguimiento → el admin ve TODO el
+    equipo, con columna de vendedora. Correcto hoy vía el bypass de RLS, sin
+    filtro adicional — así deben quedarse.
+  - Mi dinero, Mis tareas, plan semanal → solo del usuario en sesión, **sin
+    excepción de admin**. Filtro explícito por `owner_id`, nunca confiado a
+    RLS. Ya resuelto así en `useOwnOpenTaskContactIds()` y `useMyTasks()`
+    (`src/lib/queries/tasks.ts`), `useOwnOpportunityContactIds()`
+    (`src/lib/queries/pipeline.ts`) y `useCommissionsHistory()`
+    (`src/lib/queries/wallet.ts`). `my_dashboard_summary()` y
+    `my_pipeline_metrics()` (`0003_functions.sql`) ya son correctos sin
+    tocarlos: usan `auth.uid()` internamente, sin bypass de admin.
+  - Si agregas una pantalla o un hook nuevo que lea `owner_id`, decide
+    primero en cuál de las dos categorías cae — no asumas que RLS ya te
+    cubre.
 - Cada bloque de datos implementa los cuatro estados: cargando (Skeleton),
   vacío (`EmptyState` con instrucción de siguiente paso), con datos, y error
   con reintento. Una tarjeta en blanco es un bug.

@@ -12,14 +12,14 @@ import { TaskRow } from "@/components/tareas/TaskRow";
 import { copy } from "@/config/copy";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useUndoableTaskDelete } from "@/hooks/useUndoableTaskDelete";
-import { useTasks, useToggleTask } from "@/lib/queries/tasks";
+import { useMyTasks, useToggleTask } from "@/lib/queries/tasks";
 import { cn } from "@/lib/utils/cn";
 
 const PRIMARY_BUTTON_CLASSES =
   "inline-flex items-center gap-2 rounded-[var(--radius-control)] bg-accent px-3 py-2 text-sm font-medium text-text-on-coral transition-colors hover:opacity-90";
 
 export function TareasView() {
-  const { data, isLoading, isError, refetch } = useTasks();
+  const { data, isLoading, isError, refetch } = useMyTasks();
   const tasks = useMemo(() => data ?? [], [data]);
   const toggleTask = useToggleTask();
   const { remove: deleteTask } = useUndoableTaskDelete();
