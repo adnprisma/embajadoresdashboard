@@ -14,8 +14,8 @@
 // Actualizado a mano también con 0008_prospect_analysis.sql,
 // 0009_roles.sql, 0010_rls_admin.sql, 0011_contact_assignments.sql,
 // 0012_prospect_analysis_capacidades.sql, 0013_import_contacts.sql,
-// 0014_generate_weekly_plan.sql, 0015_contact_status.sql y
-// 0016_opportunity_value_split.sql.
+// 0014_generate_weekly_plan.sql, 0015_contact_status.sql,
+// 0016_opportunity_value_split.sql y 0017_opportunity_delete_guard.sql.
 // ---------------------------------------------------------------
 
 export type Json =
@@ -927,6 +927,13 @@ export type Database = {
           p_opportunity_id: string;
           p_stage_id: string;
           p_closed_value?: number | null;
+          p_changed_by?: string | null;
+        };
+        Returns: undefined;
+      };
+      delete_opportunity: {
+        Args: {
+          p_opportunity_id: string;
           p_changed_by?: string | null;
         };
         Returns: undefined;

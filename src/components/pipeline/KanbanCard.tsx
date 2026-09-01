@@ -84,56 +84,58 @@ export function KanbanCard({
           </p>
         )}
 
-        <DropdownMenu.Root>
-          <DropdownMenu.Trigger asChild>
-            <button
-              type="button"
-              aria-label={copy.pipeline.card.moveToLabel}
-              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--radius-control)] text-text-muted transition-colors hover:bg-bg-sunken"
-            >
-              <MoreHorizontal aria-hidden="true" className="h-4 w-4" strokeWidth={1.5} />
-            </button>
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Portal>
-            <DropdownMenu.Content
-              align="end"
-              sideOffset={4}
-              className="z-50 w-56 rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface p-1 shadow-[var(--shadow-raised)]"
-            >
-              {isWon ? null : (
-                <>
-                  <DropdownMenu.Label className="px-2 py-1.5 text-xs font-medium uppercase tracking-[0.06em] text-text-muted">
-                    {copy.pipeline.card.moveToLabel}
-                  </DropdownMenu.Label>
-                  {stages.map((stage) => {
-                    const isCurrent = stage.id === opportunity.stage_id;
-                    return (
-                      <DropdownMenu.Item
-                        key={stage.id}
-                        disabled={isCurrent}
-                        onSelect={() => onMoveToStage(stage)}
-                        className="flex cursor-pointer items-center justify-between gap-2 rounded-[var(--radius-control)] px-2 py-1.5 text-sm text-text-primary outline-none data-[highlighted]:bg-bg-sunken data-[disabled]:cursor-default data-[disabled]:text-text-muted"
-                      >
-                        {stage.name}
-                        {isCurrent ? (
-                          <Check aria-hidden="true" className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
-                        ) : null}
-                      </DropdownMenu.Item>
-                    );
-                  })}
-                  <DropdownMenu.Separator className="my-1 h-px bg-border-subtle" />
-                </>
-              )}
-              <DropdownMenu.Item
-                onSelect={() => setDeleteDialogOpen(true)}
-                className="flex cursor-pointer items-center gap-2 rounded-[var(--radius-control)] px-2 py-1.5 text-sm text-state-negative outline-none data-[highlighted]:bg-state-negative-soft"
+        {/* Ganada = terminal: nada que mover, nada que borrar desde aquí
+        (ver 0017_opportunity_delete_guard.sql) — el menú entero desaparece
+        en vez de quedar vacío o con opciones deshabilitadas sin explicar
+        por qué. */}
+        {isWon ? null : (
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger asChild>
+              <button
+                type="button"
+                aria-label={copy.pipeline.card.moveToLabel}
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--radius-control)] text-text-muted transition-colors hover:bg-bg-sunken"
               >
-                <Trash2 aria-hidden="true" className="h-4 w-4" strokeWidth={1.5} />
-                {copy.pipeline.card.deleteLabel}
-              </DropdownMenu.Item>
-            </DropdownMenu.Content>
-          </DropdownMenu.Portal>
-        </DropdownMenu.Root>
+                <MoreHorizontal aria-hidden="true" className="h-4 w-4" strokeWidth={1.5} />
+              </button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content
+                align="end"
+                sideOffset={4}
+                className="z-50 w-56 rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface p-1 shadow-[var(--shadow-raised)]"
+              >
+                <DropdownMenu.Label className="px-2 py-1.5 text-xs font-medium uppercase tracking-[0.06em] text-text-muted">
+                  {copy.pipeline.card.moveToLabel}
+                </DropdownMenu.Label>
+                {stages.map((stage) => {
+                  const isCurrent = stage.id === opportunity.stage_id;
+                  return (
+                    <DropdownMenu.Item
+                      key={stage.id}
+                      disabled={isCurrent}
+                      onSelect={() => onMoveToStage(stage)}
+                      className="flex cursor-pointer items-center justify-between gap-2 rounded-[var(--radius-control)] px-2 py-1.5 text-sm text-text-primary outline-none data-[highlighted]:bg-bg-sunken data-[disabled]:cursor-default data-[disabled]:text-text-muted"
+                    >
+                      {stage.name}
+                      {isCurrent ? (
+                        <Check aria-hidden="true" className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
+                      ) : null}
+                    </DropdownMenu.Item>
+                  );
+                })}
+                <DropdownMenu.Separator className="my-1 h-px bg-border-subtle" />
+                <DropdownMenu.Item
+                  onSelect={() => setDeleteDialogOpen(true)}
+                  className="flex cursor-pointer items-center gap-2 rounded-[var(--radius-control)] px-2 py-1.5 text-sm text-state-negative outline-none data-[highlighted]:bg-state-negative-soft"
+                >
+                  <Trash2 aria-hidden="true" className="h-4 w-4" strokeWidth={1.5} />
+                  {copy.pipeline.card.deleteLabel}
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Root>
+        )}
       </div>
 
       {contact?.contact_name ? <p className="truncate text-xs text-text-muted">{contact.contact_name}</p> : null}

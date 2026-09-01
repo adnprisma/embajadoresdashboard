@@ -257,13 +257,18 @@ export function useUpdateOpportunityStage() {
   });
 }
 
+// Pasa por delete_opportunity() (RPC), no por un delete directo — el
+// servidor rechaza borrar una oportunidad ganada (ver
+// 0017_opportunity_delete_guard.sql). La UI ya oculta la opción de borrar
+// para tarjetas ganadas, pero la validación real vive aquí, no en que el
+// botón esté escondido.
 export function useDeleteOpportunity() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (id: string) => {
       const supabase = createClient();
-      const { error } = await supabase.from("opportunities").delete().eq("id", id);
+      const { error } = await supabase.rpc("delete_opportunity", { p_opportunity_id: id });
       if (error) throw error;
       return id;
     },
