@@ -38,9 +38,11 @@ import { CapabilityChip, CAPABILITY_ORDER } from "@/components/contactos/Capabil
 import { ContactFormDialog } from "@/components/contactos/ContactFormDialog";
 import { OpportunityDialog } from "@/components/pipeline/OpportunityDialog";
 import { StatusBadge, STATUS_ICON } from "@/components/contactos/StatusBadge";
+import { TagBadge } from "@/components/contactos/TagBadge";
 import { TaskDialog } from "@/components/tareas/TaskDialog";
 import { TaskRow } from "@/components/tareas/TaskRow";
 import { CONTACT_STATUSES } from "@/config/contactStatus";
+import { isOperationalTag, OPERATIONAL_TAGS } from "@/config/contactTags";
 import { copy } from "@/config/copy";
 import { generarMensajeContacto } from "@/config/mensajeContacto";
 import { OFERTA_ADICIONAL, ofertaParaCarencias, type OfertaItem } from "@/config/oferta";
@@ -51,6 +53,7 @@ import {
   useContact,
   useContactRelatedCounts,
   useDeleteContact,
+  useToggleContactTag,
   type ContactRelatedCounts,
   type ContactRow,
 } from "@/lib/queries/contacts";
@@ -812,6 +815,9 @@ export function ContactDetailView({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const relatedCounts = useContactRelatedCounts(current.id, deleteDialogOpen);
   const deleteContact = useDeleteContact();
+  const toggleTag = useToggleContactTag(current.id);
+  const hasNoPhoneOrEmail = !current.phone && !current.email;
+  const missingOperationalTags = OPERATIONAL_TAGS.filter((tag) => !current.tags.includes(tag));
   const impact = relatedCounts.data ? buildDeleteImpact(relatedCounts.data) : null;
 
   const handleDelete = async () => {
@@ -954,7 +960,7 @@ export function ContactDetailView({
         </p>
       ) : null}
 
-      {current.industry || current.tags.length > 0 ? (
+      {current.industry || current.tags.length > 0 || missingOperationalTags.length > 0 ? (
         <div className="flex flex-wrap items-center gap-2">
           {current.industry ? (
             <Badge tone="neutral">
@@ -963,10 +969,49 @@ export function ContactDetailView({
             </Badge>
           ) : null}
           {current.tags.map((tag) => (
-            <Badge key={tag} tone="neutral">
-              {tag}
-            </Badge>
+            <span key={tag} className="inline-flex items-center gap-1">
+              <TagBadge tag={tag} />
+              {isOperationalTag(tag) ? (
+                <button
+                  type="button"
+                  onClick={() => toggleTag.mutate({ tag, add: false })}
+                  disabled={toggleTag.isPending}
+                  aria-label={copy.contactos.detail.tags.removeVisitar}
+                  className="flex h-6 w-6 items-center justify-center rounded-full text-text-muted transition-colors hover:bg-bg-sunken hover:text-text-primary disabled:opacity-60"
+                >
+                  <X aria-hidden="true" className="h-3.5 w-3.5" strokeWidth={1.75} />
+                </button>
+              ) : null}
+            </span>
           ))}
+          {missingOperationalTags.map((tag) => (
+            <button
+              key={tag}
+              type="button"
+              onClick={() => toggleTag.mutate({ tag, add: true })}
+              disabled={toggleTag.isPending}
+              className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-dashed border-border-subtle px-2.5 py-0.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent hover:text-accent disabled:opacity-60"
+            >
+              + {copy.contactos.detail.tags.addVisitar}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
+      {hasNoPhoneOrEmail && !current.tags.includes("visitar") ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-control)] border border-state-pending bg-state-pending-soft px-3 py-2 text-sm text-state-pending">
+          <span className="flex items-center gap-2">
+            <TriangleAlert aria-hidden="true" className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+            {copy.contactos.detail.tags.suggestBanner}
+          </span>
+          <button
+            type="button"
+            onClick={() => toggleTag.mutate({ tag: "visitar", add: true })}
+            disabled={toggleTag.isPending}
+            className="shrink-0 rounded-[var(--radius-control)] border border-state-pending px-2.5 py-1 text-xs font-medium text-state-pending transition-colors hover:bg-state-pending hover:text-white disabled:opacity-60"
+          >
+            {copy.contactos.detail.tags.suggestAction}
+          </button>
         </div>
       ) : null}
 

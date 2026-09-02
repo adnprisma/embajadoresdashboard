@@ -48,6 +48,7 @@ export type ContactRow = {
   tags: string[];
   notes: string | null;
   status: ContactStatus;
+  in_reserve: boolean;
   created_at: string;
 };
 
@@ -66,6 +67,7 @@ type ContactQueryRow = {
   tags: string[];
   notes: string | null;
   status: ContactStatus;
+  in_reserve: boolean;
   created_at: string;
   profiles: { full_name: string } | { full_name: string }[] | null;
 };
@@ -84,6 +86,7 @@ function toContactRow(row: ContactQueryRow): ContactRow {
     tags: row.tags,
     notes: row.notes,
     status: row.status,
+    in_reserve: row.in_reserve,
     created_at: row.created_at,
   };
 }
@@ -109,7 +112,7 @@ export const contactsKeys = {
 };
 
 const CONTACTS_SELECT =
-  "id, owner_id, business_name, contact_name, phone, email, industry, tags, notes, status, created_at, profiles(full_name)";
+  "id, owner_id, business_name, contact_name, phone, email, industry, tags, notes, status, in_reserve, created_at, profiles(full_name)";
 
 // PAGE_SIZE es el tamaño de bloque de .range(), no una página de UI: existe
 // porque un select() sin rango tiene un tope por defecto en PostgREST, y
@@ -201,6 +204,7 @@ export function useCreateContact() {
         tags: input.tags ?? [],
         notes: input.notes ?? null,
         status: "sin_contactar",
+        in_reserve: false,
         created_at: new Date().toISOString(),
       };
 
@@ -235,16 +239,21 @@ export function useImportContacts() {
       contacts,
       owner,
       reason,
+      inReserve,
     }: {
       contacts: ContactInput[];
       owner: string;
       reason: string;
+      // undefined = deja que import_contacts() decida (reserva si el
+      // destino es admin) — ver 0021_contact_reserve_and_tags.sql.
+      inReserve?: boolean;
     }) => {
       const supabase = createClient();
       const { data, error } = await supabase.rpc("import_contacts", {
         p_contacts: contacts,
         p_owner: owner,
         p_reason: reason,
+        p_in_reserve: inReserve ?? null,
       });
       if (error) throw error;
       return data as number;
@@ -401,6 +410,96 @@ export function useChangeContactStatus(contactId: string) {
       queryClient.invalidateQueries({ queryKey: contactsKeys.detail(contactId) });
       queryClient.invalidateQueries({ queryKey: contactsKeys.list() });
       queryClient.invalidateQueries({ queryKey: interactionsKeys.forContact(contactId) });
+    },
+  });
+}
+
+// Agrega o quita UNA etiqueta operativa de UN contacto desde la ficha.
+// useUpdateContact() no sirve aquí: su onMutate optimista sobreescribe con
+// null cualquier campo que no venga en el input (está pensado para el form
+// completo), así que un toggle de etiqueta por ese camino corrompería
+// contact_name/phone/email/industry/notes en la UI optimista.
+export function useToggleContactTag(id: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ tag, add }: { tag: string; add: boolean }) => {
+      const supabase = createClient();
+      const current = queryClient.getQueryData<ContactRow>(contactsKeys.detail(id));
+      const currentTags = current?.tags ?? [];
+      const nextTags = add
+        ? currentTags.includes(tag)
+          ? currentTags
+          : [...currentTags, tag]
+        : currentTags.filter((existing) => existing !== tag);
+
+      const { data, error } = await supabase
+        .from("contacts")
+        .update({ tags: nextTags })
+        .eq("id", id)
+        .select(CONTACTS_SELECT)
+        .single();
+      if (error) throw error;
+      return toContactRow(data as ContactQueryRow);
+    },
+    onMutate: async ({ tag, add }) => {
+      await queryClient.cancelQueries({ queryKey: contactsKeys.detail(id) });
+      const previous = queryClient.getQueryData<ContactRow>(contactsKeys.detail(id));
+
+      if (previous) {
+        const nextTags = add
+          ? previous.tags.includes(tag)
+            ? previous.tags
+            : [...previous.tags, tag]
+          : previous.tags.filter((existing) => existing !== tag);
+        queryClient.setQueryData<ContactRow>(contactsKeys.detail(id), {
+          ...previous,
+          tags: nextTags,
+        });
+      }
+
+      return { previous };
+    },
+    onError: (_error, _input, context) => {
+      if (context?.previous) queryClient.setQueryData(contactsKeys.detail(id), context.previous);
+      toast.error(copy.contactos.detail.tags.errorToast);
+    },
+    onSuccess: () => {
+      toast.success(copy.contactos.detail.tags.successToast);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: contactsKeys.detail(id) });
+      queryClient.invalidateQueries({ queryKey: contactsKeys.list() });
+    },
+  });
+}
+
+// Aplica una etiqueta operativa a varios contactos a la vez (selección
+// masiva en /contactos). bulk_add_tag() es idempotente del lado del
+// servidor — reintentar no duplica la etiqueta — y devuelve cuántas filas
+// realmente cambiaron, para un toast honesto ("N de M ya la tenían" nunca
+// se inventa como éxito silencioso).
+export function useBulkAddTag() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ contactIds, tag }: { contactIds: string[]; tag: string }) => {
+      const supabase = createClient();
+      const { data, error } = await supabase.rpc("bulk_add_tag", {
+        p_contact_ids: contactIds,
+        p_tag: tag,
+      });
+      if (error) throw error;
+      return data as number;
+    },
+    onError: () => {
+      toast.error(copy.contactos.selection.addTag.errorToast);
+    },
+    onSuccess: (count) => {
+      toast.success(copy.contactos.selection.addTag.successToast(count));
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: contactsKeys.list() });
     },
   });
 }

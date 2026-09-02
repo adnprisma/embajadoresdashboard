@@ -250,6 +250,8 @@ export const copy = {
       ownerAll: "Todas",
       statusLabel: "Estado",
       statusAll: "Todos los estados",
+      noPhoneEmailLabel: "Sin teléfono ni correo",
+      reserveLabel: "En reserva",
       clearFilters: "Limpiar filtros",
     },
     // Estado del contacto — lista cerrada (ver src/config/contactStatus.ts,
@@ -317,11 +319,19 @@ export const copy = {
       noAnalysisTitle: "Ningún contacto con análisis",
       noAnalysisDescription: "Los contactos que coinciden con estos filtros no tienen análisis de prospección todavía.",
     },
-    // Barra de selección múltiple — solo admin (ver ContactosView).
+    // Barra de selección múltiple (ver ContactosView) — "Agregar etiqueta"
+    // es para cualquiera, "Reasignar" sigue siendo solo admin.
     selection: {
       count: (n: number) => (n === 1 ? "1 seleccionado" : `${n} seleccionados`),
       reassign: "Reasignar",
       rowLabel: (businessName: string) => `Seleccionar ${businessName}`,
+      addTag: {
+        trigger: "Agregar etiqueta",
+        visitar: "Marcar para visitar",
+        successToast: (n: number) =>
+          n === 0 ? "Ya tenían esa etiqueta." : n === 1 ? "1 contacto marcado." : `${n} contactos marcados.`,
+        errorToast: "No pudimos agregar la etiqueta. Intenta de nuevo.",
+      },
     },
     reassignDialog: {
       title: "Reasignar contactos",
@@ -372,6 +382,18 @@ export const copy = {
 
     detail: {
       ownerLabel: (name: string) => `Vendedora: ${name}`,
+      // Etiquetas operativas (ver src/config/contactTags.ts) — se ponen y
+      // quitan con un clic desde la ficha, nunca a mano. Las de alcaldía
+      // (texto libre) siguen mostrándose tal cual, sin este control.
+      tags: {
+        label: "Etiquetas",
+        addVisitar: "Marcar para visitar",
+        removeVisitar: "Quitar visitar",
+        successToast: "Etiquetas actualizadas.",
+        errorToast: "No pudimos actualizar las etiquetas. Intenta de nuevo.",
+        suggestBanner: "Este contacto no tiene teléfono ni correo — puede ser candidato para visita en domicilio.",
+        suggestAction: "Marcar para visitar",
+      },
       tabs: {
         timeline: "Línea de tiempo",
         tasks: "Tareas",
@@ -509,6 +531,10 @@ export const copy = {
         label: "Asignar a",
         hint: "Los contactos importados quedarán a nombre de esta persona.",
       },
+      reserve: {
+        label: "Guardar en banco de reserva",
+        hint: "No aparecerán en el plan semanal ni en el embudo hasta que se repartan a una vendedora.",
+      },
       assignmentReason: "Importación de contactos",
       step3: {
         readyTitle: "Todo listo para importar",
@@ -544,6 +570,10 @@ export const copy = {
       columnTotal: "Total",
       emptyTitle: "Todavía no hay contactos asignados",
       emptyDescription: "En cuanto se asignen contactos a una vendedora, aparecerán aquí.",
+      // Aparte de la tabla por vendedora a propósito: no es desempeño de
+      // nadie, es inventario del negocio por repartir.
+      reserveStat: (n: number) => (n === 1 ? "En reserva: 1" : `En reserva: ${n}`),
+      reserveStatDescription: "Contactos cargados para repartir después, todavía sin vendedora.",
     },
   },
 

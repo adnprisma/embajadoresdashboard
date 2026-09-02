@@ -135,6 +135,11 @@ export function ImportDialog({ trigger, isAdmin = false }: { trigger: ReactNode;
     notes: "",
   });
   const [ownerId, setOwnerId] = useState("");
+  // Reserva por defecto: los ~315/351 ya cargados así entraron, y es el
+  // comportamiento esperado cuando el destino es el admin (ver
+  // 0021_contact_reserve_and_tags.sql). Solo se pinta/usa cuando el destino
+  // elegido es admin — importar directo a una vendedora nunca es "reserva".
+  const [inReserve, setInReserve] = useState(true);
   const [isImporting, setIsImporting] = useState(false);
   const [result, setResult] = useState<{ imported: number; errors: ImportError[] } | null>(null);
 
@@ -153,6 +158,7 @@ export function ImportDialog({ trigger, isAdmin = false }: { trigger: ReactNode;
       notes: "",
     });
     setOwnerId("");
+    setInReserve(true);
     setIsImporting(false);
     setResult(null);
   };
@@ -195,6 +201,13 @@ export function ImportDialog({ trigger, isAdmin = false }: { trigger: ReactNode;
 
   const previewRows = useMemo(() => parsedRows.slice(0, 5), [parsedRows]);
 
+  // El checkbox de reserva solo aplica cuando el destino elegido es un
+  // admin — importar directo a nombre de una vendedora nunca es "banco de
+  // reserva", es trabajo asignado desde el día uno.
+  const selectedOwnerId = ownerId || profile?.id;
+  const selectedOwnerRole = (teamData ?? []).find((member) => member.id === selectedOwnerId)?.role;
+  const showReserveOption = isAdmin && selectedOwnerRole === "admin";
+
   const runImport = async () => {
     const effectiveOwnerId = ownerId || profile?.id;
     if (!effectiveOwnerId) {
@@ -229,6 +242,7 @@ export function ImportDialog({ trigger, isAdmin = false }: { trigger: ReactNode;
             contacts: chunk.map((item) => item.input),
             owner: effectiveOwnerId,
             reason: copy.contactos.import.assignmentReason,
+            inReserve: showReserveOption ? inReserve : undefined,
           });
           importedCount += count;
         } catch (error) {
@@ -417,7 +431,7 @@ export function ImportDialog({ trigger, isAdmin = false }: { trigger: ReactNode;
                       <label className="flex w-full max-w-xs flex-col gap-1.5 text-left text-sm text-text-primary">
                         {copy.contactos.import.assignTo.label}
                         <select
-                          value={ownerId || profile?.id || ""}
+                          value={selectedOwnerId || ""}
                           onChange={(event) => setOwnerId(event.target.value)}
                           className={SELECT_CLASSES}
                         >
@@ -428,6 +442,21 @@ export function ImportDialog({ trigger, isAdmin = false }: { trigger: ReactNode;
                           ))}
                         </select>
                         <span className="text-xs text-text-muted">{copy.contactos.import.assignTo.hint}</span>
+                      </label>
+                    ) : null}
+                    {showReserveOption ? (
+                      <label className="flex w-full max-w-xs items-start gap-2 text-left text-sm text-text-primary">
+                        <input
+                          type="checkbox"
+                          checked={inReserve}
+                          onChange={(event) => setInReserve(event.target.checked)}
+                          className="mt-0.5"
+                        />
+                        <span>
+                          {copy.contactos.import.reserve.label}
+                          <br />
+                          <span className="text-xs text-text-muted">{copy.contactos.import.reserve.hint}</span>
+                        </span>
                       </label>
                     ) : null}
                     <button

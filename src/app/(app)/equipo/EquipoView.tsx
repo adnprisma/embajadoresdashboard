@@ -86,6 +86,10 @@ export function EquipoView() {
   const snapshotLoading = teamQuery.isLoading || contactsQuery.isLoading;
   const snapshotError = teamQuery.isError || contactsQuery.isError;
 
+  // Aparte de la tabla por vendedora: no es desempeño de nadie, es
+  // inventario del negocio por repartir (ver 0021_contact_reserve_and_tags.sql).
+  const reserveCount = (contactsQuery.data ?? []).filter((contact) => contact.in_reserve).length;
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={copy.equipo.title} />
@@ -191,6 +195,12 @@ export function EquipoView() {
             </table>
           </div>
         )}
+        {!snapshotError && !snapshotLoading && reserveCount > 0 ? (
+          <p className="mt-4 border-t border-border-subtle pt-3 text-sm text-text-secondary">
+            <span className="font-medium text-text-primary">{copy.equipo.snapshot.reserveStat(reserveCount)}</span>{" "}
+            · {copy.equipo.snapshot.reserveStatDescription}
+          </p>
+        ) : null}
       </Panel>
     </div>
   );

@@ -20,11 +20,12 @@ import { ContactFormDialog } from "@/components/contactos/ContactFormDialog";
 import { ImportDialog } from "@/components/contactos/ImportDialog";
 import { ReassignDialog } from "@/components/contactos/ReassignDialog";
 import { StatusBadge } from "@/components/contactos/StatusBadge";
+import { TagBadge } from "@/components/contactos/TagBadge";
 import { CONTACT_STATUSES, type ContactStatus } from "@/config/contactStatus";
 import { copy } from "@/config/copy";
 import type { Capacidad } from "@/config/oferta";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import { type ContactRow, useContacts } from "@/lib/queries/contacts";
+import { type ContactRow, useBulkAddTag, useContacts } from "@/lib/queries/contacts";
 import { useTeamProfiles } from "@/lib/queries/profile";
 import { useAllProspectAnalysis, type ProspectAnalysisRow } from "@/lib/queries/prospectAnalysis";
 import { type TaskRow, useTasks } from "@/lib/queries/tasks";
@@ -73,9 +74,7 @@ function ContactCard({
         <div className="mt-1 flex flex-wrap gap-1">
           {contact.industry ? <Badge tone="neutral">{contact.industry}</Badge> : null}
           {contact.tags.map((tag) => (
-            <Badge key={tag} tone="neutral">
-              {tag}
-            </Badge>
+            <TagBadge key={tag} tag={tag} />
           ))}
         </div>
       ) : null}
@@ -302,8 +301,11 @@ export function ContactosView({ isAdmin = false }: { isAdmin?: boolean }) {
   const [tagFilter, setTagFilter] = useState("all");
   const [ownerFilter, setOwnerFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState<"all" | ContactStatus>("all");
+  const [noPhoneEmailFilter, setNoPhoneEmailFilter] = useState(false);
+  const [reserveFilter, setReserveFilter] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [reassignDialogOpen, setReassignDialogOpen] = useState(false);
+  const bulkAddTag = useBulkAddTag();
 
   const industryOptions = useMemo(() => {
     const set = new Set<string>();
@@ -343,6 +345,8 @@ export function ContactosView({ isAdmin = false }: { isAdmin?: boolean }) {
       if (tagFilter !== "all" && !contact.tags.includes(tagFilter)) return false;
       if (isAdmin && ownerFilter !== "all" && contact.owner_id !== ownerFilter) return false;
       if (statusFilter !== "all" && contact.status !== statusFilter) return false;
+      if (noPhoneEmailFilter && (contact.phone || contact.email)) return false;
+      if (isAdmin && reserveFilter && !contact.in_reserve) return false;
 
       if (normalizedSearch) {
         const haystack = normalizeText(
@@ -355,7 +359,17 @@ export function ContactosView({ isAdmin = false }: { isAdmin?: boolean }) {
 
       return true;
     });
-  }, [contacts, industryFilter, tagFilter, ownerFilter, statusFilter, isAdmin, debouncedSearch]);
+  }, [
+    contacts,
+    industryFilter,
+    tagFilter,
+    ownerFilter,
+    statusFilter,
+    noPhoneEmailFilter,
+    reserveFilter,
+    isAdmin,
+    debouncedSearch,
+  ]);
 
   // Cruza filteredContacts (mismos 4 filtros que la Lista) contra el mapa de
   // análisis, descarta los que no tienen análisis, y ordena: score
@@ -430,7 +444,9 @@ export function ContactosView({ isAdmin = false }: { isAdmin?: boolean }) {
     industryFilter !== "all" ||
     tagFilter !== "all" ||
     ownerFilter !== "all" ||
-    statusFilter !== "all";
+    statusFilter !== "all" ||
+    noPhoneEmailFilter ||
+    reserveFilter;
 
   const clearFilters = () => {
     setSearchInput("");
@@ -438,6 +454,8 @@ export function ContactosView({ isAdmin = false }: { isAdmin?: boolean }) {
     setTagFilter("all");
     setOwnerFilter("all");
     setStatusFilter("all");
+    setNoPhoneEmailFilter(false);
+    setReserveFilter(false);
   };
 
   const selectedContacts = useMemo(
@@ -492,9 +510,7 @@ export function ContactosView({ isAdmin = false }: { isAdmin?: boolean }) {
       render: (row) => (
         <div className="flex flex-nowrap items-center gap-1 overflow-hidden">
           {row.tags.map((tag) => (
-            <Badge key={tag} tone="neutral">
-              {tag}
-            </Badge>
+            <TagBadge key={tag} tag={tag} />
           ))}
         </div>
       ),
@@ -635,6 +651,24 @@ export function ContactosView({ isAdmin = false }: { isAdmin?: boolean }) {
                 ))}
               </select>
             ) : null}
+            <label className="flex items-center gap-1.5 text-sm text-text-secondary">
+              <input
+                type="checkbox"
+                checked={noPhoneEmailFilter}
+                onChange={(event) => setNoPhoneEmailFilter(event.target.checked)}
+              />
+              {copy.contactos.filters.noPhoneEmailLabel}
+            </label>
+            {isAdmin ? (
+              <label className="flex items-center gap-1.5 text-sm text-text-secondary">
+                <input
+                  type="checkbox"
+                  checked={reserveFilter}
+                  onChange={(event) => setReserveFilter(event.target.checked)}
+                />
+                {copy.contactos.filters.reserveLabel}
+              </label>
+            ) : null}
           </div>
 
           <SegmentedControl
@@ -646,18 +680,35 @@ export function ContactosView({ isAdmin = false }: { isAdmin?: boolean }) {
             ]}
           />
 
-          {isAdmin && vista === "lista" && selectedContacts.length > 0 ? (
+          {vista === "lista" && selectedContacts.length > 0 ? (
             <div className="flex items-center justify-between rounded-[var(--radius-control)] border border-border-subtle bg-bg-sunken px-4 py-2.5">
               <p className="text-sm font-medium text-text-primary">
                 {copy.contactos.selection.count(selectedContacts.length)}
               </p>
-              <button
-                type="button"
-                onClick={() => setReassignDialogOpen(true)}
-                className={PRIMARY_BUTTON_CLASSES}
-              >
-                {copy.contactos.selection.reassign}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    bulkAddTag.mutate(
+                      { contactIds: selectedContacts.map((contact) => contact.id), tag: "visitar" },
+                      { onSuccess: () => setSelectedIds(new Set()) },
+                    )
+                  }
+                  disabled={bulkAddTag.isPending}
+                  className={SECONDARY_BUTTON_CLASSES}
+                >
+                  {copy.contactos.selection.addTag.visitar}
+                </button>
+                {isAdmin ? (
+                  <button
+                    type="button"
+                    onClick={() => setReassignDialogOpen(true)}
+                    className={PRIMARY_BUTTON_CLASSES}
+                  >
+                    {copy.contactos.selection.reassign}
+                  </button>
+                ) : null}
+              </div>
             </div>
           ) : null}
 
@@ -701,17 +752,13 @@ export function ContactosView({ isAdmin = false }: { isAdmin?: boolean }) {
                   virtualized
                   getRowHref={(row) => `/contactos/${row.id}`}
                   empty={null}
-                  selection={
-                    isAdmin
-                      ? {
-                          isSelected: (row) => selectedIds.has(row.id),
-                          onToggleRow: toggleRowSelection,
-                          onToggleAll: toggleAllSelection,
-                          allSelected: allFilteredSelected,
-                          getRowLabel: (row) => copy.contactos.selection.rowLabel(row.business_name),
-                        }
-                      : undefined
-                  }
+                  selection={{
+                    isSelected: (row) => selectedIds.has(row.id),
+                    onToggleRow: toggleRowSelection,
+                    onToggleAll: toggleAllSelection,
+                    allSelected: allFilteredSelected,
+                    getRowLabel: (row) => copy.contactos.selection.rowLabel(row.business_name),
+                  }}
                 />
               </div>
               <div className="sm:hidden">

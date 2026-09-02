@@ -59,6 +59,11 @@ export function buildWeeklyPlanCandidates(
   const candidates: WeeklyPlanCandidate[] = [];
 
   for (const contact of contacts) {
+    // Defensivo: `contacts` ya viene filtrado a los propios de quien pide
+    // el plan, así que un contacto en reserva (siempre de un admin) no
+    // debería aparecer aquí — salvo que el propio admin visite
+    // /plan-semanal, caso para el que sí hace falta este chequeo explícito.
+    if (contact.in_reserve) continue;
     const analysis = analysisByContactId.get(contact.id);
     if (!analysis) continue;
     if (contactIdsWithOpenTask.has(contact.id)) continue;

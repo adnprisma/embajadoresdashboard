@@ -96,6 +96,7 @@ export type Database = {
           tags: string[];
           notes: string | null;
           status: string;
+          in_reserve: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -110,6 +111,7 @@ export type Database = {
           tags?: string[];
           notes?: string | null;
           status?: string;
+          in_reserve?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -124,6 +126,7 @@ export type Database = {
           tags?: string[];
           notes?: string | null;
           status?: string;
+          in_reserve?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -910,6 +913,15 @@ export type Database = {
           p_owner?: string | null;
           p_reason?: string | null;
           p_assigned_by?: string | null;
+          p_in_reserve?: boolean | null;
+        };
+        Returns: number;
+      };
+      bulk_add_tag: {
+        Args: {
+          p_contact_ids: string[];
+          p_tag: string;
+          p_added_by?: string | null;
         };
         Returns: number;
       };
