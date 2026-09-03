@@ -185,17 +185,16 @@ export function QuotePrintView({
 
   return (
     <>
-      {/* Franja coral superior, repetida en TODAS las páginas impresas, no
-      solo la primera — como la del HTML de referencia. position: fixed
-      dentro de @media print es lo que la repite: Chrome vuelve a pintar un
-      elemento fixed en cada página al paginar para imprimir (a diferencia
-      de sticky, que no se repite). Vive fuera del documento centrado para
-      no heredar max-width ni padding. */}
-      <div
-        aria-hidden="true"
-        style={FORCE_PRINT_COLOR}
-        className="hidden print:fixed print:inset-x-0 print:top-0 print:block print:h-2 print:bg-accent"
-      />
+      {/* Franja coral superior — probamos position: fixed para que se
+      repitiera en todas las páginas, pero un elemento fixed no reserva
+      espacio en el flujo: en la impresión real se encimaba sobre el
+      contenido que retomaba en las páginas 2 y 3 (llegó a cortar
+      "Formularios de captura"). Esta versión es un bloque normal del
+      documento, arriba del todo: aparece una sola vez, en la primera
+      página, y ocupa su propio espacio como cualquier otro elemento — sin
+      fixed no hay forma de que se encime con nada, el problema deja de
+      existir en vez de quedar controlado. */}
+      <div aria-hidden="true" style={FORCE_PRINT_COLOR} className="hidden print:block print:h-2 print:bg-accent" />
       <div
         className={cn(
           "mx-auto flex max-w-[800px] flex-col overflow-hidden rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface shadow-[var(--shadow-card)]",
