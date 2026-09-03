@@ -204,6 +204,16 @@ create policy quote_line_items_select on quote_line_items
 -- JAMÁS toca opportunities.mrr. Quien "arregle" esto para incluir
 -- plataforma en el MRR va a estar inflando ingresos de Prisma con dinero
 -- que se le paga a GoHighLevel, no a Prisma.
+--
+-- Error simétrico al de arriba, mismo motivo: gestión (recurrente, MXN)
+-- JAMÁS suma a v_subtotal/v_total/estimated_value — solo a mrr. Sumar una
+-- mensualidad a un total de pago único es un error de categoría, y
+-- contamina estimated_value, que es la cifra contra la que se compara
+-- closed_value más adelante. Implementación (pago único), gestión
+-- (recurrente MXN) y plataforma (recurrente USD, ni siquiera es ingreso
+-- de Prisma) son tres cosas que nunca se suman entre sí — ver el bloque
+-- de líneas más abajo, donde gestión se excluye explícitamente de
+-- v_subtotal.
 -- ---------------------------------------------------------------
 
 create function generate_quote(
@@ -393,7 +403,19 @@ begin
     insert into quote_line_items (quote_id, item_type, item_id, item_name, quoted_price, seller_price, catalog_price)
     values (v_quote_id, v_line_type, v_line_id, v_line_catalog.name, v_line_quoted, v_line_seller, v_line_catalog.price);
 
-    v_subtotal := v_subtotal + v_line_quoted;
+    -- Gestión NO entra a v_subtotal: es un error de categoría sumar una
+    -- mensualidad recurrente a un total de pago único, y contamina
+    -- estimated_value — la cifra contra la que se compara closed_value más
+    -- adelante. Simétrico al caso de plataforma/mrr de arriba: son tres
+    -- cosas que nunca se suman entre sí (implementación de pago único,
+    -- gestión recurrente en MXN vía mrr, plataforma recurrente en USD que
+    -- ni siquiera es ingreso de Prisma). Gestión ya quedó registrada en
+    -- quote_line_items (para reconstruir la cotización) y en v_mrr (unas
+    -- líneas abajo) — sumarla aquí también sería la tercera vez, y la
+    -- única que rompe el total.
+    if v_line_type <> 'gestion' then
+      v_subtotal := v_subtotal + v_line_quoted;
+    end if;
   end loop;
 
   -- ---------- totales ----------
