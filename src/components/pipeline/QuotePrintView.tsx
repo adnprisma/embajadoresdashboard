@@ -216,13 +216,17 @@ export function QuotePrintView({
           el <header> completo vía FORCE_PRINT_COLOR arriba — no hace falta
           repetirlo en la imagen, que no tiene fondo propio que preservar.
           logotipo_beige-print.png es un redimensionado propio (ver
-          scripts/generate-logo-print.mjs) del logotipo_beige.png de
-          434KB — next/image no puede optimizarlo en servidor (el chunk C2PA
-          hace que su sniffer lo rechace, de ahí `unoptimized` abajo, mismo
-          motivo que en Logo.tsx), así que sin este redimensionado el
-          archivo completo de 2172x724 se mandaría tal cual para un
-          encabezado de 28px de alto. */}
-          <Image src="/brand/logotipo_beige-print.png" alt={BRAND.name} width={84} height={28} unoptimized />
+          scripts/generate-logo-print.mjs, fuente a 168px de alto — 3× este
+          render de 56px, suficiente para verse nítido) del logotipo_beige.png
+          de 434KB — next/image no puede optimizarlo en servidor (el chunk
+          C2PA hace que su sniffer lo rechace, de ahí `unoptimized` abajo,
+          mismo motivo que en Logo.tsx), así que sin este redimensionado el
+          archivo completo de 2172x724 se mandaría tal cual. height=56 (el
+          doble del primer intento, 28px, que se perdía en el encabezado):
+          identifica sin competir con el h1 de abajo, que es lo que manda en
+          jerarquía — más grande que eso ya empezaría a leerse como portada,
+          no como encabezado de documento. */}
+          <Image src="/brand/logotipo_beige-print.png" alt={BRAND.name} width={168} height={56} unoptimized />
           <h1 className="text-2xl font-bold text-text-on-dark">{t.proposalTitle(clientName)}</h1>
           <p className="text-sm text-text-on-dark/70">
             {[giro, format(parseISO(quote.createdAt), "d 'de' MMMM 'de' yyyy", { locale: es })]
