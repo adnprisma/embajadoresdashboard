@@ -1,5 +1,6 @@
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
+import type { ReactNode } from "react";
 import { MoneyValue } from "@/components/common/MoneyValue";
 import { BRAND } from "@/config/brand";
 import { copy } from "@/config/copy";
@@ -12,6 +13,7 @@ import {
   PRODUCTS,
 } from "@/config/pricing";
 import type { Quote, QuoteLineItemType } from "@/lib/queries/quotes";
+import { cn } from "@/lib/utils/cn";
 
 // Los nombres de cada línea vienen CONGELADOS en quote_line_items — si el
 // catálogo renombra un producto después, esta cotización se sigue leyendo
@@ -28,12 +30,46 @@ function resolveDescription(itemType: QuoteLineItemType, itemId: string): string
   return GESTION_PLANS.find((g) => g.id === itemId)?.description ?? "";
 }
 
+// print-color-adjust (+ prefijo -webkit-): sin esto el navegador descarta
+// los fondos de color al imprimir (encabezado carbón, cajas de nota en
+// beige) aunque estén declarados — es la causa real de que una primera
+// versión sin esto se viera plana en la impresión de prueba. Solo va en
+// los DOS elementos que dependen de un fondo para leerse — el texto
+// (títulos de sección, el total) imprime igual sin esta propiedad, no
+// hace falta repetirla ahí.
+const FORCE_PRINT_COLOR = { WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" } as const;
+
+// Título en carbón + regla coral debajo, no coral en el texto — coral sobre
+// blanco a 14px da ~3.1:1, por debajo del 4.5:1 que pide un título de
+// cuerpo (ver DESIGN_SYSTEM.md §3: coral sobre blanco solo sirve para texto
+// ≥24px o como elemento gráfico, nunca texto de cuerpo pequeño). El acento
+// de marca se queda en el borde, que es "borde de acento" — sí permitido.
+function SectionTitle({ children }: { children: ReactNode }) {
+  return (
+    <h2 className="border-b-2 border-accent pb-1 text-sm font-bold uppercase tracking-wide text-text-primary">
+      {children}
+    </h2>
+  );
+}
+
 function IncludeRow({ name, description }: { name: string; description: string }) {
   return (
     <div className="break-inside-avoid py-1 text-sm">
       <span className="font-semibold text-text-primary">{name}: </span>
       <span className="text-text-secondary">{description}</span>
     </div>
+  );
+}
+
+function NoteBox({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <p
+      style={FORCE_PRINT_COLOR}
+      className="break-inside-avoid rounded-r-[var(--radius-control)] border-l-4 border-accent bg-bg-sunken p-3 text-xs text-text-secondary"
+    >
+      <span className="font-semibold text-text-primary">{label}: </span>
+      {children}
+    </p>
   );
 }
 
@@ -63,13 +99,21 @@ export function QuotePrintView({
   const gestionTotal = gestionLines.reduce((sum, line) => sum + line.quotedPrice, 0);
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6 bg-white p-8 text-text-primary print:p-0">
-      <header className="flex flex-col items-center gap-2 border-b border-border-subtle pb-6 text-center break-inside-avoid">
-        <span className="font-[var(--font-display)] text-2xl font-semibold tracking-tight text-text-primary">
+    <div
+      className={cn(
+        "mx-auto flex max-w-[800px] flex-col overflow-hidden rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface shadow-[var(--shadow-card)]",
+        "print:max-w-none print:rounded-none print:border-0 print:shadow-none",
+      )}
+    >
+      <header
+        style={FORCE_PRINT_COLOR}
+        className="flex flex-col gap-1.5 bg-carbon px-8 py-7 text-center break-inside-avoid"
+      >
+        <span className="font-[var(--font-display)] text-sm font-semibold tracking-[0.08em] text-text-on-dark/70 uppercase">
           {BRAND.name}
         </span>
-        <h1 className="text-xl font-semibold text-text-primary">{t.proposalTitle(clientName)}</h1>
-        <p className="text-sm text-text-secondary">
+        <h1 className="text-2xl font-bold text-text-on-dark">{t.proposalTitle(clientName)}</h1>
+        <p className="text-sm text-text-on-dark/70">
           {[giro, format(parseISO(quote.createdAt), "d 'de' MMMM 'de' yyyy", { locale: es })]
             .filter(Boolean)
             .join(" · ")}
@@ -77,100 +121,104 @@ export function QuotePrintView({
         </p>
       </header>
 
-      <section className="flex flex-col gap-1 break-inside-avoid">
-        <h2 className="text-base font-semibold text-text-primary">{t.whatIncludesTitle}</h2>
-        {pkg ? (
-          <>
-            <p className="text-sm font-semibold text-text-primary">{t.packageIncludes(pkg.name)}</p>
-            {includedProducts.map((product) => (
-              <IncludeRow key={product.id} name={product.name} description={product.description} />
-            ))}
-            {includedAdn ? <IncludeRow name={includedAdn.name} description={includedAdn.description} /> : null}
-          </>
-        ) : null}
-        {productAdnLines.length > 0 ? (
-          <>
-            {pkg ? <p className="mt-2 text-sm font-semibold text-text-primary">{t.extraItemsTitle}</p> : null}
-            {productAdnLines.map((line) => (
-              <IncludeRow key={line.id} name={line.itemName} description={resolveDescription(line.itemType, line.itemId)} />
-            ))}
-          </>
-        ) : null}
-      </section>
-
-      {gestionLines.length > 0 ? (
+      <div className="flex flex-col gap-6 px-8 py-7">
         <section className="flex flex-col gap-1 break-inside-avoid">
-          <h2 className="text-base font-semibold text-text-primary">{t.gestionTitle}</h2>
-          {gestionLines.map((line) => (
-            <IncludeRow
-              key={line.id}
-              name={t.gestionItemLabel(line.itemName, new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(line.quotedPrice))}
-              description={resolveDescription(line.itemType, line.itemId)}
-            />
-          ))}
+          <SectionTitle>{t.whatIncludesTitle}</SectionTitle>
+          {pkg ? (
+            <>
+              <p className="mt-1 text-sm font-semibold text-text-primary">{t.packageIncludes(pkg.name)}</p>
+              {includedProducts.map((product) => (
+                <IncludeRow key={product.id} name={product.name} description={product.description} />
+              ))}
+              {includedAdn ? <IncludeRow name={includedAdn.name} description={includedAdn.description} /> : null}
+            </>
+          ) : null}
+          {productAdnLines.length > 0 ? (
+            <>
+              {pkg ? <p className="mt-2 text-sm font-semibold text-text-primary">{t.extraItemsTitle}</p> : null}
+              {productAdnLines.map((line) => (
+                <IncludeRow
+                  key={line.id}
+                  name={line.itemName}
+                  description={resolveDescription(line.itemType, line.itemId)}
+                />
+              ))}
+            </>
+          ) : null}
         </section>
-      ) : null}
-
-      <section className="flex flex-col gap-2 break-inside-avoid">
-        <h2 className="text-base font-semibold text-text-primary">{t.investmentTitle}</h2>
-        <table className="w-full text-sm">
-          <tbody>
-            <tr className="border-b border-border-subtle">
-              <td className="py-2 font-semibold">{t.implementationLabel}</td>
-              <td className="py-2 text-right text-lg font-semibold">
-                <MoneyValue amount={quote.total} />
-              </td>
-            </tr>
-            <tr>
-              <td className="py-1.5 text-text-secondary">{t.initialPaymentLabel}</td>
-              <td className="py-1.5 text-right">
-                <MoneyValue amount={quote.pagoInicial} />
-              </td>
-            </tr>
-            <tr>
-              <td className="py-1.5 text-text-secondary">{t.deferredPaymentLabel(quote.mesesDiferimiento)}</td>
-              <td className="py-1.5 text-right">
-                <MoneyValue amount={quote.pagoDiferidoMensual} />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <p className="break-inside-avoid rounded-[var(--radius-control)] border border-border-subtle p-3 text-xs text-text-secondary">
-          <span className="font-semibold text-text-primary">{t.platformNoteLabel}: </span>
-          {"~"}
-          <MoneyValue amount={platformTotal} currency="USD" />/mes ({plan?.name}
-          {plan?.includesWhatsapp
-            ? ` · ${t.platformIncludesWhatsapp}`
-            : quote.platformWhatsappPrice !== null
-              ? ` ${t.platformWithWhatsapp}`
-              : ` ${t.platformWithoutWhatsapp}`}
-          {" "}
-          {t.platformConsumption} {consumo?.name}). {t.platformNoteDescription}
-        </p>
 
         {gestionLines.length > 0 ? (
-          <p className="break-inside-avoid rounded-[var(--radius-control)] border border-border-subtle p-3 text-xs text-text-secondary">
-            <span className="font-semibold text-text-primary">{t.gestionNoteLabel}: </span>
-            {"~"}
-            <MoneyValue amount={gestionTotal} />
-            /mes {t.gestionNoteDescription}
-          </p>
+          <section className="flex flex-col gap-1 break-inside-avoid">
+            <SectionTitle>{t.gestionTitle}</SectionTitle>
+            {gestionLines.map((line) => (
+              <IncludeRow
+                key={line.id}
+                name={t.gestionItemLabel(
+                  line.itemName,
+                  new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(line.quotedPrice),
+                )}
+                description={resolveDescription(line.itemType, line.itemId)}
+              />
+            ))}
+          </section>
         ) : null}
-      </section>
 
-      <section className="flex flex-col gap-3 break-inside-avoid text-sm text-text-secondary">
-        <div>
-          <h2 className="text-base font-semibold text-text-primary">{t.howPaymentWorksTitle}</h2>
-          <p>{t.howPaymentWorks}</p>
-        </div>
-        <div>
-          <span className="font-semibold text-text-primary">{t.guaranteeLabel}: </span>
-          {t.guarantee}
-        </div>
-      </section>
+        <section className="flex flex-col gap-3 break-inside-avoid">
+          <SectionTitle>{t.investmentTitle}</SectionTitle>
+          <table className="w-full text-sm">
+            <tbody>
+              <tr className="border-b border-border-subtle">
+                <td className="py-2 font-semibold text-text-primary">{t.implementationLabel}</td>
+                <td className="py-2 text-right text-2xl font-bold text-accent">
+                  <MoneyValue amount={quote.total} />
+                </td>
+              </tr>
+              <tr className="border-b border-border-subtle">
+                <td className="py-1.5 text-text-secondary">{t.initialPaymentLabel}</td>
+                <td className="py-1.5 text-right text-text-primary">
+                  <MoneyValue amount={quote.pagoInicial} />
+                </td>
+              </tr>
+              <tr>
+                <td className="py-1.5 text-text-secondary">{t.deferredPaymentLabel(quote.mesesDiferimiento)}</td>
+                <td className="py-1.5 text-right text-text-primary">
+                  <MoneyValue amount={quote.pagoDiferidoMensual} />
+                </td>
+              </tr>
+            </tbody>
+          </table>
 
-      <footer className="break-inside-avoid border-t border-border-subtle pt-4 text-center text-xs text-text-muted">
+          <NoteBox label={t.platformNoteLabel}>
+            {"~"}
+            <MoneyValue amount={platformTotal} currency="USD" />
+            /mes ({plan?.name}
+            {plan?.includesWhatsapp
+              ? ` · ${t.platformIncludesWhatsapp}`
+              : quote.platformWhatsappPrice !== null
+                ? ` ${t.platformWithWhatsapp}`
+                : ` ${t.platformWithoutWhatsapp}`}{" "}
+            {t.platformConsumption} {consumo?.name}). {t.platformNoteDescription}
+          </NoteBox>
+
+          {gestionLines.length > 0 ? (
+            <NoteBox label={t.gestionNoteLabel}>
+              {"~"}
+              <MoneyValue amount={gestionTotal} />
+              /mes {t.gestionNoteDescription}
+            </NoteBox>
+          ) : null}
+        </section>
+
+        <section className="flex flex-col gap-3 break-inside-avoid">
+          <div>
+            <SectionTitle>{t.howPaymentWorksTitle}</SectionTitle>
+            <p className="mt-1 text-sm text-text-secondary">{t.howPaymentWorks}</p>
+          </div>
+          <NoteBox label={t.guaranteeLabel}>{t.guarantee}</NoteBox>
+        </section>
+      </div>
+
+      <footer className="break-inside-avoid border-t border-border-subtle px-8 py-3 text-center text-[11px] text-text-muted">
         {t.footer}
       </footer>
     </div>
