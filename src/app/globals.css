@@ -53,9 +53,17 @@
 /* Márgenes de página para lo único de este proyecto que se imprime de
    verdad (la vista de cotización en /pipeline/[id]/cotizaciones/[quoteId]/
    imprimir) — @page no tiene equivalente en las utilidades print: de
-   Tailwind, por eso vive aparte de esa pantalla. */
+   Tailwind, por eso vive aparte de esa pantalla. orphans/widows tampoco
+   tienen utilidad de Tailwind: evitan que un párrafo largo (la descripción
+   de "cómo funciona el pago", el texto de una nota) deje un solo renglón
+   suelto al cambiar de página. */
 @media print {
   @page {
     margin: 1.5cm;
+  }
+
+  p {
+    orphans: 2;
+    widows: 2;
   }
 }

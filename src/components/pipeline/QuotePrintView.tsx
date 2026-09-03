@@ -56,9 +56,11 @@ const FORCE_PRINT_COLOR = { WebkitPrintColorAdjust: "exact", printColorAdjust: "
 // cuerpo (ver DESIGN_SYSTEM.md §3: coral sobre blanco solo sirve para texto
 // ≥24px o como elemento gráfico, nunca texto de cuerpo pequeño). El acento
 // de marca se queda en el borde, que es "borde de acento" — sí permitido.
+// break-after-avoid: nunca se queda solo al final de una página con su
+// contenido empujado a la siguiente.
 function SectionTitle({ children }: { children: ReactNode }) {
   return (
-    <h2 className="border-b-2 border-accent pb-1.5 text-sm font-bold uppercase tracking-wide text-text-primary">
+    <h2 className="break-after-avoid border-b-2 border-accent pb-1.5 text-sm font-bold uppercase tracking-wide text-text-primary">
       {children}
     </h2>
   );
@@ -66,18 +68,21 @@ function SectionTitle({ children }: { children: ReactNode }) {
 
 // Un nivel entre el título de sección y un ítem: tamaño y peso propios
 // (16px/bold) para que "Paquete Completo" o "Elementos adicionales" no se
-// confundan con un producto más de la lista.
+// confundan con un producto más de la lista. break-after-avoid por la misma
+// razón que en SectionTitle.
 function SubTitle({ children }: { children: ReactNode }) {
-  return <p className="text-base font-bold text-text-primary">{children}</p>;
+  return <p className="break-after-avoid text-base font-bold text-text-primary">{children}</p>;
 }
 
 // Nombre y descripción apilados (no en la misma línea): así una descripción
 // larga que envuelve a dos renglones se queda debajo del nombre, no
 // mezclada con el siguiente producto — sigue leyéndose como un solo ítem
-// sin necesitar sangría especial. El espacio ENTRE ítems (gap-5 en el
+// sin necesitar sangría especial. El espacio ENTRE ítems (gap-4 en el
 // contenedor) es mayor que el espacio DENTRO de uno (mt-0.5 aquí) a
 // propósito: es lo que separa un renglón denso de una lista que se puede
-// escanear.
+// escanear. break-inside-avoid vive aquí, en la pieza atómica — no en la
+// sección completa que la contiene: una sección larga sí debe poder
+// partirse entre páginas, un producto individual no.
 function IncludeRow({ name, description }: { name: string; description: string }) {
   return (
     <div className="break-inside-avoid">
@@ -147,13 +152,24 @@ export function QuotePrintView({
         </p>
       </header>
 
-      <div className="flex flex-col gap-12 px-8 py-10">
-        <section className="flex flex-col gap-6 break-inside-avoid">
+      {/* gap-10 entre secciones, no gap-12: en la ronda anterior "más aire"
+      se pasó de generoso — con un documento de 14+ productos eso solo por
+      sí solo empujaba el total a tres páginas. La distinción de jerarquía
+      (sección > subtítulo > ítem) se sostiene con el break-after-avoid de
+      los títulos, no con más espacio del necesario. */}
+      <div className="flex flex-col gap-10 px-8 py-10">
+        {/* Sin break-inside-avoid aquí: "Qué incluye" puede tener 14+
+        productos y NO cabe completa en una sola página — forzarla a no
+        partirse es lo que empuja toda la sección a la página siguiente y
+        deja la primera casi vacía. Partir una sección larga entre páginas
+        es normal en un documento; lo que no debe partirse es cada producto
+        individual (ver IncludeRow). */}
+        <section className="flex flex-col gap-5">
           <SectionTitle>{t.whatIncludesTitle}</SectionTitle>
           {pkg ? (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2">
               <SubTitle>{t.packageLabel(pkg.name)}</SubTitle>
-              <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-4">
                 {includedProducts.map((product) => (
                   <IncludeRow key={product.id} name={product.name} description={product.description} />
                 ))}
@@ -162,9 +178,9 @@ export function QuotePrintView({
             </div>
           ) : null}
           {productAdnLines.length > 0 ? (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2">
               {pkg ? <SubTitle>{t.extraItemsTitle}</SubTitle> : null}
-              <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-4">
                 {productAdnLines.map((line) => (
                   <IncludeRow
                     key={line.id}
@@ -178,9 +194,9 @@ export function QuotePrintView({
         </section>
 
         {gestionLines.length > 0 ? (
-          <section className="flex flex-col gap-3 break-inside-avoid">
+          <section className="flex flex-col gap-2">
             <SectionTitle>{t.gestionTitle}</SectionTitle>
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-4">
               {gestionLines.map((line) => (
                 <IncludeRow
                   key={line.id}
@@ -192,9 +208,13 @@ export function QuotePrintView({
           </section>
         ) : null}
 
-        <section className="flex flex-col gap-4 break-inside-avoid">
+        <section className="flex flex-col gap-3">
           <SectionTitle>{t.investmentTitle}</SectionTitle>
-          <table className="w-full text-sm">
+          {/* break-inside-avoid en la tabla, no en la sección: el total y
+          los renglones de pago sí son una pieza atómica — verse partidos
+          entre el total y "pago inicial" se ve mal. Las notas de abajo ya
+          traen su propio break-inside-avoid vía NoteBox. */}
+          <table className="w-full break-inside-avoid text-sm">
             <tbody>
               <tr className="border-b border-border-subtle">
                 <td className="py-2.5 font-semibold text-text-primary">{t.implementationLabel}</td>
@@ -236,7 +256,7 @@ export function QuotePrintView({
           ) : null}
         </section>
 
-        <section className="flex flex-col gap-4 break-inside-avoid">
+        <section className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <SectionTitle>{t.howPaymentWorksTitle}</SectionTitle>
             <p className="text-sm text-text-secondary">{t.howPaymentWorks}</p>
