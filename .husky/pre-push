@@ -1,0 +1,5 @@
+# Candado A (feedback rápido en la laptop, antes de que el push salga) —
+# ver CLAUDE.md, nota sobre quoteMath.ts. El candado duro de verdad es C
+# (paso del build en Vercel, package.json "build"): este hook se puede
+# saltar con --no-verify, ese no.
+npm run check:catalog-sync && npm run check:quote-math

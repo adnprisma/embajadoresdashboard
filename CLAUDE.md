@@ -84,6 +84,37 @@ Reglas que no se negocian:
   producto nuevo en `pricing.ts` sin su migración de seed se nota la
   primera vez que alguien intente cotizarlo, no seis meses después
   revisando números raros.
+- **`src/lib/quoteMath.ts` duplica a propósito la aritmética de
+  `generate_quote()`** (subtotal/total/pago inicial/mrr — ver
+  `0023_quotes.sql`): es la réplica en cliente que usa el wizard de
+  cotización (`/pipeline/[id]/cotizaciones/nueva`) para mostrar el total
+  ANTES de enviar, sin llamar al servidor en cada tecla. Se evaluó
+  reemplazarla por una sola función de Postgres que ambos lados llamaran
+  (RPC desde el wizard en vez de cálculo local) — es la salida correcta el
+  día que la aritmética crezca (descuentos, comparación de precios del
+  bloque 6, cualquier regla nueva de negocio que dificulte mantener las dos
+  copias iguales a mano). **Se descartó por ahora, no "para siempre":** las
+  vendedoras cotizan en sitio con datos móviles, y el preview instantáneo es
+  lo que sostiene la conversación con el cliente — cambiarlo por una
+  llamada de red degradaría la herramienta en el peor momento, para
+  resolver un riesgo de desincronización que hoy es teórico. Los candados
+  que sí existen mientras tanto: `scripts/check-quote-math.ts` (corre las
+  dos implementaciones contra los mismos casos y compara los números, no
+  strings formateados) y el aviso en vivo del wizard si el total que
+  regresa `generate_quote()` no coincide con el preview mostrado — esa es
+  la última red, no la primera; no la quites pensando que el script ya
+  cubre lo mismo. `scripts/check-catalog-sync.ts` (pricing.ts↔catalog_items,
+  ver arriba) tiene el mismo problema — los dos scripts existían pero
+  dependían de que alguien se acordara de correrlos a mano antes del push,
+  y eso ya había fallado. **Candado real, decidido:** `.husky/pre-push`
+  corre los dos (feedback rápido en la laptop, saltable con `--no-verify`)
+  y `npm run build` también los corre antes de `next build` — Vercel usa
+  ese mismo comando para desplegar, así que un desface real bloquea el
+  deploy, no solo avisa. Se evaluó GitHub Actions y se descartó — hoy se
+  empuja directo a `main` sin PRs, así que un CI en rojo sin branch
+  protection es una alerta que alguien puede ignorar, no un candado; el
+  paso en el build de Vercel ya da el candado duro sin depender de que
+  cambie el flujo de trabajo.
 - **Toda función RPC `security definer` que dependa de `auth.uid()` necesita un
   parámetro de respaldo** para poder correrse desde el editor SQL de Supabase,
   donde no hay sesión y `auth.uid()` es `null`. Ya pasó dos veces (el trigger

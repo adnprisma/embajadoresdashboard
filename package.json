@@ -4,9 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run check:catalog-sync && npm run check:quote-math && next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "prepare": "husky",
+    "check:catalog-sync": "tsx scripts/check-catalog-sync.ts",
+    "check:quote-math": "tsx scripts/check-quote-math.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -46,8 +49,10 @@
     "cheerio": "^1.2.0",
     "eslint": "^9.39.5",
     "eslint-config-next": "15.5.24",
+    "husky": "^9.1.7",
     "sharp": "^0.35.4",
     "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.13",
     "typescript": "^5.9.3"
   }
 }

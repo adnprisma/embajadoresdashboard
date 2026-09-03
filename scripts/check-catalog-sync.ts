@@ -7,9 +7,10 @@
 // NEXT_PUBLIC_SUPABASE_URL/ANON_KEY directo de .env.local.
 //
 // Corre esto CADA VEZ que edites pricing.ts, después de regenerar la
-// migración de seed con scripts/generate-catalog-seed.ts. No es parte de
-// ningún pipeline automático — es responsabilidad de quien toca el
-// catálogo correrlo antes de hacer push.
+// migración de seed con scripts/generate-catalog-seed.ts. Ya no depende de
+// que alguien se acuerde: corre en .husky/pre-push y en "npm run build"
+// (que es lo que Vercel usa para desplegar) — un desface bloquea el push
+// y el deploy, no solo avisa.
 // ---------------------------------------------------------------
 
 import { readFileSync } from "node:fs";
