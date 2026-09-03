@@ -32,14 +32,20 @@ Reglas que no se negocian:
   archivos en `public/brand/` (isotipo/logotipo × carbón/coral/beige) están
   generados por IA — confirmable con
   `grep -l trainedAlgorithmicMedia public/brand/*.png`. El dueño de marca
-  los aprobó a sabiendas para usarse **solo dentro de la interfaz de este
+  los aprobó a sabiendas para usarse **dentro de la interfaz de este
   dashboard**, vía `<Logo />` (ver `DESIGN_SYSTEM.md` §9 para la matriz
-  completa de archivo/superficie/tamaño). **Nunca salen de aquí:** no van en
-  material comercial, documentos impresos, propuestas a clientes ni registro
-  de marca — eso exige el vector original, que todavía no existe. Cuando
-  llegue, estos 6 PNG se reemplazan uno a uno sin tocar la API de `<Logo />`.
-  No generes un séptimo archivo de logo por tu cuenta: si hace falta una
-  variante nueva, se pide, no se improvisa.
+  completa de archivo/superficie/tamaño), **y, desde el 3 de septiembre de
+  2026, en la propuesta de cotización que se manda a un cliente**
+  (`/pipeline/[id]/cotizaciones/[quoteId]/imprimir`, variante beige sobre el
+  encabezado carbón) — decisión consciente, tomada sabiendo que el archivo
+  sigue siendo generado por IA y que el chunk C2PA sigue intacto (ver la fila
+  `[LOGO]` de `BRANDING.md` para el detalle completo). **Sigue sin ir en
+  registro de marca** — eso exige el vector original, que todavía no existe.
+  Cuando llegue, estos 6 PNG se reemplazan uno a uno sin tocar la API de
+  `<Logo />`. No generes un séptimo archivo de logo por tu cuenta: si hace
+  falta una variante nueva, se pide, no se improvisa. Tampoco "corrijas" el
+  uso en la propuesta creyendo que viola la regla original — la excepción de
+  arriba es la regla vigente, no un error pendiente de revertir.
 - **No generes ilustraciones nuevas.** Usa exclusivamente los PNG aprobados de
   `public/illustrations/`. Los personajes P01–P04 son identidades congeladas.
 - **Transparencia real** en los recursos aislados. Nunca simules transparencia

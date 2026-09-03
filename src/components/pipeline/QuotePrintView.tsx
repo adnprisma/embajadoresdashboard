@@ -1,5 +1,6 @@
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
+import Image from "next/image";
 import type { ReactNode } from "react";
 import { Illustration } from "@/components/common/Illustration";
 import { BRAND } from "@/config/brand";
@@ -203,11 +204,25 @@ export function QuotePrintView({
       >
         <header
           style={FORCE_PRINT_COLOR}
-          className="flex flex-col gap-1.5 bg-carbon px-8 py-8 text-center break-inside-avoid"
+          className="flex flex-col items-center gap-1.5 bg-carbon px-8 py-8 text-center break-inside-avoid"
         >
-          <span className="font-[var(--font-display)] text-sm font-semibold tracking-[0.08em] text-text-on-dark/70 uppercase">
-            {BRAND.name}
-          </span>
+          {/* Logotipo real, no el wordmark tipográfico — decisión de marca
+          del 3 de septiembre de 2026, tomada sabiendo que el archivo sigue
+          siendo generado por IA y que el chunk C2PA sigue intacto (ver
+          BRANDING.md, fila [LOGO], y CLAUDE.md §2). Variante beige: es la
+          que se lee sobre el bloque carbón — la variante carbón desaparece
+          aquí. El print-color-adjust que evita que el fondo carbón (y con
+          él, la lectura del logo beige) desaparezca al imprimir ya lo trae
+          el <header> completo vía FORCE_PRINT_COLOR arriba — no hace falta
+          repetirlo en la imagen, que no tiene fondo propio que preservar.
+          logotipo_beige-print.png es un redimensionado propio (ver
+          scripts/generate-logo-print.mjs) del logotipo_beige.png de
+          434KB — next/image no puede optimizarlo en servidor (el chunk C2PA
+          hace que su sniffer lo rechace, de ahí `unoptimized` abajo, mismo
+          motivo que en Logo.tsx), así que sin este redimensionado el
+          archivo completo de 2172x724 se mandaría tal cual para un
+          encabezado de 28px de alto. */}
+          <Image src="/brand/logotipo_beige-print.png" alt={BRAND.name} width={84} height={28} unoptimized />
           <h1 className="text-2xl font-bold text-text-on-dark">{t.proposalTitle(clientName)}</h1>
           <p className="text-sm text-text-on-dark/70">
             {[giro, format(parseISO(quote.createdAt), "d 'de' MMMM 'de' yyyy", { locale: es })]
