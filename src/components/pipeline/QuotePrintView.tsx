@@ -156,8 +156,12 @@ export function QuotePrintView({
       se pasó de generoso — con un documento de 14+ productos eso solo por
       sí solo empujaba el total a tres páginas. La distinción de jerarquía
       (sección > subtítulo > ítem) se sostiene con el break-after-avoid de
-      los títulos, no con más espacio del necesario. */}
-      <div className="flex flex-col gap-10 px-8 py-10">
+      los títulos, no con más espacio del necesario.
+      print:pb-4 en vez de py-10 completo: el padding inferior generoso
+      pensado para pantalla es lo que dejaba media página 2 en blanco antes
+      del pie — en impreso el pie solo necesita el mínimo que lo separe del
+      contenido, no el mismo aire. */}
+      <div className="flex flex-col gap-10 px-8 py-10 print:pb-4">
         {/* Sin break-inside-avoid aquí: "Qué incluye" puede tener 14+
         productos y NO cabe completa en una sola página — forzarla a no
         partirse es lo que empuja toda la sección a la página siguiente y
@@ -265,7 +269,11 @@ export function QuotePrintView({
         </section>
       </div>
 
-      <footer className="break-inside-avoid border-t border-border-subtle px-8 py-3 text-center text-[11px] text-text-muted">
+      {/* Sin break-inside-avoid: es una sola línea, ya es indivisible por
+      naturaleza — forzarlo no ayuda a que quepa, solo lo trataba como
+      bloque aparte. print:py-1: el pie no necesita el mismo aire que en
+      pantalla, solo separarse del contenido. */}
+      <footer className="border-t border-border-subtle px-8 py-3 text-center text-[11px] text-text-muted print:py-1">
         {t.footer}
       </footer>
     </div>
