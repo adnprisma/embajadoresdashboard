@@ -1,7 +1,6 @@
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import type { ReactNode } from "react";
-import { MoneyValue } from "@/components/common/MoneyValue";
 import { BRAND } from "@/config/brand";
 import { copy } from "@/config/copy";
 import {
@@ -30,6 +29,19 @@ function resolveDescription(itemType: QuoteLineItemType, itemId: string): string
   return GESTION_PLANS.find((g) => g.id === itemId)?.description ?? "";
 }
 
+// Formateador propio, distinto de <MoneyValue> (que siempre muestra .00):
+// en un documento, "$47,500" se lee mejor que "$47,500.00" — los centavos
+// se quedan solo donde hay fracción real (el diferido mensual). MoneyValue
+// no cambia: esta regla es de documento, no de interfaz.
+function formatMoney(amount: number, currency: "MXN" | "USD" = "MXN") {
+  return new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
+
 // print-color-adjust (+ prefijo -webkit-): sin esto el navegador descarta
 // los fondos de color al imprimir (encabezado carbón, cajas de nota en
 // beige) aunque estén declarados — es la causa real de que una primera
@@ -46,17 +58,31 @@ const FORCE_PRINT_COLOR = { WebkitPrintColorAdjust: "exact", printColorAdjust: "
 // de marca se queda en el borde, que es "borde de acento" — sí permitido.
 function SectionTitle({ children }: { children: ReactNode }) {
   return (
-    <h2 className="border-b-2 border-accent pb-1 text-sm font-bold uppercase tracking-wide text-text-primary">
+    <h2 className="border-b-2 border-accent pb-1.5 text-sm font-bold uppercase tracking-wide text-text-primary">
       {children}
     </h2>
   );
 }
 
+// Un nivel entre el título de sección y un ítem: tamaño y peso propios
+// (16px/bold) para que "Paquete Completo" o "Elementos adicionales" no se
+// confundan con un producto más de la lista.
+function SubTitle({ children }: { children: ReactNode }) {
+  return <p className="text-base font-bold text-text-primary">{children}</p>;
+}
+
+// Nombre y descripción apilados (no en la misma línea): así una descripción
+// larga que envuelve a dos renglones se queda debajo del nombre, no
+// mezclada con el siguiente producto — sigue leyéndose como un solo ítem
+// sin necesitar sangría especial. El espacio ENTRE ítems (gap-5 en el
+// contenedor) es mayor que el espacio DENTRO de uno (mt-0.5 aquí) a
+// propósito: es lo que separa un renglón denso de una lista que se puede
+// escanear.
 function IncludeRow({ name, description }: { name: string; description: string }) {
   return (
-    <div className="break-inside-avoid py-1 text-sm">
-      <span className="font-semibold text-text-primary">{name}: </span>
-      <span className="text-text-secondary">{description}</span>
+    <div className="break-inside-avoid">
+      <p className="text-sm font-semibold text-text-primary">{name}</p>
+      <p className="mt-0.5 text-sm text-text-secondary">{description}</p>
     </div>
   );
 }
@@ -65,7 +91,7 @@ function NoteBox({ label, children }: { label: string; children: ReactNode }) {
   return (
     <p
       style={FORCE_PRINT_COLOR}
-      className="break-inside-avoid rounded-r-[var(--radius-control)] border-l-4 border-accent bg-bg-sunken p-3 text-xs text-text-secondary"
+      className="break-inside-avoid rounded-r-[var(--radius-control)] border-l-4 border-accent bg-bg-sunken p-4 text-xs text-text-secondary"
     >
       <span className="font-semibold text-text-primary">{label}: </span>
       {children}
@@ -107,7 +133,7 @@ export function QuotePrintView({
     >
       <header
         style={FORCE_PRINT_COLOR}
-        className="flex flex-col gap-1.5 bg-carbon px-8 py-7 text-center break-inside-avoid"
+        className="flex flex-col gap-1.5 bg-carbon px-8 py-8 text-center break-inside-avoid"
       >
         <span className="font-[var(--font-display)] text-sm font-semibold tracking-[0.08em] text-text-on-dark/70 uppercase">
           {BRAND.name}
@@ -121,68 +147,69 @@ export function QuotePrintView({
         </p>
       </header>
 
-      <div className="flex flex-col gap-6 px-8 py-7">
-        <section className="flex flex-col gap-1 break-inside-avoid">
+      <div className="flex flex-col gap-12 px-8 py-10">
+        <section className="flex flex-col gap-6 break-inside-avoid">
           <SectionTitle>{t.whatIncludesTitle}</SectionTitle>
           {pkg ? (
-            <>
-              <p className="mt-1 text-sm font-semibold text-text-primary">{t.packageIncludes(pkg.name)}</p>
-              {includedProducts.map((product) => (
-                <IncludeRow key={product.id} name={product.name} description={product.description} />
-              ))}
-              {includedAdn ? <IncludeRow name={includedAdn.name} description={includedAdn.description} /> : null}
-            </>
+            <div className="flex flex-col gap-3">
+              <SubTitle>{t.packageLabel(pkg.name)}</SubTitle>
+              <div className="flex flex-col gap-5">
+                {includedProducts.map((product) => (
+                  <IncludeRow key={product.id} name={product.name} description={product.description} />
+                ))}
+                {includedAdn ? <IncludeRow name={includedAdn.name} description={includedAdn.description} /> : null}
+              </div>
+            </div>
           ) : null}
           {productAdnLines.length > 0 ? (
-            <>
-              {pkg ? <p className="mt-2 text-sm font-semibold text-text-primary">{t.extraItemsTitle}</p> : null}
-              {productAdnLines.map((line) => (
-                <IncludeRow
-                  key={line.id}
-                  name={line.itemName}
-                  description={resolveDescription(line.itemType, line.itemId)}
-                />
-              ))}
-            </>
+            <div className="flex flex-col gap-3">
+              {pkg ? <SubTitle>{t.extraItemsTitle}</SubTitle> : null}
+              <div className="flex flex-col gap-5">
+                {productAdnLines.map((line) => (
+                  <IncludeRow
+                    key={line.id}
+                    name={line.itemName}
+                    description={resolveDescription(line.itemType, line.itemId)}
+                  />
+                ))}
+              </div>
+            </div>
           ) : null}
         </section>
 
         {gestionLines.length > 0 ? (
-          <section className="flex flex-col gap-1 break-inside-avoid">
+          <section className="flex flex-col gap-3 break-inside-avoid">
             <SectionTitle>{t.gestionTitle}</SectionTitle>
-            {gestionLines.map((line) => (
-              <IncludeRow
-                key={line.id}
-                name={t.gestionItemLabel(
-                  line.itemName,
-                  new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(line.quotedPrice),
-                )}
-                description={resolveDescription(line.itemType, line.itemId)}
-              />
-            ))}
+            <div className="flex flex-col gap-5">
+              {gestionLines.map((line) => (
+                <IncludeRow
+                  key={line.id}
+                  name={t.gestionItemLabel(line.itemName, formatMoney(line.quotedPrice))}
+                  description={resolveDescription(line.itemType, line.itemId)}
+                />
+              ))}
+            </div>
           </section>
         ) : null}
 
-        <section className="flex flex-col gap-3 break-inside-avoid">
+        <section className="flex flex-col gap-4 break-inside-avoid">
           <SectionTitle>{t.investmentTitle}</SectionTitle>
           <table className="w-full text-sm">
             <tbody>
               <tr className="border-b border-border-subtle">
-                <td className="py-2 font-semibold text-text-primary">{t.implementationLabel}</td>
-                <td className="py-2 text-right text-2xl font-bold text-accent">
-                  <MoneyValue amount={quote.total} />
+                <td className="py-2.5 font-semibold text-text-primary">{t.implementationLabel}</td>
+                <td className="numeric py-2.5 text-right text-2xl font-bold text-accent">
+                  {formatMoney(quote.total)}
                 </td>
               </tr>
               <tr className="border-b border-border-subtle">
-                <td className="py-1.5 text-text-secondary">{t.initialPaymentLabel}</td>
-                <td className="py-1.5 text-right text-text-primary">
-                  <MoneyValue amount={quote.pagoInicial} />
-                </td>
+                <td className="py-2 text-text-secondary">{t.initialPaymentLabel}</td>
+                <td className="numeric py-2 text-right text-text-primary">{formatMoney(quote.pagoInicial)}</td>
               </tr>
               <tr>
-                <td className="py-1.5 text-text-secondary">{t.deferredPaymentLabel(quote.mesesDiferimiento)}</td>
-                <td className="py-1.5 text-right text-text-primary">
-                  <MoneyValue amount={quote.pagoDiferidoMensual} />
+                <td className="py-2 text-text-secondary">{t.deferredPaymentLabel(quote.mesesDiferimiento)}</td>
+                <td className="numeric py-2 text-right text-text-primary">
+                  {formatMoney(quote.pagoDiferidoMensual)}
                 </td>
               </tr>
             </tbody>
@@ -190,7 +217,7 @@ export function QuotePrintView({
 
           <NoteBox label={t.platformNoteLabel}>
             {"~"}
-            <MoneyValue amount={platformTotal} currency="USD" />
+            <span className="numeric">{formatMoney(platformTotal, "USD")}</span>
             /mes ({plan?.name}
             {plan?.includesWhatsapp
               ? ` · ${t.platformIncludesWhatsapp}`
@@ -203,16 +230,16 @@ export function QuotePrintView({
           {gestionLines.length > 0 ? (
             <NoteBox label={t.gestionNoteLabel}>
               {"~"}
-              <MoneyValue amount={gestionTotal} />
+              <span className="numeric">{formatMoney(gestionTotal)}</span>
               /mes {t.gestionNoteDescription}
             </NoteBox>
           ) : null}
         </section>
 
-        <section className="flex flex-col gap-3 break-inside-avoid">
-          <div>
+        <section className="flex flex-col gap-4 break-inside-avoid">
+          <div className="flex flex-col gap-2">
             <SectionTitle>{t.howPaymentWorksTitle}</SectionTitle>
-            <p className="mt-1 text-sm text-text-secondary">{t.howPaymentWorks}</p>
+            <p className="text-sm text-text-secondary">{t.howPaymentWorks}</p>
           </div>
           <NoteBox label={t.guaranteeLabel}>{t.guarantee}</NoteBox>
         </section>

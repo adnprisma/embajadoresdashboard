@@ -720,7 +720,7 @@ export const copy = {
       proposalTitle: (client: string) => `Propuesta para ${client}`,
       embajadorLabel: (name: string) => `Embajador(a): ${name}`,
       whatIncludesTitle: "Qué incluye",
-      packageIncludes: (name: string) => `Paquete ${name}. Incluye:`,
+      packageLabel: (name: string) => `Paquete ${name}`,
       extraItemsTitle: "Elementos adicionales",
       gestionTitle: "Gestión mensual (recurrente)",
       gestionItemLabel: (name: string, monthly: string) => `${name} (~${monthly}/mes)`,
