@@ -916,6 +916,170 @@ export type Database = {
           },
         ];
       };
+      catalog_items: {
+        Row: {
+          id: string;
+          item_type: string;
+          item_id: string;
+          name: string;
+          price: number;
+          currency: string;
+          includes_whatsapp: boolean;
+        };
+        Insert: {
+          id?: string;
+          item_type: string;
+          item_id: string;
+          name: string;
+          price: number;
+          currency: string;
+          includes_whatsapp?: boolean;
+        };
+        Update: {
+          id?: string;
+          item_type?: string;
+          item_id?: string;
+          name?: string;
+          price?: number;
+          currency?: string;
+          includes_whatsapp?: boolean;
+        };
+        Relationships: [];
+      };
+      quotes: {
+        Row: {
+          id: string;
+          opportunity_id: string;
+          created_by: string;
+          created_at: string;
+          mode: string;
+          package_id: string | null;
+          package_quoted_price: number | null;
+          package_seller_price: number | null;
+          package_catalog_price: number | null;
+          package_adn_tier_id: string | null;
+          meses_diferimiento: number;
+          whatsapp_incluido: boolean;
+          platform_plan_id: string;
+          platform_plan_price: number;
+          platform_consumo_id: string;
+          platform_consumo_price: number;
+          platform_whatsapp_price: number | null;
+          precio_especial: number | null;
+          subtotal: number;
+          total: number;
+          pago_inicial: number;
+          pago_diferido_mensual: number;
+          mrr: number;
+        };
+        Insert: {
+          id?: string;
+          opportunity_id: string;
+          created_by: string;
+          created_at?: string;
+          mode: string;
+          package_id?: string | null;
+          package_quoted_price?: number | null;
+          package_seller_price?: number | null;
+          package_catalog_price?: number | null;
+          package_adn_tier_id?: string | null;
+          meses_diferimiento: number;
+          whatsapp_incluido: boolean;
+          platform_plan_id: string;
+          platform_plan_price: number;
+          platform_consumo_id: string;
+          platform_consumo_price: number;
+          platform_whatsapp_price?: number | null;
+          precio_especial?: number | null;
+          subtotal: number;
+          total: number;
+          pago_inicial: number;
+          pago_diferido_mensual: number;
+          mrr?: number;
+        };
+        Update: {
+          id?: string;
+          opportunity_id?: string;
+          created_by?: string;
+          created_at?: string;
+          mode?: string;
+          package_id?: string | null;
+          package_quoted_price?: number | null;
+          package_seller_price?: number | null;
+          package_catalog_price?: number | null;
+          package_adn_tier_id?: string | null;
+          meses_diferimiento?: number;
+          whatsapp_incluido?: boolean;
+          platform_plan_id?: string;
+          platform_plan_price?: number;
+          platform_consumo_id?: string;
+          platform_consumo_price?: number;
+          platform_whatsapp_price?: number | null;
+          precio_especial?: number | null;
+          subtotal?: number;
+          total?: number;
+          pago_inicial?: number;
+          pago_diferido_mensual?: number;
+          mrr?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "quotes_opportunity_id_fkey";
+            columns: ["opportunity_id"];
+            isOneToOne: false;
+            referencedRelation: "opportunities";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "quotes_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      quote_line_items: {
+        Row: {
+          id: string;
+          quote_id: string;
+          item_type: string;
+          item_id: string;
+          item_name: string;
+          quoted_price: number;
+          seller_price: number | null;
+          catalog_price: number;
+        };
+        Insert: {
+          id?: string;
+          quote_id: string;
+          item_type: string;
+          item_id: string;
+          item_name: string;
+          quoted_price: number;
+          seller_price?: number | null;
+          catalog_price: number;
+        };
+        Update: {
+          id?: string;
+          quote_id?: string;
+          item_type?: string;
+          item_id?: string;
+          item_name?: string;
+          quoted_price?: number;
+          seller_price?: number | null;
+          catalog_price?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "quote_line_items_quote_id_fkey";
+            columns: ["quote_id"];
+            isOneToOne: false;
+            referencedRelation: "quotes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -1017,6 +1181,23 @@ export type Database = {
           p_changed_by?: string | null;
         };
         Returns: number;
+      };
+      generate_quote: {
+        Args: {
+          p_opportunity_id: string;
+          p_mode: string;
+          p_meses_diferimiento: number;
+          p_whatsapp_incluido: boolean;
+          p_platform_plan_id: string;
+          p_platform_consumo_id: string;
+          p_lines?: Json;
+          p_package_id?: string | null;
+          p_package_quoted_price?: number | null;
+          p_package_adn_tier_id?: string | null;
+          p_precio_especial?: number | null;
+          p_created_by?: string | null;
+        };
+        Returns: string;
       };
       generate_weekly_plan: {
         Args: {

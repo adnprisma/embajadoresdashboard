@@ -649,6 +649,65 @@ export const copy = {
         required: "Captura el valor cerrado para continuar.",
       },
     },
+    // Vista de detalle /pipeline/[id] — bloque 4, solo lectura salvo notas
+    // y el valor estimado (y ese último, solo mientras no haya cotización).
+    detail: {
+      header: {
+        viewContact: "Ver contacto",
+        noContact: "Sin contacto vinculado",
+        ownerLabel: (name: string) => `Vendedora: ${name}`,
+      },
+      estimatedValue: {
+        label: "Valor estimado",
+        placeholder: "Sin estimar",
+        save: "Guardar",
+        saving: "Guardando…",
+        successToast: "Valor estimado actualizado.",
+        errorToast: "No pudimos guardar el valor estimado. Intenta de nuevo.",
+        lockedHasQuote:
+          "Ya existe una cotización para esta oportunidad — el valor se actualiza generando una cotización nueva, no se edita a mano.",
+        lockedTerminalWon:
+          "Esta oportunidad ya está ganada. El valor cerrado real es el que cuenta, no el estimado.",
+        lockedTerminalLost:
+          "Esta oportunidad está perdida. Muévela a una etapa abierta antes de poder editar el estimado.",
+      },
+      notes: {
+        label: "Notas",
+        placeholder: "Notas internas sobre esta oportunidad",
+        save: "Guardar",
+        saving: "Guardando…",
+        successToast: "Notas actualizadas.",
+        errorToast: "No pudimos guardar las notas. Intenta de nuevo.",
+      },
+      quote: {
+        modeLabel: {
+          pkg: "Paquete",
+          custom: "Personalizada",
+        },
+        implementationTitle: "Implementación (pago único)",
+        subtotalLabel: "Subtotal",
+        specialPriceLabel: "Precio especial aplicado",
+        totalLabel: "Total implementación",
+        initialPaymentLabel: "Pago inicial",
+        deferredPaymentLabel: (months: number) => `Diferido en ${months} meses`,
+        gestionTitle: "Gestión mensual (recurrente)",
+        gestionHint: "Servicio recurrente, aparte de la implementación.",
+        platformTitle: "Plataforma (recurrente, no incluido en el total)",
+        platformHint: "Se paga directo a la plataforma, en dólares — nunca se suma a lo de arriba.",
+        platformWhatsappIncluded: "WhatsApp incluido en el plan",
+        adnIncludedLabel: "ADN incluido",
+        whatsappLabel: "WhatsApp (el Puente)",
+      },
+      history: {
+        title: "Historial de cotizaciones",
+        current: "Vigente",
+        by: (name: string) => `por ${name}`,
+      },
+      emptyState: {
+        title: "Todavía no hay ninguna cotización",
+        description: "En cuanto se genere una, su desglose aparece aquí.",
+      },
+    },
   },
 
   tareas: {

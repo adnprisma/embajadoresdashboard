@@ -71,6 +71,7 @@ export const pipelineKeys = {
   opportunities: () => [...pipelineKeys.all, "opportunities"] as const,
   metrics: () => [...pipelineKeys.all, "metrics"] as const,
   forContact: (contactId: string) => [...pipelineKeys.all, "contact", contactId] as const,
+  detail: (id: string) => [...pipelineKeys.all, "detail", id] as const,
 };
 
 const OPPORTUNITIES_SELECT =
@@ -250,9 +251,10 @@ export function useUpdateOpportunityStage() {
     onSuccess: () => {
       toast.success(copy.pipeline.moveSuccessToast);
     },
-    onSettled: () => {
+    onSettled: (_data, _error, variables) => {
       queryClient.invalidateQueries({ queryKey: pipelineKeys.opportunities() });
       queryClient.invalidateQueries({ queryKey: pipelineKeys.metrics() });
+      queryClient.invalidateQueries({ queryKey: pipelineKeys.detail(variables.id) });
     },
   });
 }
@@ -290,6 +292,130 @@ export function useDeleteOpportunity() {
       toast.success(copy.pipeline.deleteDialog.successToast);
     },
     onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: pipelineKeys.opportunities() });
+      queryClient.invalidateQueries({ queryKey: pipelineKeys.metrics() });
+    },
+  });
+}
+
+// owner_full_name/contact_business_name solo existen aquí, no en
+// OPPORTUNITIES_SELECT (el tablero no los necesita) — evita el join extra
+// en la query que sí corre en cada carga de /pipeline.
+export type OpportunityDetail = OpportunityRow & {
+  owner_full_name: string | null;
+  contact_business_name: string | null;
+};
+
+type OpportunityDetailQueryRow = {
+  id: string;
+  contact_id: string | null;
+  business_name: string;
+  stage_id: string;
+  estimated_value: number | null;
+  closed_value: number | null;
+  mrr: number;
+  position: number;
+  closed_at: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  profiles: { full_name: string } | { full_name: string }[] | null;
+  contacts: { business_name: string } | { business_name: string }[] | null;
+};
+
+const OPPORTUNITY_DETAIL_SELECT =
+  "id, contact_id, business_name, stage_id, estimated_value, closed_value, mrr, position, closed_at, notes, created_at, updated_at, profiles(full_name), contacts(business_name)";
+
+function toOpportunityDetail(row: OpportunityDetailQueryRow): OpportunityDetail {
+  const owner = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+  const contact = Array.isArray(row.contacts) ? row.contacts[0] : row.contacts;
+  return {
+    id: row.id,
+    contact_id: row.contact_id,
+    business_name: row.business_name,
+    stage_id: row.stage_id,
+    estimated_value: row.estimated_value,
+    closed_value: row.closed_value,
+    mrr: row.mrr,
+    position: row.position,
+    closed_at: row.closed_at,
+    notes: row.notes,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+    owner_full_name: owner?.full_name ?? null,
+    contact_business_name: contact?.business_name ?? null,
+  };
+}
+
+// `initialData` viene del fetch server-side de /pipeline/[id]/page.tsx —
+// mismo patrón que useContact() en contacts.ts.
+export function useOpportunity(id: string, initialData?: OpportunityDetail) {
+  return useQuery({
+    queryKey: pipelineKeys.detail(id),
+    queryFn: async (): Promise<OpportunityDetail> => {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("opportunities")
+        .select(OPPORTUNITY_DETAIL_SELECT)
+        .eq("id", id)
+        .single();
+      if (error) throw error;
+      return toOpportunityDetail(data as OpportunityDetailQueryRow);
+    },
+    initialData,
+  });
+}
+
+// Notas: se editan in situ desde /pipeline/[id], sin diálogo — update
+// directo a la tabla (RLS ya exige owner_id = auth.uid() o admin, ver
+// 0010_rls_admin.sql). No hay cálculo ni dinero de por medio, así que no
+// hace falta un RPC para esto.
+export function useUpdateOpportunityNotes(id: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (notes: string) => {
+      const supabase = createClient();
+      const { error } = await supabase.from("opportunities").update({ notes: notes.trim() || null }).eq("id", id);
+      if (error) throw error;
+    },
+    onError: () => {
+      toast.error(copy.pipeline.detail.notes.errorToast);
+    },
+    onSuccess: () => {
+      toast.success(copy.pipeline.detail.notes.successToast);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: pipelineKeys.detail(id) });
+      queryClient.invalidateQueries({ queryKey: pipelineKeys.opportunities() });
+    },
+  });
+}
+
+// Valor estimado: editable a mano SOLO mientras no exista ninguna
+// cotización y la etapa no sea terminal — la pantalla (OpportunityDetailView)
+// es quien decide si el campo se pinta editable, esta mutación no repite esa
+// regla porque no hay nada que calcular aquí tampoco: es un número que la
+// vendedora decide, igual que hoy lo decide una vez al crear la oportunidad
+// (useCreateOpportunity, arriba). En cuanto exista una cotización, este
+// campo lo vuelve a escribir generate_quote(), nunca esta mutación.
+export function useUpdateOpportunityEstimatedValue(id: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (estimatedValue: number) => {
+      const supabase = createClient();
+      const { error } = await supabase.from("opportunities").update({ estimated_value: estimatedValue }).eq("id", id);
+      if (error) throw error;
+    },
+    onError: () => {
+      toast.error(copy.pipeline.detail.estimatedValue.errorToast);
+    },
+    onSuccess: () => {
+      toast.success(copy.pipeline.detail.estimatedValue.successToast);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: pipelineKeys.detail(id) });
       queryClient.invalidateQueries({ queryKey: pipelineKeys.opportunities() });
       queryClient.invalidateQueries({ queryKey: pipelineKeys.metrics() });
     },
