@@ -24,23 +24,6 @@ export type TaxData = {
   direccion_fiscal?: string;
 };
 
-// PROPUESTA — todavía nadie más lee esta forma (ni una RPC, ni el
-// cotizador del bloque 14). No confundir con config/pricing.ts: ese es el
-// catálogo MAESTRO de planes de Prisma (hoy vacío, TODO bloque 14); esto es
-// lo que CADA usuario decide cobrarle a SUS propios clientes, en conceptos
-// libres — no está atado a los planes de pricing.ts porque ese catálogo
-// todavía no existe.
-export type OwnPriceEntry = {
-  id: string;
-  label: string;
-  monthly: number;
-  annual: number;
-};
-
-export type OwnPrices = {
-  entries: OwnPriceEntry[];
-};
-
 export type Profile = {
   id: string;
   full_name: string;
@@ -49,7 +32,6 @@ export type Profile = {
   billing_complete: boolean;
   bank_data: BankData;
   tax_data: TaxData;
-  own_prices: OwnPrices;
 };
 
 export type DocumentRow = {
@@ -66,14 +48,7 @@ export const profileKeys = {
   documents: () => [...profileKeys.all, "documents"] as const,
 };
 
-const PROFILE_SELECT = "id, full_name, email, avatar_url, billing_complete, bank_data, tax_data, own_prices";
-
-function normalizeOwnPrices(value: unknown): OwnPrices {
-  if (value && typeof value === "object" && Array.isArray((value as OwnPrices).entries)) {
-    return value as OwnPrices;
-  }
-  return { entries: [] };
-}
+const PROFILE_SELECT = "id, full_name, email, avatar_url, billing_complete, bank_data, tax_data";
 
 export function useProfile() {
   return useQuery({
@@ -87,7 +62,6 @@ export function useProfile() {
         ...data,
         bank_data: (data.bank_data ?? {}) as BankData,
         tax_data: (data.tax_data ?? {}) as TaxData,
-        own_prices: normalizeOwnPrices(data.own_prices),
       };
     },
   });
@@ -227,22 +201,6 @@ export function useUpdateBillingData() {
     },
     onError: () => toast.error(copy.perfil.billing.errorToast),
     onSuccess: () => toast.success(copy.perfil.billing.successToast),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: profileKeys.detail() }),
-  });
-}
-
-export function useUpdateOwnPrices() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (input: OwnPrices) => {
-      const supabase = createClient();
-      const ownerId = await getOwnerId();
-      const { error } = await supabase.from("profiles").update({ own_prices: input }).eq("id", ownerId);
-      if (error) throw error;
-    },
-    onError: () => toast.error(copy.perfil.prices.errorToast),
-    onSuccess: () => toast.success(copy.perfil.prices.successToast),
     onSettled: () => queryClient.invalidateQueries({ queryKey: profileKeys.detail() }),
   });
 }

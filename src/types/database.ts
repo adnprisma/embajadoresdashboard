@@ -833,6 +833,89 @@ export type Database = {
           },
         ];
       };
+      seller_prices: {
+        Row: {
+          id: string;
+          seller_id: string;
+          item_type: string;
+          item_id: string;
+          price: number;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          seller_id: string;
+          item_type: string;
+          item_id: string;
+          price: number;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          seller_id?: string;
+          item_type?: string;
+          item_id?: string;
+          price?: number;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "seller_prices_seller_id_fkey";
+            columns: ["seller_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      seller_price_changes: {
+        Row: {
+          id: string;
+          seller_id: string;
+          item_type: string;
+          item_id: string;
+          old_price: number | null;
+          new_price: number;
+          changed_by: string;
+          changed_at: string;
+        };
+        Insert: {
+          id?: string;
+          seller_id: string;
+          item_type: string;
+          item_id: string;
+          old_price?: number | null;
+          new_price: number;
+          changed_by: string;
+          changed_at?: string;
+        };
+        Update: {
+          id?: string;
+          seller_id?: string;
+          item_type?: string;
+          item_id?: string;
+          old_price?: number | null;
+          new_price?: number;
+          changed_by?: string;
+          changed_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "seller_price_changes_seller_id_fkey";
+            columns: ["seller_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "seller_price_changes_changed_by_fkey";
+            columns: ["changed_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -922,6 +1005,16 @@ export type Database = {
           p_contact_ids: string[];
           p_tag: string;
           p_added_by?: string | null;
+        };
+        Returns: number;
+      };
+      update_seller_price: {
+        Args: {
+          p_item_type: string;
+          p_item_id: string;
+          p_new_price: number;
+          p_seller_id?: string | null;
+          p_changed_by?: string | null;
         };
         Returns: number;
       };
