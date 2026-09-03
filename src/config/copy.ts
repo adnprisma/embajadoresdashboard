@@ -708,6 +708,42 @@ export const copy = {
         description: "En cuanto se genere una, su desglose aparece aquí.",
       },
     },
+    // Vista imprimible (/pipeline/[id]/cotizaciones/[quoteId]/imprimir) —
+    // lo único de todo el proyecto que puede terminar en manos de un
+    // cliente de Prisma, no de una vendedora. howPaymentWorks y guarantee
+    // salen literales del HTML de referencia — el dueño de producto los
+    // revisa antes de que se manden a un cliente real (no son texto
+    // definitivo todavía).
+    print: {
+      printButton: "Imprimir",
+      backButton: "Volver",
+      proposalTitle: (client: string) => `Propuesta para ${client}`,
+      embajadorLabel: (name: string) => `Embajador(a): ${name}`,
+      whatIncludesTitle: "Qué incluye",
+      packageIncludes: (name: string) => `Paquete ${name}. Incluye:`,
+      extraItemsTitle: "Elementos adicionales",
+      gestionTitle: "Gestión mensual (recurrente)",
+      gestionItemLabel: (name: string, monthly: string) => `${name} (~${monthly}/mes)`,
+      investmentTitle: "Tu inversión",
+      implementationLabel: "Implementación (pago a Prisma)",
+      initialPaymentLabel: "Pago inicial para arrancar",
+      deferredPaymentLabel: (months: number) => `Resto diferido en ${months} mensualidades`,
+      platformNoteLabel: "Plataforma (aparte, mensual, estimado)",
+      platformNoteDescription: "Lo pagas directo a la plataforma y varía según tu uso.",
+      platformIncludesWhatsapp: "WhatsApp incluido",
+      platformWithWhatsapp: "+ WhatsApp",
+      platformWithoutWhatsapp: "sin WhatsApp",
+      platformConsumption: "+ consumo",
+      gestionNoteLabel: "Gestión mensual",
+      gestionNoteDescription: "por el servicio recurrente que trae clientes nuevos.",
+      howPaymentWorksTitle: "Cómo funciona el pago",
+      howPaymentWorks:
+        "Son tres cosas, claras y sin sorpresas: (1) la implementación que nos pagas a nosotros; (2) la plataforma, una mensualidad que pagas directo a la plataforma; y (3) si contrataste gestión mensual, ese servicio recurrente.",
+      guaranteeLabel: "Garantía",
+      guarantee: "Dejamos tu sistema montado, funcionando y bien hecho, y te acompañamos.",
+      footer:
+        "PRISMA · Propuesta / confirmación de lo contratado · Precios de implementación en MXN; plataforma en USD (estimada según uso).",
+    },
   },
 
   tareas: {

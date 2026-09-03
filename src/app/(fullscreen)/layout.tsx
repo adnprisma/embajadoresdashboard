@@ -17,13 +17,18 @@ export default async function FullscreenGroupLayout({ children }: { children: Re
   }
 
   return (
-    <div className="min-h-screen bg-bg-base">
-      <header className="flex items-center justify-between border-b border-border-subtle bg-bg-surface px-4 py-3 lg:px-8">
+    <div className="min-h-screen bg-bg-base print:bg-white">
+      {/* print:hidden — este header trae el logo aprobado SOLO para la
+      interfaz interna (ver CLAUDE.md §2). Nunca debe llegar a lo impreso,
+      que es exactamente el caso que esa regla excluye. */}
+      <header className="flex items-center justify-between border-b border-border-subtle bg-bg-surface px-4 py-3 lg:px-8 print:hidden">
         <FullscreenBackButton />
         <Logo variant="carbon" form="isotipo" height={24} />
         <div className="w-[72px]" aria-hidden="true" />
       </header>
-      <main className="mx-auto w-full max-w-[var(--content-max-width)] px-4 py-6 lg:px-8">{children}</main>
+      <main className="mx-auto w-full max-w-[var(--content-max-width)] px-4 py-6 lg:px-8 print:max-w-none print:p-0">
+        {children}
+      </main>
     </div>
   );
 }

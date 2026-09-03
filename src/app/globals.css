@@ -49,3 +49,13 @@
   --color-state-negative: var(--state-negative);
   --color-state-negative-soft: var(--state-negative-soft);
 }
+
+/* Márgenes de página para lo único de este proyecto que se imprime de
+   verdad (la vista de cotización en /pipeline/[id]/cotizaciones/[quoteId]/
+   imprimir) — @page no tiene equivalente en las utilidades print: de
+   Tailwind, por eso vive aparte de esa pantalla. */
+@media print {
+  @page {
+    margin: 1.5cm;
+  }
+}
