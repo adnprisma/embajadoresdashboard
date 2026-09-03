@@ -222,11 +222,13 @@ export function QuotePrintView({
         sí solo empujaba el total a tres páginas. La distinción de jerarquía
         (sección > subtítulo > ítem) se sostiene con el break-after-avoid de
         los títulos, no con más espacio del necesario.
-        print:pb-4 en vez de py-10 completo: el padding inferior generoso
-        pensado para pantalla es lo que dejaba media página 2 en blanco antes
-        del pie — en impreso el pie solo necesita el mínimo que lo separe del
-        contenido, no el mismo aire. */}
-        <div className="flex flex-col gap-10 px-8 py-10 print:pb-4">
+        py-10 completo, sin recorte print-only: tres páginas para un paquete
+        Completo (14+ productos) quedan aceptadas — una cotización normal ya
+        cabe en dos sin tocar nada, así que no vale la pena apretar el
+        documento entero por el peor caso. Sin esa presión, el padding
+        inferior puede ser el mismo que en pantalla: es lo que separa la
+        ilustración del pie con aire generoso. */}
+        <div className="flex flex-col gap-10 px-8 py-10">
           {/* Sin break-inside-avoid aquí: "Qué incluye" puede tener 14+
           productos y NO cabe completa en una sola página — forzarla a no
           partirse es lo que empuja toda la sección a la página siguiente y
@@ -337,19 +339,23 @@ export function QuotePrintView({
           casa con lo que de verdad se está proponiendo — paquete completo
           más gestión mensual, que es contenido + campañas — no con
           "encontrar" (diferenciación de marca) ni "crear" (producción de
-          contenido en sí). size="xl" (280px, bien sobre el mínimo de 80px
-          del kit): al ser la última pieza del documento puede pesar más sin
-          competir con nada. */}
+          contenido en sí). size="md" (140px, sobre el mínimo de 80px del
+          kit): a xl (280px) se comía media hoja sin necesidad — es la única
+          palanca de tamaño de página sin costo de lectura, así que se ajusta
+          antes de tocar cualquier otra cosa. */}
           <div className="flex justify-center pt-2">
-            <Illustration name="planear" size="xl" alt="" />
+            <Illustration name="planear" size="md" alt="" />
           </div>
         </div>
 
-        {/* Sin break-inside-avoid: es una sola línea, ya es indivisible por
-        naturaleza — forzarlo no ayuda a que quepa, solo lo trataba como
-        bloque aparte. print:py-1: el pie no necesita el mismo aire que en
-        pantalla, solo separarse del contenido. */}
-        <footer className="border-t border-border-subtle px-8 py-3 text-center text-[11px] text-text-muted print:py-1">
+        {/* py-4 en vez de py-3, sin recorte print-only: con tres páginas ya
+        aceptadas, el pie no necesita pelear por espacio — border-t es su
+        propia regla de cierre, y el padding generoso (igual en pantalla y
+        en impreso) lo separa de la ilustración en vez de sentirse pegado.
+        Nada de position: fixed / bottom aquí — es el mismo truco que ya
+        falló dos veces con la franja; un pie con aire de sobra al final del
+        flujo se lee como cierre de documento igual de bien. */}
+        <footer className="border-t border-border-subtle px-8 py-4 text-center text-[11px] text-text-muted">
           {t.footer}
         </footer>
       </div>
