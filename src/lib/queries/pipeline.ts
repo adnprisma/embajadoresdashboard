@@ -302,12 +302,18 @@ export function useDeleteOpportunity() {
 // OPPORTUNITIES_SELECT (el tablero no los necesita) — evita el join extra
 // en la query que sí corre en cada carga de /pipeline.
 export type OpportunityDetail = OpportunityRow & {
+  // owner_id (no solo owner_full_name): el wizard de cotización
+  // (bloque 5b) lo necesita para resolver seller_prices — el precio propio
+  // es de la DUEÑA de la oportunidad, no de quien la esté viendo (admin
+  // puede generar cotizaciones para el equipo).
+  owner_id: string;
   owner_full_name: string | null;
   contact_business_name: string | null;
 };
 
 type OpportunityDetailQueryRow = {
   id: string;
+  owner_id: string;
   contact_id: string | null;
   business_name: string;
   stage_id: string;
@@ -324,13 +330,14 @@ type OpportunityDetailQueryRow = {
 };
 
 const OPPORTUNITY_DETAIL_SELECT =
-  "id, contact_id, business_name, stage_id, estimated_value, closed_value, mrr, position, closed_at, notes, created_at, updated_at, profiles(full_name), contacts(business_name)";
+  "id, owner_id, contact_id, business_name, stage_id, estimated_value, closed_value, mrr, position, closed_at, notes, created_at, updated_at, profiles(full_name), contacts(business_name)";
 
 function toOpportunityDetail(row: OpportunityDetailQueryRow): OpportunityDetail {
   const owner = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
   const contact = Array.isArray(row.contacts) ? row.contacts[0] : row.contacts;
   return {
     id: row.id,
+    owner_id: row.owner_id,
     contact_id: row.contact_id,
     business_name: row.business_name,
     stage_id: row.stage_id,

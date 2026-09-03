@@ -1,7 +1,7 @@
 import { MoneyValue } from "@/components/common/MoneyValue";
 import { copy } from "@/config/copy";
 import { ADN_TIERS, PACKAGES, PLATFORM_CONSUMPTION_TIERS, PLATFORM_PLANS } from "@/config/pricing";
-import type { Quote } from "@/lib/queries/quotes";
+import type { QuoteBreakdownData } from "@/lib/queries/quotes";
 
 function LineRow({ name, amount, currency }: { name: string; amount: number; currency?: string }) {
   return (
@@ -19,7 +19,7 @@ function LineRow({ name, amount, currency }: { name: string; amount: number; cur
 // por línea: seller_price/catalog_price existen en la base pero son
 // información de supervisión (bloque 6), no algo que la vendedora necesite
 // ver aquí.
-export function QuoteBreakdown({ quote }: { quote: Quote }) {
+export function QuoteBreakdown({ quote }: { quote: QuoteBreakdownData }) {
   const t = copy.pipeline.detail.quote;
 
   const packageName = quote.packageId ? (PACKAGES.find((p) => p.id === quote.packageId)?.name ?? quote.packageId) : null;

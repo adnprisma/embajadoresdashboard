@@ -4,10 +4,11 @@ import { getCurrentProfile } from "@/lib/supabase/get-current-profile";
 import { OpportunityDetailView } from "./OpportunityDetailView";
 
 const OPPORTUNITY_SELECT =
-  "id, contact_id, business_name, stage_id, estimated_value, closed_value, mrr, position, closed_at, notes, created_at, updated_at, profiles(full_name), contacts(business_name)";
+  "id, owner_id, contact_id, business_name, stage_id, estimated_value, closed_value, mrr, position, closed_at, notes, created_at, updated_at, profiles(full_name), contacts(business_name)";
 
 type OpportunityQueryRow = {
   id: string;
+  owner_id: string;
   contact_id: string | null;
   business_name: string;
   stage_id: string;
@@ -51,6 +52,7 @@ export default async function OpportunityDetailPage({
     <OpportunityDetailView
       opportunity={{
         id: row.id,
+        owner_id: row.owner_id,
         contact_id: row.contact_id,
         business_name: row.business_name,
         stage_id: row.stage_id,

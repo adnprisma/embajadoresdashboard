@@ -3,7 +3,7 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
-import { Check, ChevronDown, FileText } from "lucide-react";
+import { Check, ChevronDown, FileText, Plus, Printer } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { EmptyState } from "@/components/common/EmptyState";
@@ -28,6 +28,9 @@ import { cn } from "@/lib/utils/cn";
 
 const SECONDARY_BUTTON_CLASSES =
   "inline-flex items-center gap-2 rounded-[var(--radius-control)] border border-border-subtle px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-bg-sunken disabled:cursor-not-allowed disabled:opacity-60";
+
+const PRIMARY_BUTTON_CLASSES =
+  "inline-flex items-center gap-2 rounded-[var(--radius-control)] bg-accent px-3 py-2 text-sm font-medium text-text-on-coral transition-colors hover:opacity-90";
 
 const INPUT_CLASSES =
   "w-full rounded-[var(--radius-control)] border border-border-subtle bg-bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted";
@@ -171,7 +174,30 @@ export function OpportunityDetailView({
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title={current.business_name} />
+      <PageHeader
+        title={current.business_name}
+        action={
+          <div className="flex gap-2">
+            {hasQuotes && latestQuoteId ? (
+              <Link href={`/pipeline/${current.id}/cotizaciones/${latestQuoteId}/imprimir`} className={SECONDARY_BUTTON_CLASSES}>
+                <Printer aria-hidden="true" className="h-4 w-4" strokeWidth={1.5} />
+                {copy.pipeline.detail.actions.viewPrint}
+              </Link>
+            ) : null}
+            {/* Sin esto, "generar cotización" sería alcanzable en una
+            oportunidad ganada o perdida — el candado real vive en
+            generate_quote() (0023_quotes.sql) y en el propio
+            /cotizaciones/nueva/page.tsx (URL directa), pero el botón no
+            debe ofrecerlo ni para el caso normal de navegación. */}
+            {!isWon && !isLost ? (
+              <Link href={`/pipeline/${current.id}/cotizaciones/nueva`} className={PRIMARY_BUTTON_CLASSES}>
+                <Plus aria-hidden="true" className="h-4 w-4" strokeWidth={1.75} />
+                {copy.pipeline.detail.actions.newQuote}
+              </Link>
+            ) : null}
+          </div>
+        }
+      />
 
       <div className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface p-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col gap-2">

@@ -707,6 +707,10 @@ export const copy = {
         title: "Todavía no hay ninguna cotización",
         description: "En cuanto se genere una, su desglose aparece aquí.",
       },
+      actions: {
+        newQuote: "Nueva cotización",
+        viewPrint: "Ver / imprimir",
+      },
     },
     // Vista imprimible (/pipeline/[id]/cotizaciones/[quoteId]/imprimir) —
     // lo único de todo el proyecto que puede terminar en manos de un
@@ -743,6 +747,70 @@ export const copy = {
       guarantee: "Dejamos tu sistema montado, funcionando y bien hecho, y te acompañamos.",
       footer:
         "PRISMA · Propuesta / confirmación de lo contratado · Precios de implementación en MXN; plataforma en USD (estimada según uso).",
+    },
+    // Wizard de captura (/pipeline/[id]/cotizaciones/nueva, bloque 5b) — el
+    // único punto de la app que llama a generate_quote(). errorToast y
+    // successToast son de useGenerateQuote() (lib/queries/quotes.ts), no de
+    // un componente — por eso viven sueltos aquí, no dentro de summary.
+    wizard: {
+      title: "Nueva cotización",
+      backButton: "Cancelar",
+      errorToast: "No pudimos generar la cotización. Intenta de nuevo.",
+      successToast: "Cotización generada.",
+      mismatchWarningToast:
+        "La cotización se generó, pero el total no coincidió exactamente con la vista previa — revisa el desglose antes de mandarla.",
+      blocked: {
+        title: "Esta oportunidad no admite una cotización nueva",
+        won: "Ya está ganada — el valor cerrado real es el que cuenta. Si hace falta cotizar de nuevo (una ampliación, un segundo proyecto), créale una oportunidad nueva.",
+        lost: "Está perdida — muévela a una etapa abierta antes de generar una cotización.",
+        backButton: "Volver a la oportunidad",
+      },
+      steps: {
+        content: "Contenido",
+        gestionPlatform: "Gestión y plataforma",
+        summary: "Resumen",
+      },
+      nav: {
+        back: "Atrás",
+        next: "Siguiente",
+      },
+      content: {
+        modePkg: "Paquete",
+        modeCustom: "Personalizada",
+        packagesTitle: "Elige un paquete",
+        packagePriceLabel: "Precio de este paquete",
+        includedTitle: "Incluye",
+        includedAdnLabel: (name: string) => `ADN incluido: ${name}`,
+        extrasTitle: "Elementos adicionales",
+        extrasHint: "Fuera del paquete, aparte — súmalos solo si de verdad se están cotizando.",
+        customTitle: "Elige lo que necesita",
+        adnTitle: "ADN",
+        adnHint: "Combinables entre sí — puedes marcar más de uno.",
+        priceInputLabel: "Precio",
+        itemCountLabel: (count: number) => (count === 1 ? "1 elemento" : `${count} elementos`),
+      },
+      gestionPlatform: {
+        gestionTitle: "Gestión mensual",
+        gestionHint: "Servicio recurrente, aparte de la implementación. Precio fijo, sin negociar.",
+        gestionNone: "Ninguna",
+        platformTitle: "Plataforma",
+        platformHint: "Se paga directo a la plataforma, en dólares — nunca se suma al total de implementación.",
+        planLabel: "Plan",
+        consumoLabel: "Consumo",
+        whatsappLabel: "WhatsApp (el Puente)",
+        whatsappIncludedNote: "Incluido en este plan",
+        mesesLabel: "Meses para diferir el resto",
+      },
+      summary: {
+        title: "Resumen",
+        specialPriceLabel: "Precio especial (opcional)",
+        specialPriceHint: "Si lo dejas vacío, el total es la suma de arriba.",
+        submitButton: "Generar cotización",
+        submitting: "Generando…",
+      },
+      totalBar: {
+        runningTotalLabel: "Total",
+      },
     },
   },
 
