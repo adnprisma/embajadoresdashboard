@@ -64,6 +64,20 @@ Reglas que no se negocian:
   `src/lib/queries/`.
 - **El cliente nunca calcula ni escribe dinero, puntos ni permisos.** Eso vive
   en funciones RPC `security definer` y en políticas RLS.
+- **`src/config/pricing.ts` es la única fuente de precios que se edita a mano.**
+  La tabla `catalog_items` es su espejo en Postgres — la necesitan las
+  funciones RPC (`generate_quote()`), que no pueden leer un archivo de
+  TypeScript. Nunca edites `catalog_items` con un `UPDATE`/`INSERT` directo:
+  si tocas `pricing.ts`, regenera la migración de seed con el script
+  generador y corre el script de verificación (ambos documentados en el
+  header de `pricing.ts`) antes de hacer push. El script de verificación
+  detecta un precio desincronizado, pero solo si alguien se acuerda de
+  correrlo — por eso `generate_quote()` además **falla con una excepción
+  clara si un id de la selección no existe en `catalog_items`** (nunca
+  salta la línea en silencio ni inserta con precio en cero): así, un
+  producto nuevo en `pricing.ts` sin su migración de seed se nota la
+  primera vez que alguien intente cotizarlo, no seis meses después
+  revisando números raros.
 - **Toda función RPC `security definer` que dependa de `auth.uid()` necesita un
   parámetro de respaldo** para poder correrse desde el editor SQL de Supabase,
   donde no hay sesión y `auth.uid()` es `null`. Ya pasó dos veces (el trigger
