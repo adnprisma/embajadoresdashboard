@@ -71,18 +71,16 @@ export function KanbanCard({
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        {opportunity.contact_id ? (
-          <Link
-            href={`/contactos/${opportunity.contact_id}`}
-            className="min-w-0 flex-1 truncate text-sm font-medium text-text-primary underline-offset-2 hover:underline"
-          >
-            {opportunity.business_name}
-          </Link>
-        ) : (
-          <p className="min-w-0 flex-1 truncate text-sm font-medium text-text-primary">
-            {opportunity.business_name}
-          </p>
-        )}
+        {/* Enlace real, no onClick sobre la tarjeta — se anuncia, se abre en
+        pestaña nueva y se alcanza con teclado (misma razón que ya aplicamos
+        en la tabla de contactos). La ficha del contacto sigue accesible
+        desde ahí, un clic más adentro. */}
+        <Link
+          href={`/pipeline/${opportunity.id}`}
+          className="min-w-0 flex-1 truncate text-sm font-medium text-text-primary underline-offset-2 hover:underline"
+        >
+          {opportunity.business_name}
+        </Link>
 
         {/* Ganada = terminal: nada que mover, nada que borrar desde aquí
         (ver 0017_opportunity_delete_guard.sql) — el menú entero desaparece
