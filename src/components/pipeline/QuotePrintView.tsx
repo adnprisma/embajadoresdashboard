@@ -1,6 +1,7 @@
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import type { ReactNode } from "react";
+import { Illustration } from "@/components/common/Illustration";
 import { BRAND } from "@/config/brand";
 import { copy } from "@/config/copy";
 import {
@@ -9,6 +10,7 @@ import {
   PACKAGES,
   PLATFORM_CONSUMPTION_TIERS,
   PLATFORM_PLANS,
+  PRODUCT_CATEGORIES,
   PRODUCTS,
 } from "@/config/pricing";
 import type { Quote, QuoteLineItemType } from "@/lib/queries/quotes";
@@ -29,6 +31,15 @@ function resolveDescription(itemType: QuoteLineItemType, itemId: string): string
   return GESTION_PLANS.find((g) => g.id === itemId)?.description ?? "";
 }
 
+// La categoría de un producto extra (fuera del paquete) se resuelve contra
+// PRODUCTS en vivo, igual que la descripción — mismo razonamiento que
+// resolveDescription: es metadata de catálogo, no algo que el cliente haya
+// leído textual y deba quedar congelado.
+function resolveCategoryId(itemType: QuoteLineItemType, itemId: string): string | null {
+  if (itemType !== "producto") return null;
+  return PRODUCTS.find((p) => p.id === itemId)?.categoryId ?? null;
+}
+
 // Formateador propio, distinto de <MoneyValue> (que siempre muestra .00):
 // en un documento, "$47,500" se lee mejor que "$47,500.00" — los centavos
 // se quedan solo donde hay fracción real (el diferido mensual). MoneyValue
@@ -43,12 +54,12 @@ function formatMoney(amount: number, currency: "MXN" | "USD" = "MXN") {
 }
 
 // print-color-adjust (+ prefijo -webkit-): sin esto el navegador descarta
-// los fondos de color al imprimir (encabezado carbón, cajas de nota en
-// beige) aunque estén declarados — es la causa real de que una primera
-// versión sin esto se viera plana en la impresión de prueba. Solo va en
-// los DOS elementos que dependen de un fondo para leerse — el texto
-// (títulos de sección, el total) imprime igual sin esta propiedad, no
-// hace falta repetirla ahí.
+// los fondos de color al imprimir (encabezado carbón, bloque de inversión,
+// franja superior, cajas de nota) aunque estén declarados — es la causa
+// real de que una primera versión sin esto se viera plana en la impresión
+// de prueba. Solo va en los elementos que dependen de un fondo para
+// leerse — el texto (títulos de sección) imprime igual sin esta
+// propiedad, no hace falta repetirla ahí.
 const FORCE_PRINT_COLOR = { WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" } as const;
 
 // Título en carbón + regla coral debajo, no coral en el texto — coral sobre
@@ -67,11 +78,23 @@ function SectionTitle({ children }: { children: ReactNode }) {
 }
 
 // Un nivel entre el título de sección y un ítem: tamaño y peso propios
-// (16px/bold) para que "Paquete Completo" o "Elementos adicionales" no se
-// confundan con un producto más de la lista. break-after-avoid por la misma
-// razón que en SectionTitle.
+// (16px/bold) para que "Paquete Completo" no se confunda con un producto
+// más de la lista. break-after-avoid por la misma razón que en SectionTitle.
 function SubTitle({ children }: { children: ReactNode }) {
   return <p className="break-after-avoid text-base font-bold text-text-primary">{children}</p>;
+}
+
+// Etiqueta fina de categoría — mismo tratamiento que las etiquetas de KPI
+// del sistema de diseño (DESIGN_SYSTEM.md §4: mayúsculas, letter-spacing
+// 0.06em, 12px). Se usa text-muted (carbón al 65%) y no el 60% literal que
+// pide esa sección: tokens.css ya fija 65% como el piso legible (5.1:1 /
+// 5.4:1) y pide explícitamente no bajar de ahí.
+function CategoryLabel({ children }: { children: ReactNode }) {
+  return (
+    <p className="break-after-avoid text-xs font-semibold uppercase tracking-[0.06em] text-text-muted">
+      {children}
+    </p>
+  );
 }
 
 // Nombre y descripción apilados (no en la misma línea): así una descripción
@@ -121,8 +144,39 @@ export function QuotePrintView({
   const includedProducts = pkg ? PRODUCTS.filter((p) => pkg.includedProductIds.includes(p.id)) : [];
   const includedAdn = quote.packageAdnTierId ? ADN_TIERS.find((a) => a.id === quote.packageAdnTierId) : null;
 
-  const productAdnLines = quote.lines.filter((line) => line.itemType === "producto" || line.itemType === "adn");
+  const productLines = quote.lines.filter((line) => line.itemType === "producto");
+  const adnLines = quote.lines.filter((line) => line.itemType === "adn");
   const gestionLines = quote.lines.filter((line) => line.itemType === "gestion");
+
+  // "Qué incluye" agrupado por categoría de catálogo — paquete y extras
+  // juntos: al cliente le importa qué frentes le cubres, no si un producto
+  // llegó dentro del paquete o se sumó aparte (eso es contabilidad interna
+  // de Prisma). Solo aparecen categorías con al menos un producto.
+  type CategorizedProduct = { id: string; name: string; description: string; categoryId: string };
+  const allProducts: CategorizedProduct[] = [
+    ...includedProducts.map((p) => ({ id: p.id, name: p.name, description: p.description, categoryId: p.categoryId })),
+    ...productLines.map((line) => ({
+      id: line.id,
+      name: line.itemName,
+      description: resolveDescription("producto", line.itemId),
+      categoryId: resolveCategoryId("producto", line.itemId) ?? "",
+    })),
+  ];
+  const productsByCategory = PRODUCT_CATEGORIES.map((category) => ({
+    category,
+    items: allProducts.filter((p) => p.categoryId === category.id),
+  })).filter((group) => group.items.length > 0);
+
+  // El ADN va aparte, al final, con su propia etiqueta — no es un producto
+  // de catálogo con categoría, es la capa de marca.
+  const adnEntries = [
+    ...(includedAdn ? [{ id: includedAdn.id, name: includedAdn.name, description: includedAdn.description }] : []),
+    ...adnLines.map((line) => ({
+      id: line.id,
+      name: line.itemName,
+      description: resolveDescription("adn", line.itemId),
+    })),
+  ];
 
   const plan = PLATFORM_PLANS.find((p) => p.id === quote.platformPlanId);
   const consumo = PLATFORM_CONSUMPTION_TIERS.find((c) => c.id === quote.platformConsumoId);
@@ -130,152 +184,173 @@ export function QuotePrintView({
   const gestionTotal = gestionLines.reduce((sum, line) => sum + line.quotedPrice, 0);
 
   return (
-    <div
-      className={cn(
-        "mx-auto flex max-w-[800px] flex-col overflow-hidden rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface shadow-[var(--shadow-card)]",
-        "print:max-w-none print:rounded-none print:border-0 print:shadow-none",
-      )}
-    >
-      <header
+    <>
+      {/* Franja coral superior, repetida en TODAS las páginas impresas, no
+      solo la primera — como la del HTML de referencia. position: fixed
+      dentro de @media print es lo que la repite: Chrome vuelve a pintar un
+      elemento fixed en cada página al paginar para imprimir (a diferencia
+      de sticky, que no se repite). Vive fuera del documento centrado para
+      no heredar max-width ni padding. */}
+      <div
+        aria-hidden="true"
         style={FORCE_PRINT_COLOR}
-        className="flex flex-col gap-1.5 bg-carbon px-8 py-8 text-center break-inside-avoid"
+        className="hidden print:fixed print:inset-x-0 print:top-0 print:block print:h-2 print:bg-accent"
+      />
+      <div
+        className={cn(
+          "mx-auto flex max-w-[800px] flex-col overflow-hidden rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface shadow-[var(--shadow-card)]",
+          "print:max-w-none print:rounded-none print:border-0 print:shadow-none",
+        )}
       >
-        <span className="font-[var(--font-display)] text-sm font-semibold tracking-[0.08em] text-text-on-dark/70 uppercase">
-          {BRAND.name}
-        </span>
-        <h1 className="text-2xl font-bold text-text-on-dark">{t.proposalTitle(clientName)}</h1>
-        <p className="text-sm text-text-on-dark/70">
-          {[giro, format(parseISO(quote.createdAt), "d 'de' MMMM 'de' yyyy", { locale: es })]
-            .filter(Boolean)
-            .join(" · ")}
-          {embajadorName ? ` · ${t.embajadorLabel(embajadorName)}` : ""}
-        </p>
-      </header>
+        <header
+          style={FORCE_PRINT_COLOR}
+          className="flex flex-col gap-1.5 bg-carbon px-8 py-8 text-center break-inside-avoid"
+        >
+          <span className="font-[var(--font-display)] text-sm font-semibold tracking-[0.08em] text-text-on-dark/70 uppercase">
+            {BRAND.name}
+          </span>
+          <h1 className="text-2xl font-bold text-text-on-dark">{t.proposalTitle(clientName)}</h1>
+          <p className="text-sm text-text-on-dark/70">
+            {[giro, format(parseISO(quote.createdAt), "d 'de' MMMM 'de' yyyy", { locale: es })]
+              .filter(Boolean)
+              .join(" · ")}
+            {embajadorName ? ` · ${t.embajadorLabel(embajadorName)}` : ""}
+          </p>
+        </header>
 
-      {/* gap-10 entre secciones, no gap-12: en la ronda anterior "más aire"
-      se pasó de generoso — con un documento de 14+ productos eso solo por
-      sí solo empujaba el total a tres páginas. La distinción de jerarquía
-      (sección > subtítulo > ítem) se sostiene con el break-after-avoid de
-      los títulos, no con más espacio del necesario.
-      print:pb-4 en vez de py-10 completo: el padding inferior generoso
-      pensado para pantalla es lo que dejaba media página 2 en blanco antes
-      del pie — en impreso el pie solo necesita el mínimo que lo separe del
-      contenido, no el mismo aire. */}
-      <div className="flex flex-col gap-10 px-8 py-10 print:pb-4">
-        {/* Sin break-inside-avoid aquí: "Qué incluye" puede tener 14+
-        productos y NO cabe completa en una sola página — forzarla a no
-        partirse es lo que empuja toda la sección a la página siguiente y
-        deja la primera casi vacía. Partir una sección larga entre páginas
-        es normal en un documento; lo que no debe partirse es cada producto
-        individual (ver IncludeRow). */}
-        <section className="flex flex-col gap-5">
-          <SectionTitle>{t.whatIncludesTitle}</SectionTitle>
-          {pkg ? (
-            <div className="flex flex-col gap-2">
-              <SubTitle>{t.packageLabel(pkg.name)}</SubTitle>
-              <div className="flex flex-col gap-4">
-                {includedProducts.map((product) => (
-                  <IncludeRow key={product.id} name={product.name} description={product.description} />
-                ))}
-                {includedAdn ? <IncludeRow name={includedAdn.name} description={includedAdn.description} /> : null}
+        {/* La ilustración va aquí, sobre bg-bg-surface (superficie clara),
+        nunca sobre el bloque carbón del encabezado: el trazo del kit es
+        carbón con transparencia real y desaparece sobre un fondo oscuro.
+        "planear" (ESC_14: dos personas planeando una campaña en pizarra)
+        se eligió porque casa con lo que de verdad se está proponiendo en
+        este documento — un paquete completo más gestión mensual, que es
+        contenido + campañas — no con "encontrar" (diferenciación de marca)
+        ni "crear" (producción de contenido en sí). size="sm" (96px, sobre
+        el mínimo de 80px del kit) para no pesar el presupuesto de página. */}
+        <div className="flex justify-center px-8 pt-6 print:pt-4">
+          <Illustration name="planear" size="sm" alt="" />
+        </div>
+
+        {/* gap-10 entre secciones, no gap-12: en la ronda anterior "más aire"
+        se pasó de generoso — con un documento de 14+ productos eso solo por
+        sí solo empujaba el total a tres páginas. La distinción de jerarquía
+        (sección > subtítulo > ítem) se sostiene con el break-after-avoid de
+        los títulos, no con más espacio del necesario.
+        print:pb-4 en vez de py-10 completo: el padding inferior generoso
+        pensado para pantalla es lo que dejaba media página 2 en blanco antes
+        del pie — en impreso el pie solo necesita el mínimo que lo separe del
+        contenido, no el mismo aire. */}
+        <div className="flex flex-col gap-10 px-8 py-10 print:pb-4">
+          {/* Sin break-inside-avoid aquí: "Qué incluye" puede tener 14+
+          productos y NO cabe completa en una sola página — forzarla a no
+          partirse es lo que empuja toda la sección a la página siguiente y
+          deja la primera casi vacía. Partir una sección larga entre páginas
+          es normal en un documento; lo que no debe partirse es cada producto
+          individual (ver IncludeRow). */}
+          <section className="flex flex-col gap-5">
+            <SectionTitle>{t.whatIncludesTitle}</SectionTitle>
+            {pkg ? <SubTitle>{t.packageLabel(pkg.name)}</SubTitle> : null}
+            {productsByCategory.map(({ category, items }) => (
+              <div key={category.id} className="flex flex-col gap-2">
+                <CategoryLabel>{category.name}</CategoryLabel>
+                <div className="flex flex-col gap-4">
+                  {items.map((item) => (
+                    <IncludeRow key={item.id} name={item.name} description={item.description} />
+                  ))}
+                </div>
               </div>
-            </div>
-          ) : null}
-          {productAdnLines.length > 0 ? (
-            <div className="flex flex-col gap-2">
-              {pkg ? <SubTitle>{t.extraItemsTitle}</SubTitle> : null}
+            ))}
+            {adnEntries.length > 0 ? (
+              <div className="flex flex-col gap-2">
+                <CategoryLabel>{t.adnLabel}</CategoryLabel>
+                <div className="flex flex-col gap-4">
+                  {adnEntries.map((entry) => (
+                    <IncludeRow key={entry.id} name={entry.name} description={entry.description} />
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </section>
+
+          {gestionLines.length > 0 ? (
+            <section className="flex flex-col gap-2">
+              <SectionTitle>{t.gestionTitle}</SectionTitle>
               <div className="flex flex-col gap-4">
-                {productAdnLines.map((line) => (
+                {gestionLines.map((line) => (
                   <IncludeRow
                     key={line.id}
-                    name={line.itemName}
+                    name={t.gestionItemLabel(line.itemName, formatMoney(line.quotedPrice))}
                     description={resolveDescription(line.itemType, line.itemId)}
                   />
                 ))}
               </div>
-            </div>
+            </section>
           ) : null}
-        </section>
 
-        {gestionLines.length > 0 ? (
-          <section className="flex flex-col gap-2">
-            <SectionTitle>{t.gestionTitle}</SectionTitle>
-            <div className="flex flex-col gap-4">
-              {gestionLines.map((line) => (
-                <IncludeRow
-                  key={line.id}
-                  name={t.gestionItemLabel(line.itemName, formatMoney(line.quotedPrice))}
-                  description={resolveDescription(line.itemType, line.itemId)}
-                />
-              ))}
+          <section className="flex flex-col gap-3">
+            <SectionTitle>{t.investmentTitle}</SectionTitle>
+            {/* Bloque carbón, no tabla: es lo primero que busca el cliente y
+            antes se veía igual que cualquier otro renglón. El total va en
+            grande encima; pago inicial y diferido debajo, con menos peso.
+            Coral sobre carbón da ~5.6:1 (misma fórmula que "carbón sobre
+            coral" en DESIGN_SYSTEM.md §3, el contraste no distingue quién es
+            fondo y quién es texto) — válido para texto de cualquier tamaño,
+            no solo por ser grande. */}
+            <div style={FORCE_PRINT_COLOR} className="break-inside-avoid rounded-[var(--radius-card)] bg-carbon px-6 py-6">
+              <p className="text-xs font-semibold uppercase tracking-wide text-text-on-dark/60">
+                {t.implementationLabel}
+              </p>
+              <p className="numeric mt-1 text-4xl font-bold text-accent">{formatMoney(quote.total)}</p>
+              <div className="mt-4 flex flex-col gap-1.5 border-t border-text-on-dark/15 pt-3 text-xs text-text-on-dark/70">
+                <div className="flex items-baseline justify-between gap-4">
+                  <span>{t.initialPaymentLabel}</span>
+                  <span className="numeric text-text-on-dark">{formatMoney(quote.pagoInicial)}</span>
+                </div>
+                <div className="flex items-baseline justify-between gap-4">
+                  <span>{t.deferredPaymentLabel(quote.mesesDiferimiento)}</span>
+                  <span className="numeric text-text-on-dark">{formatMoney(quote.pagoDiferidoMensual)}</span>
+                </div>
+              </div>
             </div>
-          </section>
-        ) : null}
 
-        <section className="flex flex-col gap-3">
-          <SectionTitle>{t.investmentTitle}</SectionTitle>
-          {/* break-inside-avoid en la tabla, no en la sección: el total y
-          los renglones de pago sí son una pieza atómica — verse partidos
-          entre el total y "pago inicial" se ve mal. Las notas de abajo ya
-          traen su propio break-inside-avoid vía NoteBox. */}
-          <table className="w-full break-inside-avoid text-sm">
-            <tbody>
-              <tr className="border-b border-border-subtle">
-                <td className="py-2.5 font-semibold text-text-primary">{t.implementationLabel}</td>
-                <td className="numeric py-2.5 text-right text-2xl font-bold text-accent">
-                  {formatMoney(quote.total)}
-                </td>
-              </tr>
-              <tr className="border-b border-border-subtle">
-                <td className="py-2 text-text-secondary">{t.initialPaymentLabel}</td>
-                <td className="numeric py-2 text-right text-text-primary">{formatMoney(quote.pagoInicial)}</td>
-              </tr>
-              <tr>
-                <td className="py-2 text-text-secondary">{t.deferredPaymentLabel(quote.mesesDiferimiento)}</td>
-                <td className="numeric py-2 text-right text-text-primary">
-                  {formatMoney(quote.pagoDiferidoMensual)}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <NoteBox label={t.platformNoteLabel}>
-            {"~"}
-            <span className="numeric">{formatMoney(platformTotal, "USD")}</span>
-            /mes ({plan?.name}
-            {plan?.includesWhatsapp
-              ? ` · ${t.platformIncludesWhatsapp}`
-              : quote.platformWhatsappPrice !== null
-                ? ` ${t.platformWithWhatsapp}`
-                : ` ${t.platformWithoutWhatsapp}`}{" "}
-            {t.platformConsumption} {consumo?.name}). {t.platformNoteDescription}
-          </NoteBox>
-
-          {gestionLines.length > 0 ? (
-            <NoteBox label={t.gestionNoteLabel}>
+            <NoteBox label={t.platformNoteLabel}>
               {"~"}
-              <span className="numeric">{formatMoney(gestionTotal)}</span>
-              /mes {t.gestionNoteDescription}
+              <span className="numeric">{formatMoney(platformTotal, "USD")}</span>
+              /mes ({plan?.name}
+              {plan?.includesWhatsapp
+                ? ` · ${t.platformIncludesWhatsapp}`
+                : quote.platformWhatsappPrice !== null
+                  ? ` ${t.platformWithWhatsapp}`
+                  : ` ${t.platformWithoutWhatsapp}`}{" "}
+              {t.platformConsumption} {consumo?.name}). {t.platformNoteDescription}
             </NoteBox>
-          ) : null}
-        </section>
 
-        <section className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <SectionTitle>{t.howPaymentWorksTitle}</SectionTitle>
-            <p className="text-sm text-text-secondary">{t.howPaymentWorks}</p>
-          </div>
-          <NoteBox label={t.guaranteeLabel}>{t.guarantee}</NoteBox>
-        </section>
+            {gestionLines.length > 0 ? (
+              <NoteBox label={t.gestionNoteLabel}>
+                {"~"}
+                <span className="numeric">{formatMoney(gestionTotal)}</span>
+                /mes {t.gestionNoteDescription}
+              </NoteBox>
+            ) : null}
+          </section>
+
+          <section className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <SectionTitle>{t.howPaymentWorksTitle}</SectionTitle>
+              <p className="text-sm text-text-secondary">{t.howPaymentWorks}</p>
+            </div>
+            <NoteBox label={t.guaranteeLabel}>{t.guarantee}</NoteBox>
+          </section>
+        </div>
+
+        {/* Sin break-inside-avoid: es una sola línea, ya es indivisible por
+        naturaleza — forzarlo no ayuda a que quepa, solo lo trataba como
+        bloque aparte. print:py-1: el pie no necesita el mismo aire que en
+        pantalla, solo separarse del contenido. */}
+        <footer className="border-t border-border-subtle px-8 py-3 text-center text-[11px] text-text-muted print:py-1">
+          {t.footer}
+        </footer>
       </div>
-
-      {/* Sin break-inside-avoid: es una sola línea, ya es indivisible por
-      naturaleza — forzarlo no ayuda a que quepa, solo lo trataba como
-      bloque aparte. print:py-1: el pie no necesita el mismo aire que en
-      pantalla, solo separarse del contenido. */}
-      <footer className="border-t border-border-subtle px-8 py-3 text-center text-[11px] text-text-muted print:py-1">
-        {t.footer}
-      </footer>
-    </div>
+    </>
   );
 }

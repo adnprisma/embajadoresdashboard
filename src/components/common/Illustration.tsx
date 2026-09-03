@@ -67,6 +67,14 @@ export function Illustration({
       height={height}
       aria-hidden={alt === "" ? true : undefined}
       className={cn("w-auto", SIZE_CLASSES[size], className)}
+      // Sin esto, next/image no sabe que este componente nunca se pinta
+      // más ancho que ~450px (h-[280px], la variante xl, sobre el aspect
+      // ratio más panorámico del kit) y pide el breakpoint completo del
+      // archivo origen (probado: 3840px de ancho para un render de 91px) —
+      // mismo pendiente de peso que ya existe con los PNG de marca, pero
+      // aquí sí se puede resolver: un valor fijo (no una lista de media
+      // queries) porque el tamaño no depende del viewport, solo de `size`.
+      sizes="450px"
     />
   );
 }

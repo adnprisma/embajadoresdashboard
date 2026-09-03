@@ -721,7 +721,7 @@ export const copy = {
       embajadorLabel: (name: string) => `Embajador(a): ${name}`,
       whatIncludesTitle: "Qué incluye",
       packageLabel: (name: string) => `Paquete ${name}`,
-      extraItemsTitle: "Elementos adicionales",
+      adnLabel: "ADN",
       gestionTitle: "Gestión mensual (recurrente)",
       gestionItemLabel: (name: string, monthly: string) => `${name} (~${monthly}/mes)`,
       investmentTitle: "Tu inversión",
