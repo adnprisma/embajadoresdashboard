@@ -218,19 +218,6 @@ export function QuotePrintView({
           </p>
         </header>
 
-        {/* La ilustración va aquí, sobre bg-bg-surface (superficie clara),
-        nunca sobre el bloque carbón del encabezado: el trazo del kit es
-        carbón con transparencia real y desaparece sobre un fondo oscuro.
-        "planear" (ESC_14: dos personas planeando una campaña en pizarra)
-        se eligió porque casa con lo que de verdad se está proponiendo en
-        este documento — un paquete completo más gestión mensual, que es
-        contenido + campañas — no con "encontrar" (diferenciación de marca)
-        ni "crear" (producción de contenido en sí). size="sm" (96px, sobre
-        el mínimo de 80px del kit) para no pesar el presupuesto de página. */}
-        <div className="flex justify-center px-8 pt-6 print:pt-4">
-          <Illustration name="planear" size="sm" alt="" />
-        </div>
-
         {/* gap-10 entre secciones, no gap-12: en la ronda anterior "más aire"
         se pasó de generoso — con un documento de 14+ productos eso solo por
         sí solo empujaba el total a tres páginas. La distinción de jerarquía
@@ -341,6 +328,22 @@ export function QuotePrintView({
             </div>
             <NoteBox label={t.guaranteeLabel}>{t.guarantee}</NoteBox>
           </section>
+
+          {/* La ilustración va al final, no al inicio: arriba y chica se leía
+          como un error, no como una decisión, y competía con el encabezado.
+          Al cierre funciona como remate visual del documento — sobre
+          bg-bg-surface (superficie clara), nunca sobre un fondo oscuro: el
+          trazo del kit es carbón con transparencia real y desaparece ahí.
+          "planear" (ESC_14: dos personas planeando una campaña en pizarra)
+          casa con lo que de verdad se está proponiendo — paquete completo
+          más gestión mensual, que es contenido + campañas — no con
+          "encontrar" (diferenciación de marca) ni "crear" (producción de
+          contenido en sí). size="xl" (280px, bien sobre el mínimo de 80px
+          del kit): al ser la última pieza del documento puede pesar más sin
+          competir con nada. */}
+          <div className="flex justify-center pt-2">
+            <Illustration name="planear" size="xl" alt="" />
+          </div>
         </div>
 
         {/* Sin break-inside-avoid: es una sola línea, ya es indivisible por

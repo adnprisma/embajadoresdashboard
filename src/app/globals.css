@@ -56,10 +56,26 @@
    Tailwind, por eso vive aparte de esa pantalla. orphans/widows tampoco
    tienen utilidad de Tailwind: evitan que un párrafo largo (la descripción
    de "cómo funciona el pago", el texto de una nota) deje un solo renglón
-   suelto al cambiar de página. */
+   suelto al cambiar de página.
+
+   margin-top a 2.2cm, no 1.5cm como los otros tres lados: es el hueco
+   donde vive la franja coral fija de QuotePrintView (position: fixed
+   dentro de @media print, 8px de alto). Un elemento fixed no reserva
+   espacio en el flujo normal — por eso, sin este margen extra, el
+   contenido que retoma en cada página nueva empieza exactamente donde
+   también pinta la franja, y la franja termina encimada sobre las
+   primeras líneas de esa página (se vio literalmente cortando "Formularios
+   de captura" en la página 2). El margen de @page sí se vuelve a aplicar
+   en cada página — a diferencia del padding de un bloque, que solo se ve
+   una vez al principio del documento — así que este hueco se repite en
+   todas. 2.2cm da ~0.7cm de aire debajo de la franja antes de que
+   arranque el contenido. */
 @media print {
   @page {
-    margin: 1.5cm;
+    margin-top: 2.2cm;
+    margin-right: 1.5cm;
+    margin-bottom: 1.5cm;
+    margin-left: 1.5cm;
   }
 
   p {
