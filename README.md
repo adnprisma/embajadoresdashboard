@@ -75,9 +75,6 @@ Ranking del dashboard enlazaba a `/ranking`, que ya no existe).
 
 ### Falta
 
-- **`[NOMBRE DE MARCA]` y `[LOGO]`**: sin resolver. Ver `BRANDING.md` — el
-  logotipo real está en revisión y no está aprobado; no se debe generar ni
-  aproximar mientras tanto.
 - **Tipografía de títulos (`--font-display`)**: es un marcador temporal
   (apunta a IBM Plex Sans, igual que el texto de cuerpo). El kit de marca no
   define tipografía y no hay licencia confirmada para una familia propia —
