@@ -32,6 +32,7 @@ export type Profile = {
   billing_complete: boolean;
   bank_data: BankData;
   tax_data: TaxData;
+  daily_lead_target: number;
 };
 
 export type DocumentRow = {
@@ -48,7 +49,7 @@ export const profileKeys = {
   documents: () => [...profileKeys.all, "documents"] as const,
 };
 
-const PROFILE_SELECT = "id, full_name, email, avatar_url, billing_complete, bank_data, tax_data";
+const PROFILE_SELECT = "id, full_name, email, avatar_url, billing_complete, bank_data, tax_data, daily_lead_target";
 
 export function useProfile() {
   return useQuery({
@@ -72,6 +73,7 @@ export type TeamProfileRow = {
   full_name: string;
   email: string;
   role: "admin" | "seller";
+  daily_lead_target: number;
 };
 
 // Todo el equipo (admin + sellers) — solo lo consume la UI de admin
@@ -86,11 +88,34 @@ export function useTeamProfiles() {
       const supabase = createClient();
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, email, role")
+        .select("id, full_name, email, role, daily_lead_target")
         .order("full_name", { ascending: true });
       if (error) throw error;
       return data as TeamProfileRow[];
     },
+  });
+}
+
+// Admin-only en la práctica: la fila destino no es la del que llama, y
+// profiles_update_own (0010_rls_admin.sql) solo deja pasar ese UPDATE si
+// is_admin() es verdadero — sin RPC nuevo, el trigger
+// prevent_daily_lead_target_self_edit() (0025_daily_lead_target.sql) es lo
+// que impide que una vendedora suba su propia meta.
+export function useUpdateDailyLeadTarget() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: { sellerId: string; dailyLeadTarget: number }) => {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("profiles")
+        .update({ daily_lead_target: input.dailyLeadTarget })
+        .eq("id", input.sellerId);
+      if (error) throw error;
+    },
+    onError: () => toast.error(copy.equipo.dailyTarget.errorToast),
+    onSuccess: () => toast.success(copy.equipo.dailyTarget.successToast),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: [...profileKeys.all, "team"] }),
   });
 }
 

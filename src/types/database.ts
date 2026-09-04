@@ -16,9 +16,12 @@
 // 0012_prospect_analysis_capacidades.sql, 0013_import_contacts.sql,
 // 0014_generate_weekly_plan.sql, 0015_contact_status.sql,
 // 0016_opportunity_value_split.sql, 0017_opportunity_delete_guard.sql,
-// 0018_interactions_attribution_fix.sql, 0019_weekly_status_funnel.sql y
-// 0020_task_status.sql. `done` sigue en el esquema (migración B pendiente,
-// ver 0020) pero el cliente ya no la lee ni la escribe — solo status.
+// 0018_interactions_attribution_fix.sql, 0019_weekly_status_funnel.sql,
+// 0020_task_status.sql, 0021_contact_reserve_and_tags.sql,
+// 0022_seller_prices.sql, 0023_quotes.sql, 0024_compute_quote_totals.sql y
+// 0025_daily_lead_target.sql. `done` sigue en el esquema (migración B
+// pendiente, ver 0020) pero el cliente ya no la lee ni la escribe — solo
+// status.
 // ---------------------------------------------------------------
 
 export type Json =
@@ -47,6 +50,7 @@ export type Database = {
           own_prices: Json | null;
           tour_seen: boolean;
           role: string;
+          daily_lead_target: number;
           created_at: string;
         };
         Insert: {
@@ -63,6 +67,7 @@ export type Database = {
           own_prices?: Json | null;
           tour_seen?: boolean;
           role?: string;
+          daily_lead_target?: number;
           created_at?: string;
         };
         Update: {
@@ -79,6 +84,7 @@ export type Database = {
           own_prices?: Json | null;
           tour_seen?: boolean;
           role?: string;
+          daily_lead_target?: number;
           created_at?: string;
         };
         Relationships: [];

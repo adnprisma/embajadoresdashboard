@@ -1,7 +1,7 @@
 "use client";
 
 import { Activity, AlertTriangle, Users } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Illustration } from "@/components/common/Illustration";
 import { PageHeader } from "@/components/common/PageHeader";
@@ -10,8 +10,44 @@ import { Skeleton } from "@/components/common/Skeleton";
 import { CONTACT_STATUSES, FUNNEL_STATUSES, type ContactStatus } from "@/config/contactStatus";
 import { copy } from "@/config/copy";
 import { useContacts } from "@/lib/queries/contacts";
-import { useTeamProfiles } from "@/lib/queries/profile";
+import { useTeamProfiles, useUpdateDailyLeadTarget, type TeamProfileRow } from "@/lib/queries/profile";
 import { useWeeklyStatusFunnel, type WeeklyStatusFunnelRow } from "@/lib/queries/weeklyStatusFunnel";
+
+const DAILY_LEAD_TARGET_MIN = 1;
+const DAILY_LEAD_TARGET_MAX = 50;
+
+// Guarda al salir del campo, solo si el valor cambió y es válido — el
+// check (daily_lead_target between 1 and 50) de 0025_daily_lead_target.sql
+// es la última red, esto evita mandarle un valor fuera de rango de entrada.
+function DailyTargetCell({ seller }: { seller: TeamProfileRow }) {
+  const [value, setValue] = useState(String(seller.daily_lead_target));
+  const updateTarget = useUpdateDailyLeadTarget();
+
+  const commit = () => {
+    const parsed = Number(value);
+    if (!Number.isInteger(parsed) || parsed < DAILY_LEAD_TARGET_MIN || parsed > DAILY_LEAD_TARGET_MAX) {
+      setValue(String(seller.daily_lead_target));
+      return;
+    }
+    if (parsed === seller.daily_lead_target) return;
+    updateTarget.mutate({ sellerId: seller.id, dailyLeadTarget: parsed });
+  };
+
+  return (
+    <input
+      type="number"
+      min={DAILY_LEAD_TARGET_MIN}
+      max={DAILY_LEAD_TARGET_MAX}
+      step={1}
+      value={value}
+      aria-label={copy.equipo.dailyTarget.inputLabel(seller.full_name)}
+      disabled={updateTarget.isPending}
+      onChange={(event) => setValue(event.target.value)}
+      onBlur={commit}
+      className="numeric w-16 rounded-[var(--radius-control)] border border-border-subtle bg-bg-surface px-2 py-1 text-sm text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-50"
+    />
+  );
+}
 
 function ErrorBlock({ onRetry }: { onRetry: () => void }) {
   return (
@@ -123,6 +159,7 @@ export function EquipoView() {
                       {copy.contactos.status.labels[status]}
                     </th>
                   ))}
+                  <th className="py-2 pr-4">{copy.equipo.dailyTarget.columnLabel}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-subtle">
@@ -141,6 +178,9 @@ export function EquipoView() {
                         </td>
                       );
                     })}
+                    <td className="py-2 pr-4">
+                      <DailyTargetCell seller={seller} />
+                    </td>
                   </tr>
                 ))}
               </tbody>

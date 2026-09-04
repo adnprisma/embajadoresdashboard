@@ -145,6 +145,33 @@ Reglas que no se negocian:
 - Cada mutación termina en `toast.success` o `toast.error`. Sin acciones silenciosas.
 - Formatos con `Intl` y locale `es-MX`. Fechas con `date-fns` locale `es`.
 - Semana que inicia en **lunes**.
+- **El lote de veterinarias CDMX del 2 de septiembre de 2026 (351 contactos,
+  `supabase/test-data/23-importa-veterinarias-cdmx-2sep.sql`) no trae
+  nombre de persona de contacto — pero SÍ trae domicilio.** Corrección sobre
+  una nota anterior de este mismo archivo, que decía lo contrario: el CSV
+  original (columnas negocio, contacto, teléfono, email, giro, etiquetas,
+  notas — `contacto` y `notas` vacías en los 351) en efecto no tenía
+  domicilio, pero los 16 HTML de análisis de prospección que generaron ese
+  CSV sí lo tienen, ficha por ficha. Se carga vía
+  `scripts/parse-prospect-analysis.mjs` (mismo parser del lote original de
+  104, ver `supabase/test-data/07-load-prospect-analysis.sql` y
+  `11-load-prospect-analysis-gladys.sql`) hacia `prospect_analysis.address`
+  — no hay CSV involucrado en esta carga, el parser lee el HTML directo.
+  La etiqueta `visitar` (grupo de 151 sin teléfono ni correo, ver
+  `src/config/contactTags.ts`) por sí sola no implica dirección: lo que la
+  da es tener ficha de análisis cargada, con o sin `visitar`.
+- **La dirección vive en `prospect_analysis.address`, no en
+  `contacts`.** Decisión tomada así porque hoy todo contacto con ficha de
+  análisis ya la tiene ahí, en vivo, servida a dos pantallas
+  (`ContactosView.tsx`, `ContactDetailView.tsx`) — moverla exigiría
+  migración + backfill + reescribir esas dos pantallas, un rediseño
+  aparte, no un paso de carga de datos. **Condición de revisión, para que
+  esta decisión no quede como accidente:** hoy todo contacto llega con
+  ficha de análisis (asunción implícita de guardar la dirección ahí). Un
+  contacto capturado a mano, o de un lote sin HTML de prospección, se
+  queda sin domicilio — y la etiqueta `visitar` vuelve a no tener a dónde
+  apuntar. Si eso empieza a pasar con regularidad, la dirección se mueve a
+  `contacts`.
 
 ---
 

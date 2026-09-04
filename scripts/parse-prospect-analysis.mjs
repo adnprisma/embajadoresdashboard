@@ -14,21 +14,40 @@
 // que uno que se reporta y se revisa a mano.
 //
 // Este script NO tiene acceso a la base de datos (solo hay anon key en
-// este entorno) — por eso la idempotencia contra prospect_analysis se
-// resuelve con --known apuntando al SQL de una carga anterior (el mismo
-// archivo que este script generó la vez pasada), y además con un guardián
-// en el propio SQL generado (WHERE NOT EXISTS contra prospect_analysis)
-// como defensa adicional si --known se omite u olvida un archivo.
+// este entorno) — por eso --known NUNCA decide qué fila se genera: solo
+// puede comparar TEXTO de business_name, y dos contactos reales distintos
+// pueden compartir nombre exacto (ya pasó: "Veterinaria Animalitos" existe
+// como contacto viejo de una vendedora Y como contacto nuevo del lote,
+// mismo texto, dos contact_id distintos — --known filtrando por texto
+// saltó la ficha nueva completa, en silencio, porque el nombre "ya se veía
+// conocido"). Por eso ahora --known es SOLO un aviso en la terminal
+// ("este nombre ya apareció en una carga anterior, revísalo") — nunca
+// excluye una fila del SQL generado. La única idempotencia real es el
+// "and not exists" del INSERT, que sí opera por contact_id (correcto por
+// construcción, porque compara contra la fila real, no contra texto).
+//
+// Guardián de conteo: al final, fichas encontradas (unión tabla+tarjetas)
+// tiene que ser EXACTAMENTE fichas generadas + mismatches — si no cuadra,
+// el script sale con código 1 y dice qué falta y por qué, en vez de
+// generar SQL incompleto sin decirlo. Un mismatch (tabla sin tarjeta o
+// viceversa) también sale con código 1 por default — hay que declararlo
+// explícitamente con --accept-mismatch si de verdad es un caso a saltar,
+// nunca es el comportamiento por default.
 //
 // Uso:
-//   node scripts/parse-prospect-analysis.mjs [--known <sql1> [--known <sql2> ...]] [--dry-run] <html-o-carpeta> [<html-o-carpeta> ...]
+//   node scripts/parse-prospect-analysis.mjs [--known <sql1> [--known <sql2> ...]] [--accept-mismatch <negocio> [...]] [--dry-run] <html-o-carpeta> [<html-o-carpeta> ...]
 //
-//   --known <archivo.sql>  SQL de una carga previa (ej. 07-load-prospect-analysis.sql).
-//                          Se puede repetir. Sin esto, no se puede saber qué
-//                          ya existe y el script avisa que no comprobó nada.
-//   --dry-run              Reporta todo (matches, mismatches, ya-existentes)
-//                          pero no imprime el SQL de carga — para confirmar
-//                          el diagnóstico antes de generar nada.
+//   --known <archivo.sql>       SQL de una carga previa (ej. 07-load-prospect-analysis.sql).
+//                                Se puede repetir. Solo informativo — nunca excluye
+//                                una fila del SQL generado (ver arriba).
+//   --accept-mismatch <negocio> Declara explícitamente que el mismatch tabla/tarjeta
+//                                de ESTE negocio (nombre tal cual aparece en el HTML,
+//                                se compara normalizado) es esperado y se puede saltar.
+//                                Se puede repetir. Sin esto, cualquier mismatch detiene
+//                                el script con código 1 — no se genera SQL parcial.
+//   --dry-run                   Reporta todo (matches, mismatches, avisos de --known)
+//                                pero no imprime el SQL de carga — para confirmar
+//                                el diagnóstico antes de generar nada.
 //
 // La salida SQL va a stdout; redirige a un archivo nuevo en supabase/test-data/.
 // ---------------------------------------------------------------
@@ -76,6 +95,7 @@ function alcaldiaFromTitle(h1) {
 // --- CLI: separa flags de rutas, expande carpetas a sus .html ----------
 const argv = process.argv.slice(2);
 const knownFiles = [];
+const acceptedMismatches = new Set();
 let dryRun = false;
 const inputPaths = [];
 
@@ -88,6 +108,13 @@ for (let i = 0; i < argv.length; i++) {
       process.exit(1);
     }
     knownFiles.push(value);
+  } else if (arg === "--accept-mismatch") {
+    const value = argv[++i];
+    if (!value) {
+      console.error("--accept-mismatch necesita el nombre del negocio (tal cual aparece en el HTML).");
+      process.exit(1);
+    }
+    acceptedMismatches.add(normalize(value));
   } else if (arg === "--dry-run") {
     dryRun = true;
   } else {
@@ -142,8 +169,9 @@ if (knownFiles.length === 0) {
 }
 
 const allRecords = [];
-const skippedExisting = [];
+const nameOverlapWarnings = [];
 const mismatches = [];
+let totalCardsFound = 0;
 
 for (const filePath of htmlFiles) {
   const file = filePath.split("/").pop();
@@ -211,6 +239,7 @@ for (const filePath of htmlFiles) {
   });
 
   const allKeys = new Set([...tableByName.keys(), ...cardByName.keys()]);
+  totalCardsFound += allKeys.size;
   for (const key of allKeys) {
     const t = tableByName.get(key);
     const c = cardByName.get(key);
@@ -218,14 +247,19 @@ for (const filePath of htmlFiles) {
       mismatches.push({
         file,
         businessName: (t ?? c).businessName,
+        key,
         problem: !t ? "está en las tarjetas pero no en la tabla comparativa" : "está en la tabla pero no en las tarjetas de detalle",
       });
       continue;
     }
 
+    // Solo un aviso — NUNCA excluye la fila. --known compara texto, y dos
+    // contactos reales distintos pueden compartir business_name exacto
+    // (ver comentario de cabecera). La única idempotencia real es el
+    // "and not exists" del INSERT generado más abajo, que sí opera por
+    // contact_id.
     if (knownBusinessNames.has(key)) {
-      skippedExisting.push({ file, businessName: t.businessName });
-      continue;
+      nameOverlapWarnings.push({ file, businessName: t.businessName });
     }
 
     allRecords.push({
@@ -252,20 +286,50 @@ for (const filePath of htmlFiles) {
   }
 }
 
-if (mismatches.length > 0) {
-  console.error(`\n⚠ ${mismatches.length} negocios no casaron entre tabla y tarjetas (nombre tal cual en el HTML):`);
-  for (const m of mismatches) {
-    console.error(`  - [${m.file}] "${m.businessName}" ${m.problem}`);
+if (nameOverlapWarnings.length > 0) {
+  console.error(
+    `\nℹ ${nameOverlapWarnings.length} negocios comparten nombre exacto con algo de una carga anterior (--known) — ` +
+      `SE INCLUYEN igual en el SQL, el "and not exists" del INSERT decide por contact_id, no por texto. ` +
+      `Verifica que sea el mismo contacto reanalizado y no un homónimo (ya pasó con "Veterinaria Animalitos"):`,
+  );
+  for (const w of nameOverlapWarnings) {
+    console.error(`  - [${w.file}] "${w.businessName}"`);
   }
   console.error("");
 }
 
-if (skippedExisting.length > 0) {
-  console.error(`\n↷ ${skippedExisting.length} negocios ya tienen prospect_analysis — se saltan, no se pisan:`);
-  for (const s of skippedExisting) {
-    console.error(`  - [${s.file}] "${s.businessName}"`);
+const unacceptedMismatches = mismatches.filter((m) => !acceptedMismatches.has(m.key));
+
+if (mismatches.length > 0) {
+  console.error(`\n⚠ ${mismatches.length} negocios no casaron entre tabla y tarjetas (nombre tal cual en el HTML):`);
+  for (const m of mismatches) {
+    const accepted = acceptedMismatches.has(m.key);
+    console.error(`  - [${m.file}] "${m.businessName}" ${m.problem}${accepted ? " (aceptado vía --accept-mismatch)" : ""}`);
   }
   console.error("");
+}
+
+if (unacceptedMismatches.length > 0) {
+  console.error(
+    `✗ ${unacceptedMismatches.length} mismatch(es) sin declarar. No se genera SQL. ` +
+      `Corrige el HTML, o si de verdad hay que saltarlos, decláralo explícito:\n` +
+      unacceptedMismatches.map((m) => `    --accept-mismatch "${m.businessName}"`).join("\n"),
+  );
+  process.exit(1);
+}
+
+// Guardián de conteo: fichas encontradas (tabla ∪ tarjetas, por archivo)
+// tiene que ser EXACTAMENTE fichas generadas + mismatches. nameOverlapWarnings
+// ya no resta de allRecords (ver arriba), así que si esto no cuadra es una
+// fuga real — no un negocio que "ya se veía conocido" y se saltó en silencio.
+const accountedFor = allRecords.length + mismatches.length;
+if (totalCardsFound !== accountedFor) {
+  console.error(
+    `\n✗ Guardián de conteo falló: ${totalCardsFound} fichas encontradas, pero solo ${accountedFor} ` +
+      `quedaron contabilizadas (${allRecords.length} filas + ${mismatches.length} mismatches). ` +
+      `Hay ${totalCardsFound - accountedFor} ficha(s) que desaparecieron sin explicación — no se genera SQL.`,
+  );
+  process.exit(1);
 }
 
 console.error(`Nuevos a insertar: ${allRecords.length}`);
@@ -301,11 +365,11 @@ if (allRecords.length === 0) {
 // al final para revisión manual — nunca se inserta con owner_id null,
 // porque la columna es NOT NULL.
 //
-// El INSERT lleva además "and not exists (... prospect_analysis ...)"
-// como segunda barrera de idempotencia, independiente de --known: si este
-// script no supo de una carga anterior (--known no se pasó, o faltó un
-// archivo), la base de datos igual se niega a duplicar el análisis de un
-// contacto que ya lo tiene.
+// El INSERT lleva "and not exists (... prospect_analysis ...)" como ÚNICA
+// barrera de idempotencia real — --known ya no excluye filas (ver cabecera
+// del archivo), así que esta es la que de verdad decide, y decide por
+// contact_id, no por texto: si dos contactos comparten business_name, cada
+// uno con su propio contact_id recibe su propia fila sin pisar la del otro.
 // ---------------------------------------------------------------
 
 const rows = allRecords
@@ -320,11 +384,16 @@ console.log(`-- ---------------------------------------------------------------
 -- en el origen.
 --
 -- owner_id/contact_id salen de un LEFT JOIN por nombre exacto contra
--- contacts. Corre primero el SELECT de abajo para ver cuántos no casan
--- antes de insertar.
+-- contacts. El bloque 2) es una guarda dura: si algún negocio de la ficha
+-- no tiene fila en contacts, ABORTA con una excepción y lista cuáles —
+-- antes el JOIN del INSERT simplemente los saltaba sin insertar nada y sin
+-- avisar (así se nos escapó "Veterinaria Molinos", ver
+-- 30-crea-contacto-veterinaria-molinos.sql). No corras el bloque 3) si el
+-- 2) no pasó limpio.
 -- ---------------------------------------------------------------
 
--- 1) Verificación: negocios del lote sin match en contacts (deberían ser 0)
+-- 1) Verificación legible: negocios del lote sin match en contacts
+-- (informativo — el bloque 2) es el que de verdad bloquea).
 select v.business_name
 from (values
 ${rows}
@@ -332,9 +401,29 @@ ${rows}
 left join contacts c on lower(trim(c.business_name)) = lower(trim(v.business_name))
 where c.id is null;
 
--- 2) Carga real — el "and not exists" es la segunda barrera de
--- idempotencia (ver comentario arriba): no duplica aunque --known no se
--- haya usado.
+-- 2) Guarda de cobertura — corre esto ANTES del INSERT. Si algún negocio
+-- de la ficha no tiene fila en contacts, aborta con excepción y los lista.
+-- No hay forma de "seguir de todos modos" desde aquí a propósito: crear el
+-- contacto que falta (o corregir el nombre) es un paso separado y
+-- deliberado, no algo que este script deba decidir solo.
+do $$
+declare
+  v_missing text;
+begin
+  select string_agg(v.business_name, ', ') into v_missing
+  from (values
+${rows}
+  ) as v(business_name, alcaldia, colonia, address, phone, email, web_note, score, is_urgent, has_web, has_whatsapp, has_reservas, has_crm, has_chat, has_blog, has_redes, gaps, note, source_file)
+  left join contacts c on lower(trim(c.business_name)) = lower(trim(v.business_name))
+  where c.id is null;
+
+  if v_missing is not null then
+    raise exception 'Cobertura incompleta: sin fila en contacts para: %. Créalos (o corrige el nombre) antes de cargar prospect_analysis.', v_missing;
+  end if;
+end $$;
+
+-- 3) Carga real — el "and not exists" es la barrera de idempotencia real
+-- (ver cabecera del archivo): no duplica aunque --known no se haya usado.
 insert into prospect_analysis (
   owner_id, contact_id, business_name, alcaldia, colonia, address, phone, email,
   web_note, score, is_urgent, has_web, has_whatsapp, has_reservas, has_crm, has_chat,

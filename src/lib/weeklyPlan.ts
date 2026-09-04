@@ -3,8 +3,6 @@ import { TERMINAL_STATUSES } from "@/config/contactStatus";
 import type { ContactRow } from "@/lib/queries/contacts";
 import type { ProspectAnalysisRow } from "@/lib/queries/prospectAnalysis";
 
-export const TASKS_PER_DAY = 10;
-
 /**
  * Días hábiles restantes de la semana en curso, empezando en HOY (lunes es
  * la semana completa: 5 días). Si hoy es sábado o domingo, no quedan días
@@ -112,18 +110,19 @@ export function timeForSlot(day: Date, index: number): Date {
 }
 
 /**
- * Reparte TASKS_PER_DAY candidatos por día, en el orden ya calculado. Si
- * hay menos candidatos que espacios, los días de más quedan con menos (o
+ * Reparte dailyTarget candidatos por día, en el orden ya calculado. Si hay
+ * menos candidatos que espacios, los días de más quedan con menos (o
  * vacíos) — nunca se rellena con un candidato repetido o ya trabajado. Si
  * hay más candidatos que espacios totales, los que sobran no se proponen
  * esta semana (siguen sin tarea, así que vuelven a salir la próxima vez que
- * se genere el plan).
+ * se genere el plan). dailyTarget viene de profiles.daily_lead_target —
+ * configurable por vendedora, ver 0025_daily_lead_target.sql.
  */
-export function distributeIntoDays(candidates: WeeklyPlanCandidate[], days: Date[]): WeeklyPlanDay[] {
+export function distributeIntoDays(candidates: WeeklyPlanCandidate[], days: Date[], dailyTarget: number): WeeklyPlanDay[] {
   const result: WeeklyPlanDay[] = days.map((date) => ({ date, candidates: [] }));
 
   candidates.forEach((candidate, index) => {
-    const dayIndex = Math.floor(index / TASKS_PER_DAY);
+    const dayIndex = Math.floor(index / dailyTarget);
     const day = result[dayIndex];
     if (!day) return;
     day.candidates.push(candidate);

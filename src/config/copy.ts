@@ -580,6 +580,12 @@ export const copy = {
       reserveStat: (n: number) => (n === 1 ? "En reserva: 1" : `En reserva: ${n}`),
       reserveStatDescription: "Contactos cargados para repartir después, todavía sin vendedora.",
     },
+    dailyTarget: {
+      columnLabel: "Meta diaria",
+      inputLabel: (fullName: string) => `Meta diaria de ${fullName}`,
+      successToast: "Meta diaria actualizada.",
+      errorToast: "No pudimos actualizar la meta diaria. Intenta de nuevo.",
+    },
   },
 
   pipeline: {
@@ -899,6 +905,13 @@ export const copy = {
       emptyNoAnalysisDescription: "El plan se arma sobre contactos con análisis de prospección. Carga un lote o pide que se analicen los tuyos.",
       emptyAllWorkedTitle: "Ya trabajaste todos tus prospectos",
       emptyAllWorkedDescription: "Ninguno de tus contactos con análisis está libre esta semana: ya tienen tarea abierta o ya están en el pipeline.",
+      // Solo aparece cuando 0 < disponibles < meta — el caso "cero
+      // disponibles" ya tiene su propio EmptyState (emptyAllWorkedTitle) y
+      // no debe confundirse con este. Nombra "candidatos disponibles"
+      // explícito, no solo "tareas", para que quede claro que el hueco es
+      // por falta de contactos y no por otra razón.
+      partialFillNote: (available: number, target: number) =>
+        `Se armaron ${available} de ${target} tareas propuestas: solo hay ${available} candidatos disponibles esta semana.`,
     },
   },
 

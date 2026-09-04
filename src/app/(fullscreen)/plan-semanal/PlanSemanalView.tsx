@@ -132,16 +132,26 @@ export function PlanSemanalView() {
   // renglones que la vendedora ya quitó.
   const analysisMap = analysisQuery.data;
 
+  // Candidatos totales antes de repartir en días — se guarda aparte de
+  // planDays porque distributeIntoDays() descarta silenciosamente lo que no
+  // cabe en la capacidad de la semana (ver su comentario), y el aviso de
+  // faltantes necesita el número real de disponibles, no solo lo colocado.
+  const [availableCount, setAvailableCount] = useState<number | null>(null);
+
   useEffect(() => {
     if (planDays !== null) return;
     if (!isReady || isError || !analysisMap) return;
 
     const candidates = buildWeeklyPlanCandidates(myContacts, analysisMap, openTaskQuery.data ?? new Set(), opportunityQuery.data ?? new Set());
     const days = remainingBusinessDays(new Date());
-    setPlanDays(distributeIntoDays(candidates, days));
-  }, [planDays, isReady, isError, myContacts, analysisMap, openTaskQuery.data, opportunityQuery.data]);
+    setAvailableCount(candidates.length);
+    setPlanDays(distributeIntoDays(candidates, days, profile?.daily_lead_target ?? 10));
+  }, [planDays, isReady, isError, myContacts, analysisMap, openTaskQuery.data, opportunityQuery.data, profile?.daily_lead_target]);
 
   const totalCount = useMemo(() => planDays?.reduce((sum, day) => sum + day.candidates.length, 0) ?? 0, [planDays]);
+
+  const targetTotal = (profile?.daily_lead_target ?? 0) * (planDays?.length ?? 0);
+  const showPartialFillNote = availableCount !== null && availableCount > 0 && availableCount < targetTotal;
 
   const removeCandidate = (dayIndex: number, contactId: string) => {
     setPlanDays((prev) =>
@@ -201,6 +211,12 @@ export function PlanSemanalView() {
         />
       ) : (
         <>
+          {showPartialFillNote ? (
+            <p className="rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface px-4 py-2.5 text-sm text-text-secondary">
+              {copy.tareas.weeklyPlan.partialFillNote(availableCount, targetTotal)}
+            </p>
+          ) : null}
+
           <div className="flex gap-4 overflow-x-auto pb-2">
             {planDays.map((day, index) => (
               <DayColumn key={day.date.toISOString()} day={day} dayIndex={index} onRemove={removeCandidate} />
