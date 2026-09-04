@@ -976,7 +976,7 @@ export function ContactDetailView({
                   type="button"
                   onClick={() => toggleTag.mutate({ tag, add: false })}
                   disabled={toggleTag.isPending}
-                  aria-label={copy.contactos.detail.tags.removeVisitar}
+                  aria-label={copy.contactos.detail.tags.removeOperationalTag(tag)}
                   className="flex h-6 w-6 items-center justify-center rounded-full text-text-muted transition-colors hover:bg-bg-sunken hover:text-text-primary disabled:opacity-60"
                 >
                   <X aria-hidden="true" className="h-3.5 w-3.5" strokeWidth={1.75} />
@@ -992,7 +992,7 @@ export function ContactDetailView({
               disabled={toggleTag.isPending}
               className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-dashed border-border-subtle px-2.5 py-0.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent hover:text-accent disabled:opacity-60"
             >
-              + {copy.contactos.detail.tags.addVisitar}
+              + {copy.contactos.detail.tags.addOperationalTag(tag)}
             </button>
           ))}
         </div>

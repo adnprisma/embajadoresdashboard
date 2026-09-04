@@ -387,8 +387,13 @@ export const copy = {
       // (texto libre) siguen mostrándose tal cual, sin este control.
       tags: {
         label: "Etiquetas",
-        addVisitar: "Marcar para visitar",
-        removeVisitar: "Quitar visitar",
+        // Genéricas, no solo para "visitar": OPERATIONAL_TAGS
+        // (config/contactTags.ts) ya trae más de una etiqueta operativa
+        // (lote-sep-2026, posible-duplicado) — un texto fijo tipo "Marcar
+        // para visitar" quedaría mal en un botón que en realidad agrega
+        // "lote-sep-2026".
+        addOperationalTag: (tag: string) => `Agregar "${tag}"`,
+        removeOperationalTag: (tag: string) => `Quitar "${tag}"`,
         successToast: "Etiquetas actualizadas.",
         errorToast: "No pudimos actualizar las etiquetas. Intenta de nuevo.",
         suggestBanner: "Este contacto no tiene teléfono ni correo — puede ser candidato para visita en domicilio.",
