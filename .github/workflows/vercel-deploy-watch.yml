@@ -1,0 +1,98 @@
+# ---------------------------------------------------------------
+# Vigilante del último deploy de producción en Vercel.
+#
+# No bloquea nada — a diferencia de los candados de pricing.ts/quoteMath.ts
+# (esos SÍ gatean el build), esto es puro aviso. Corre cada hora y pregunta
+# a la API de Vercel cómo quedó el último deploy de producción; si está en
+# ERROR (o CANCELED), el step falla a propósito. Lo que de verdad resuelve
+# el problema de fondo no es el mecanismo de aviso (el correo default de
+# GitHub por workflow programado que falla) — es que ESTO SE REPITE: un
+# build roto sigue fallando en cada corrida de esta hoja, no solo la
+# primera vez que se detecta. El incidente real (build roto dos días sin
+# que nadie lo viera) fue una alerta única que se perdió, no la ausencia de
+# alerta — 48 correos en dos días no se pierden igual.
+#
+# ADVERTENCIA — modo de falla silencioso conocido, no resuelto por este
+# archivo: GitHub apaga automáticamente los workflows programados
+# (schedule) en un repo sin commits en 60 días. Si este repo se queda
+# quieto ese tiempo, el vigilante se apaga solo, sin avisar — exactamente
+# el tipo de falla silenciosa que este workflow existe para evitar en el
+# otro sentido. No hay manera de que un workflow se reactive solo; si algún
+# día el repo entra en una racha larga sin commits, hay que entrar a
+# Settings → Actions y reactivarlo a mano.
+#
+# Secrets requeridos (Settings → Secrets and variables → Actions):
+#   VERCEL_TOKEN       — token de Vercel. Ver CLAUDE.md para su fecha de
+#                        expiración real y el recordatorio de rotación: un
+#                        token vencido también apaga este vigilante en
+#                        silencio.
+#   VERCEL_PROJECT_ID  — id del proyecto en Vercel (Project Settings →
+#                        General).
+#   VERCEL_TEAM_ID     — SOLO si el proyecto vive bajo un Team, no una
+#                        cuenta personal. Si no aplica, no la agregues y
+#                        deja el parámetro teamId fuera de la URL de abajo.
+# ---------------------------------------------------------------
+
+name: Vercel production deploy watch
+
+on:
+  # schedule comentado a propósito: workflow_dispatch necesita el archivo
+  # ya en main para poder dispararse a mano, pero no debe empezar a mandar
+  # correos horarios de un workflow sin probar. Se descomenta en un segundo
+  # push, después de confirmar con workflow_dispatch que detecta un deploy
+  # roto Y que uno sano pasa limpio. Si ves esto comentado en el repo, la
+  # prueba quedó a medias — no lo descomentes sin correr esas dos pruebas.
+  # schedule:
+  #   - cron: "0 * * * *" # cada hora
+  workflow_dispatch:
+    inputs:
+      test_deployment_id:
+        description: >
+          Prueba negativa: id de un deployment específico (ej. uno de los
+          que ya falló) en vez del último de producción. Deja vacío para
+          el chequeo real.
+        required: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Revisa el estado del deploy de producción
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          TEST_DEPLOYMENT_ID: ${{ github.event.inputs.test_deployment_id }}
+        run: |
+          set -euo pipefail
+
+          TEAM_QS=""
+          if [ -n "${VERCEL_TEAM_ID:-}" ]; then
+            TEAM_QS="&teamId=${VERCEL_TEAM_ID}"
+          fi
+
+          if [ -n "${TEST_DEPLOYMENT_ID:-}" ]; then
+            echo "Modo prueba: consultando el deployment $TEST_DEPLOYMENT_ID directo, no 'el último de producción'."
+            # Sin "?" fijo: si TEAM_QS está vacío, esto pediría ".../ID?" con
+            # una query vacía — inofensivo para curl/Vercel, pero se evita
+            # armando la URL completa aparte en vez de depender de que
+            # funcione un "?" colgado.
+            QS="${TEAM_QS#&}"
+            URL_PATH="https://api.vercel.com/v13/deployments/${TEST_DEPLOYMENT_ID}"
+            [ -n "$QS" ] && URL_PATH="${URL_PATH}?${QS}"
+            RESPONSE=$(curl -sf "$URL_PATH" -H "Authorization: Bearer ${VERCEL_TOKEN}")
+            STATE=$(echo "$RESPONSE" | jq -r '.readyState')
+            URL=$(echo "$RESPONSE" | jq -r '.url')
+          else
+            RESPONSE=$(curl -sf "https://api.vercel.com/v6/deployments?projectId=${VERCEL_PROJECT_ID}&target=production&limit=1${TEAM_QS}" \
+              -H "Authorization: Bearer ${VERCEL_TOKEN}")
+            STATE=$(echo "$RESPONSE" | jq -r '.deployments[0].readyState')
+            URL=$(echo "$RESPONSE" | jq -r '.deployments[0].url')
+          fi
+
+          echo "Deploy revisado: $URL — estado: $STATE"
+
+          if [ "$STATE" = "ERROR" ] || [ "$STATE" = "CANCELED" ]; then
+            echo "::error::El deploy de producción está en estado $STATE ($URL). Revisa Vercel."
+            exit 1
+          fi
