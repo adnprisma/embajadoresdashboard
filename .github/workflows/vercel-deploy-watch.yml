@@ -54,14 +54,12 @@
 name: Vercel production deploy watch
 
 on:
-  # schedule comentado a propósito: workflow_dispatch necesita el archivo
-  # ya en main para poder dispararse a mano, pero no debe empezar a mandar
-  # correos horarios de un workflow sin probar. Se descomenta en un segundo
-  # push, después de confirmar con workflow_dispatch que detecta un deploy
-  # roto Y que uno sano pasa limpio. Si ves esto comentado en el repo, la
-  # prueba quedó a medias — no lo descomentes sin correr esas dos pruebas.
-  # schedule:
-  #   - cron: "0 * * * *" # cada hora
+  # Probado con workflow_dispatch antes de activar esto: detecta un deploy
+  # en ERROR (dpl_7qu1RL33vrmUZrZAqtJcfUNaTfJZ, commit e2fa15a) y deja
+  # pasar uno sano, ambos con las tres categorías [RED]/[ESQUEMA]/[DEPLOY]
+  # funcionando — no solo "no estorba", sino confirmado que sí detecta.
+  schedule:
+    - cron: "0 * * * *" # cada hora
   workflow_dispatch:
     inputs:
       test_deployment_id:
