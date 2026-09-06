@@ -12,6 +12,24 @@
 # que nadie lo viera) fue una alerta única que se perdió, no la ausencia de
 # alerta — 48 correos en dos días no se pierden igual.
 #
+# Tres categorías de salida, mismo criterio que check-quote-math.ts — nunca
+# el mismo mensaje opaco para "el deploy falló" y "no pude preguntarle a
+# Vercel":
+#   [DEPLOY]   el deploy de producción está en ERROR/CANCELED -> es lo que
+#              este workflow existe para detectar.
+#   [RED]      no se pudo hablar con la API de Vercel (curl no conectó, o
+#              respondió un HTTP fuera de 2xx: 401/403/404/5xx) -> el
+#              vigilante está roto (token vencido, secret mal puesto,
+#              proyecto/team id incorrecto), no es veredicto sobre el
+#              deploy. Se imprime el código HTTP y el cuerpo de la
+#              respuesta, no solo el exit code de curl.
+#   [ESQUEMA]  la respuesta fue 2xx pero no trae el campo readyState
+#              esperado -> el contrato de la API de Vercel cambió o el
+#              cuerpo no es el JSON que se esperaba.
+# Ya pasó una vez (ver historial): sin esta distinción, un 401 por token
+# vencido se ve IDÉNTICO a un deploy roto — el día que el token expire,
+# esto tiene que decir "el vigilante está roto", no "producción está mal".
+#
 # ADVERTENCIA — modo de falla silencioso conocido, no resuelto por este
 # archivo: GitHub apaga automáticamente los workflows programados
 # (schedule) en un repo sin commits en 60 días. Si este repo se queda
@@ -24,8 +42,8 @@
 # Secrets requeridos (Settings → Secrets and variables → Actions):
 #   VERCEL_TOKEN       — token de Vercel. Ver CLAUDE.md para su fecha de
 #                        expiración real y el recordatorio de rotación: un
-#                        token vencido también apaga este vigilante en
-#                        silencio.
+#                        token vencido cae en [RED], no en silencio — pero
+#                        sigue siendo trabajo evitable si se rota a tiempo.
 #   VERCEL_PROJECT_ID  — id del proyecto en Vercel (Project Settings →
 #                        General).
 #   VERCEL_TEAM_ID     — SOLO si el proyecto vive bajo un Team, no una
@@ -64,7 +82,13 @@ jobs:
           VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
           TEST_DEPLOYMENT_ID: ${{ github.event.inputs.test_deployment_id }}
         run: |
-          set -euo pipefail
+          # Sin -e a propósito: cada modo de falla se maneja explícito más
+          # abajo (curl no falla-y-mata-el-script con -f; se examina el
+          # código HTTP y el cuerpo a mano). Con -e, el primer error de
+          # curl mataba el script ANTES de llegar a cualquier echo de
+          # diagnóstico — así se vieron los dos "exit code 22" sin más
+          # información la vez pasada.
+          set -uo pipefail
 
           TEAM_QS=""
           if [ -n "${VERCEL_TEAM_ID:-}" ]; then
@@ -73,26 +97,56 @@ jobs:
 
           if [ -n "${TEST_DEPLOYMENT_ID:-}" ]; then
             echo "Modo prueba: consultando el deployment $TEST_DEPLOYMENT_ID directo, no 'el último de producción'."
-            # Sin "?" fijo: si TEAM_QS está vacío, esto pediría ".../ID?" con
-            # una query vacía — inofensivo para curl/Vercel, pero se evita
-            # armando la URL completa aparte en vez de depender de que
-            # funcione un "?" colgado.
             QS="${TEAM_QS#&}"
-            URL_PATH="https://api.vercel.com/v13/deployments/${TEST_DEPLOYMENT_ID}"
-            [ -n "$QS" ] && URL_PATH="${URL_PATH}?${QS}"
-            RESPONSE=$(curl -sf "$URL_PATH" -H "Authorization: Bearer ${VERCEL_TOKEN}")
-            STATE=$(echo "$RESPONSE" | jq -r '.readyState')
-            URL=$(echo "$RESPONSE" | jq -r '.url')
+            URL="https://api.vercel.com/v13/deployments/${TEST_DEPLOYMENT_ID}"
+            [ -n "$QS" ] && URL="${URL}?${QS}"
           else
-            RESPONSE=$(curl -sf "https://api.vercel.com/v6/deployments?projectId=${VERCEL_PROJECT_ID}&target=production&limit=1${TEAM_QS}" \
-              -H "Authorization: Bearer ${VERCEL_TOKEN}")
-            STATE=$(echo "$RESPONSE" | jq -r '.deployments[0].readyState')
-            URL=$(echo "$RESPONSE" | jq -r '.deployments[0].url')
+            URL="https://api.vercel.com/v6/deployments?projectId=${VERCEL_PROJECT_ID}&target=production&limit=1${TEAM_QS}"
           fi
 
-          echo "Deploy revisado: $URL — estado: $STATE"
+          # -sS (silenciosa pero muestra errores propios de curl) y SIN -f:
+          # sin -f, curl no falla-y-descarta el cuerpo en un 4xx/5xx — deja
+          # que el script decida, con el cuerpo real disponible para el
+          # mensaje de error.
+          RAW=$(curl -sS -w '\n%{http_code}' "$URL" -H "Authorization: Bearer ${VERCEL_TOKEN}")
+          CURL_EXIT=$?
 
-          if [ "$STATE" = "ERROR" ] || [ "$STATE" = "CANCELED" ]; then
-            echo "::error::El deploy de producción está en estado $STATE ($URL). Revisa Vercel."
+          if [ $CURL_EXIT -ne 0 ]; then
+            echo "::error::[RED] No se pudo conectar con la API de Vercel (curl exit ${CURL_EXIT}) — el vigilante está roto, esto NO es un veredicto sobre el deploy. Revisa conectividad del runner o si api.vercel.com está caído."
             exit 1
           fi
+
+          HTTP_STATUS=$(echo "$RAW" | tail -n1)
+          HTTP_BODY=$(echo "$RAW" | sed '$d')
+
+          if ! [[ "$HTTP_STATUS" =~ ^[0-9]{3}$ ]]; then
+            echo "::error::[RED] No se pudo leer un código HTTP válido de la respuesta (obtuve: '${HTTP_STATUS}') — el vigilante está roto, no es veredicto sobre el deploy. Cuerpo: ${HTTP_BODY}"
+            exit 1
+          fi
+
+          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
+            echo "::error::[RED] La API de Vercel respondió HTTP ${HTTP_STATUS} — el vigilante no pudo autenticarse o alcanzar el recurso (token vencido, secret mal puesto, o VERCEL_PROJECT_ID/VERCEL_TEAM_ID incorrectos son las causas típicas de 401/403/404). Esto NO es un veredicto sobre el deploy. Cuerpo: ${HTTP_BODY}"
+            exit 1
+          fi
+
+          if [ -n "${TEST_DEPLOYMENT_ID:-}" ]; then
+            STATE=$(echo "$HTTP_BODY" | jq -r '.readyState // empty')
+            DEPLOY_URL=$(echo "$HTTP_BODY" | jq -r '.url // empty')
+          else
+            STATE=$(echo "$HTTP_BODY" | jq -r '.deployments[0].readyState // empty')
+            DEPLOY_URL=$(echo "$HTTP_BODY" | jq -r '.deployments[0].url // empty')
+          fi
+
+          if [ -z "$STATE" ]; then
+            echo "::error::[ESQUEMA] HTTP ${HTTP_STATUS} pero la respuesta no trae el campo readyState esperado — el contrato de la API de Vercel pudo cambiar, o el cuerpo no es el JSON esperado. Cuerpo: ${HTTP_BODY}"
+            exit 1
+          fi
+
+          echo "Deploy revisado: ${DEPLOY_URL} — estado: ${STATE}"
+
+          if [ "$STATE" = "ERROR" ] || [ "$STATE" = "CANCELED" ]; then
+            echo "::error::[DEPLOY] El deploy de producción está en estado ${STATE} (${DEPLOY_URL}). Esta sí es una alarma real — revisa Vercel."
+            exit 1
+          fi
+
+          echo "[OK] Deploy sano."
