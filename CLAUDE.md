@@ -23,6 +23,24 @@ el repo — hizo falta más de una vez en una misma sesión (pensar opciones de
 alerta de build roto, verificar si una URL vieja seguía respondiendo en
 vivo) antes de que alguien lo escribiera aquí.
 
+**El `VERCEL_TOKEN` del vigilante de deploy (`.github/workflows/vercel-deploy-watch.yml`)
+no tiene fecha de expiración — decisión consciente del 6 de septiembre de
+2026, no un descuido.** Se evaluó rotarlo cada 90 días y se optó por no
+hacerlo, a cambio de no tener que rotar credenciales periódicamente.
+**Riesgo aceptado:** es acceso permanente a la cuenta de Vercel (no hay
+scope de solo lectura en este plan) guardado como secret de GitHub — si ese
+secret se filtra, o se agrega un colaborador al repo, el acceso no caduca
+solo. Si algún día el repo deja de ser de una sola persona, esta decisión
+se revisa. Dos formas en que este vigilante puede morir sin que nadie lo
+note, ninguna resuelta por el propio workflow:
+- **Un token inválido (revocado a mano, cuenta de Vercel deshabilitada,
+  etc.) cae en `[RED]`, no en silencio** — el workflow sí falla y sí manda
+  el correo de siempre.
+- **GitHub apaga solo los workflows programados (`schedule`) en un repo sin
+  commits en 60 días.** Si este repo se queda quieto ese tiempo, el
+  vigilante se apaga sin avisar — esta sí es silenciosa de verdad: si pasa,
+  hay que entrar a Settings → Actions y reactivarlo a mano.
+
 ---
 
 ## 2. Fuente de autoridad visual
