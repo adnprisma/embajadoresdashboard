@@ -14,6 +14,15 @@ landing page. No tiene registro abierto: las altas se hacen por invitación.
 Idioma de la interfaz: **español (México)**.
 Idioma del código, nombres de variables y comentarios: **inglés**.
 
+**Dominio de producción real: `https://www.adnprisma.com`** — el que se le
+da al equipo y el que va en cualquier documento (el apex `adnprisma.com`
+rebota ahí con 308; los dos con certificado válido). `embajadoresdashboard.vercel.app`
+es el dominio interno de Vercel — sigue funcionando y sigue siendo el mismo
+deploy, pero no es el que se comparte. Ninguno de los dos estaba anotado en
+el repo — hizo falta más de una vez en una misma sesión (pensar opciones de
+alerta de build roto, verificar si una URL vieja seguía respondiendo en
+vivo) antes de que alguien lo escribiera aquí.
+
 ---
 
 ## 2. Fuente de autoridad visual

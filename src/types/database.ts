@@ -18,10 +18,10 @@
 // 0016_opportunity_value_split.sql, 0017_opportunity_delete_guard.sql,
 // 0018_interactions_attribution_fix.sql, 0019_weekly_status_funnel.sql,
 // 0020_task_status.sql, 0021_contact_reserve_and_tags.sql,
-// 0022_seller_prices.sql, 0023_quotes.sql, 0024_compute_quote_totals.sql y
-// 0025_daily_lead_target.sql. `done` sigue en el esquema (migración B
-// pendiente, ver 0020) pero el cliente ya no la lee ni la escribe — solo
-// status.
+// 0022_seller_prices.sql, 0023_quotes.sql, 0024_compute_quote_totals.sql,
+// 0025_daily_lead_target.sql y 0026_app_settings.sql. `done` sigue en el
+// esquema (migración B pendiente, ver 0020) pero el cliente ya no la lee
+// ni la escribe — solo status.
 // ---------------------------------------------------------------
 
 export type Json =
@@ -1085,6 +1085,28 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+
+      app_settings: {
+        Row: {
+          key: string;
+          value: string | null;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          key: string;
+          value?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          key?: string;
+          value?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [];
       };
     };
     Views: {

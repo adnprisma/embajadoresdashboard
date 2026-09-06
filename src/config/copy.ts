@@ -123,6 +123,7 @@ export const copy = {
       calendar: "Calendario",
       tasks: "Mis tareas",
       resources: "Recursos",
+      paymentData: "Datos de pago",
     },
     userMenu: {
       profile: "Perfil",
@@ -1108,6 +1109,25 @@ export const copy = {
       back: "Volver a Recursos",
       fullscreen: "Pantalla completa",
       iframeTitle: (titulo: string) => `Contenido de ${titulo}`,
+    },
+  },
+
+  datosPago: {
+    pageTitle: "Datos de pago",
+    headerImageAlt: "Datos bancarios",
+    transfer: {
+      title: "Transferencia bancaria",
+      titularLabel: "Titular",
+      bankLabel: "Banco",
+      clabeLabel: "CLABE",
+      copyClabeLabel: "Copiar CLABE",
+      copySuccessToast: "CLABE copiada.",
+      copyErrorToast: "No pudimos copiar la CLABE.",
+    },
+    stripe: {
+      title: "Pagar con tarjeta (Stripe)",
+      payButtonLabel: (packageName: string) => `Pagar ${packageName}`,
+      pendingLabel: "Disponible pronto",
     },
   },
 } as const;

@@ -4,6 +4,7 @@ import {
   BookOpen,
   Calendar,
   Contact,
+  CreditCard,
   Kanban,
   LayoutDashboard,
   ListTodo,
@@ -47,6 +48,7 @@ export const NAV_GROUPS: NavGroup[] = [
   ],
   [
     { label: copy.shell.nav.resources, href: "/recursos", icon: BookOpen },
+    { label: copy.shell.nav.paymentData, href: "/datos-de-pago", icon: CreditCard },
     // Enlaces externos: PENDIENTE. Se agregan cuando se definan las URLs reales.
   ],
 ];
