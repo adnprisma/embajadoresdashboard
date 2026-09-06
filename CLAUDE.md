@@ -129,6 +129,23 @@ Reglas que no se negocian:
   donde no hay sesión y `auth.uid()` es `null`. Ya pasó dos veces (el trigger
   de cambio de rol en `profiles` y `reassign_contacts()`): sin el respaldo, la
   función simplemente no se puede ejecutar a mano cuando hace falta.
+- **Los 9 links de pago de Stripe (`app_settings`, `stripe_link.<modalidad>.<packageId>`,
+  `0027_stripe_link_modalidad.sql`) se verifican a mano, nunca contra la API
+  de Stripe — decisión tomada, no pendiente.** Se evaluó: `GET
+  /v1/payment_links` sí expone si un link es de cobro único o recurrente
+  (`line_items[].price.type`). Se descartó porque con tres modalidades
+  (contado, plan a 3 meses, plan a 6 meses) el error más probable no es
+  "suscripción donde iba pago único" — es pegar el link de 6 meses en la
+  ranura de 3 meses. Para Stripe, plan-3 y plan-6 son `recurring`
+  idénticos: un script que solo revisara el tipo de precio diría
+  "correcto" en los dos casos, dando confianza falsa justo donde está el
+  riesgo. Abrir el link sí lo detecta (la pantalla de pago muestra monto y
+  periodicidad). **Procedimiento obligatorio antes de guardar cualquiera
+  de los 9:** abrir el link y confirmar paquete, monto, y si es cobro
+  único o mensual con cuántos cobros. Ni el trigger de `app_settings`
+  (valida dominio y descarta links de modo prueba, nada más) ni ninguna
+  pantalla lo hacen por ti — es el único punto donde un error le cuesta
+  dinero real a un cliente, y no tiene atajo automático.
 - **Alcance de datos para admin, por tipo de pantalla — RLS por sí sola no lo
   resuelve.** Desde `0010_rls_admin.sql` casi todas las políticas le dan a
   admin `owner_id = auth.uid() or is_admin()`, así que cualquier query sin

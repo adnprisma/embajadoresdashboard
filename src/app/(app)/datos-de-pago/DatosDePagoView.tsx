@@ -1,11 +1,12 @@
 "use client";
 
-import { AlertTriangle, Copy } from "lucide-react";
+import { AlertTriangle, Banknote, Copy, ExternalLink, Repeat } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Panel } from "@/components/common/Panel";
 import { Skeleton } from "@/components/common/Skeleton";
-import { stripeLinkKey } from "@/config/appSettings";
+import { PAYMENT_MODALITIES, stripeLinkKey, type PaymentModality } from "@/config/appSettings";
 import { copy } from "@/config/copy";
 import { PACKAGES } from "@/config/pricing";
 import { useAppSettings } from "@/lib/queries/appSettings";
@@ -29,13 +30,71 @@ function ErrorBlock({ onRetry }: { onRetry: () => void }) {
   );
 }
 
-async function copyClabe(clabe: string) {
+async function copyToClipboard(value: string, successMessage: string, errorMessage: string) {
   try {
-    await navigator.clipboard.writeText(clabe);
-    toast.success(copy.datosPago.transfer.copySuccessToast);
+    await navigator.clipboard.writeText(value);
+    toast.success(successMessage);
   } catch {
-    toast.error(copy.datosPago.transfer.copyErrorToast);
+    toast.error(errorMessage);
   }
+}
+
+// Ícono por modalidad — pago único se distingue de las dos recurrentes;
+// plan-3 y plan-6 comparten ícono porque su título de panel ("Plan a 3
+// meses" / "Plan a 6 meses") ya los distingue, y no hay un ícono de lucide
+// que signifique "3" o "6" repeticiones sin inventar algo fuera del set.
+const MODALITY_ICON: Record<PaymentModality, LucideIcon> = {
+  contado: Banknote,
+  "plan-3": Repeat,
+  "plan-6": Repeat,
+};
+
+// Esta pantalla la ve la vendedora, nunca el cliente (está detrás de
+// sesión) — la acción del día a día es copiar el link para mandarlo por
+// WhatsApp, no "pagar". Abrir en pestaña nueva es secundario a propósito:
+// sirve para la verificación manual de los 9 links (ver
+// 0027_stripe_link_modalidad.sql — paquete, monto, cobro único o cuántos
+// cobros mensuales), no para el uso diario.
+function StripeLinkRow({ packageName, modalityLabel, link }: { packageName: string; modalityLabel: string; link: string | null }) {
+  const label = copy.datosPago.stripe.copyButtonLabel(packageName, modalityLabel);
+
+  if (!link) {
+    return (
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          disabled
+          className="inline-flex items-center gap-2 rounded-[var(--radius-control)] border border-border-subtle px-3 py-2 text-sm font-medium text-text-muted"
+        >
+          <Copy aria-hidden="true" className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+          {label}
+        </button>
+        <span className="text-xs font-medium text-text-muted">{copy.datosPago.stripe.pendingLabel}</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        type="button"
+        onClick={() => copyToClipboard(link, copy.datosPago.stripe.copySuccessToast, copy.datosPago.stripe.copyErrorToast)}
+        className="inline-flex items-center gap-2 rounded-[var(--radius-control)] border border-border-subtle px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-bg-sunken"
+      >
+        <Copy aria-hidden="true" className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+        {label}
+      </button>
+      <a
+        href={link}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={copy.datosPago.stripe.openLabel(packageName, modalityLabel)}
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius-control)] text-text-muted transition-colors hover:bg-bg-sunken hover:text-text-primary"
+      >
+        <ExternalLink aria-hidden="true" className="h-4 w-4" strokeWidth={1.5} />
+      </a>
+    </div>
+  );
 }
 
 export function DatosDePagoView() {
@@ -52,6 +111,8 @@ export function DatosDePagoView() {
       ) : settingsQuery.isLoading || !settingsQuery.data ? (
         <div className="flex flex-col gap-4">
           <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
           <Skeleton className="h-32 w-full" />
         </div>
       ) : (
@@ -86,7 +147,13 @@ export function DatosDePagoView() {
                     <span className="numeric text-sm text-text-primary">{settingsQuery.data.bank_clabe}</span>
                     <button
                       type="button"
-                      onClick={() => copyClabe(settingsQuery.data.bank_clabe ?? "")}
+                      onClick={() =>
+                        copyToClipboard(
+                          settingsQuery.data.bank_clabe ?? "",
+                          copy.datosPago.transfer.copySuccessToast,
+                          copy.datosPago.transfer.copyErrorToast,
+                        )
+                      }
                       aria-label={copy.datosPago.transfer.copyClabeLabel}
                       className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--radius-control)] text-text-muted transition-colors hover:bg-bg-sunken hover:text-text-primary"
                     >
@@ -98,33 +165,20 @@ export function DatosDePagoView() {
             </div>
           </Panel>
 
-          <Panel title={copy.datosPago.stripe.title}>
-            <div className="flex flex-wrap gap-3">
-              {PACKAGES.map((pkg) => {
-                const link = settingsQuery.data[stripeLinkKey(pkg.id)];
-                return link ? (
-                  <a
+          {PAYMENT_MODALITIES.map((modality) => (
+            <Panel key={modality} title={copy.datosPago.stripe.panelTitle[modality]} icon={MODALITY_ICON[modality]}>
+              <div className="flex flex-col gap-3">
+                {PACKAGES.map((pkg) => (
+                  <StripeLinkRow
                     key={pkg.id}
-                    href={link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-[var(--radius-control)] bg-accent px-4 py-2 text-sm font-medium text-text-on-coral transition-colors hover:opacity-90"
-                  >
-                    {copy.datosPago.stripe.payButtonLabel(pkg.name)}
-                  </a>
-                ) : (
-                  <button
-                    key={pkg.id}
-                    type="button"
-                    disabled
-                    className="inline-flex items-center gap-2 rounded-[var(--radius-control)] border border-border-subtle px-4 py-2 text-sm font-medium text-text-muted"
-                  >
-                    {copy.datosPago.stripe.payButtonLabel(pkg.name)} — {copy.datosPago.stripe.pendingLabel}
-                  </button>
-                );
-              })}
-            </div>
-          </Panel>
+                    packageName={pkg.name}
+                    modalityLabel={copy.datosPago.stripe.modalityLabel[modality]}
+                    link={settingsQuery.data[stripeLinkKey(modality, pkg.id)] ?? null}
+                  />
+                ))}
+              </div>
+            </Panel>
+          ))}
         </>
       )}
     </div>

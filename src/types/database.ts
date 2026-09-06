@@ -19,7 +19,9 @@
 // 0018_interactions_attribution_fix.sql, 0019_weekly_status_funnel.sql,
 // 0020_task_status.sql, 0021_contact_reserve_and_tags.sql,
 // 0022_seller_prices.sql, 0023_quotes.sql, 0024_compute_quote_totals.sql,
-// 0025_daily_lead_target.sql y 0026_app_settings.sql. `done` sigue en el
+// 0025_daily_lead_target.sql, 0026_app_settings.sql y
+// 0027_stripe_link_modalidad.sql (esta última no cambia la forma de la
+// tabla, solo sus filas — sin cambio de tipos aquí). `done` sigue en el
 // esquema (migración B pendiente, ver 0020) pero el cliente ya no la lee
 // ni la escribe — solo status.
 // ---------------------------------------------------------------

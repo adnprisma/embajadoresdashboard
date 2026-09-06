@@ -1125,8 +1125,27 @@ export const copy = {
       copyErrorToast: "No pudimos copiar la CLABE.",
     },
     stripe: {
-      title: "Pagar con tarjeta (Stripe)",
-      payButtonLabel: (packageName: string) => `Pagar ${packageName}`,
+      // Esta pantalla la ve la vendedora, nunca el cliente — la acción no es
+      // "pagar", es copiar el link para mandarlo por WhatsApp. Ver
+      // DatosDePagoView.tsx.
+      panelTitle: {
+        contado: "Pago de contado",
+        "plan-3": "Plan a 3 meses",
+        "plan-6": "Plan a 6 meses",
+      },
+      // La modalidad va siempre en el texto del botón, nunca solo el
+      // paquete — un botón fuera de contexto (lector de pantalla, captura
+      // de pantalla) debe seguir siendo inequívoco.
+      modalityLabel: {
+        contado: "pago único",
+        "plan-3": "plan a 3 meses",
+        "plan-6": "plan a 6 meses",
+      },
+      copyButtonLabel: (packageName: string, modalityLabel: string) => `Copiar link — ${packageName}, ${modalityLabel}`,
+      copySuccessToast: "Link copiado.",
+      copyErrorToast: "No pudimos copiar el link.",
+      openLabel: (packageName: string, modalityLabel: string) => `Abrir en pestaña nueva — ${packageName}, ${modalityLabel}`,
+      // Texto aparte, nunca encadenado al label del botón con otro guión.
       pendingLabel: "Disponible pronto",
     },
   },
