@@ -185,6 +185,23 @@ Reglas que no se negocian:
   revés. Esto es aparte del bug de auto-duplicado de paréntesis al pegar
   saltos de línea literales (la razón original de convertir a una sola
   línea) — son dos problemas distintos del mismo flujo.
+- **Un arreglo de cruce (JOIN, matching por texto, lo que sea) se prueba
+  PRIMERO contra los datos que ya están cargados, antes de usarlo con datos
+  nuevos — nunca al revés.** El caso nuevo es exactamente el que menos
+  sabes si es representativo. Pasó al arreglar
+  `parse-prospect-analysis.mjs` para cruzar por nombre+alcaldía (lote de
+  dentistas, 2026-09-07): la primera versión normalizaba la alcaldía por
+  igualdad exacta contra `contacts.tags`, y antes de usarla en las 690
+  fichas nuevas se corrió contra las 539 de veterinaria YA CARGADAS — 62
+  de esas 539 fallaban (los HTML de veterinarias traen el nombre oficial
+  completo de la alcaldía, "Cuajimalpa de Morelos", "La Magdalena
+  Contreras"; los de dentistas traen la forma corta, que coincide con la
+  etiqueta). Ninguna guarda existente lo habría notado: el lote nuevo no
+  tiene con qué compararse hasta que ya está mal. Si el arreglo se hubiera
+  probado solo contra el lote nuevo, esas 62 fichas de veterinaria habrían
+  quedado con el cruce viejo (roto) el día que alguien tocara ese código
+  de nuevo, sin que nada lo hubiera detectado — el arreglo se habría dado
+  por bueno con evidencia que nunca lo puso a prueba de verdad.
 - **Los 9 links de pago de Stripe (`app_settings`, `stripe_link.<modalidad>.<packageId>`,
   `0027_stripe_link_modalidad.sql`) se verifican a mano, nunca contra la API
   de Stripe — decisión tomada, no pendiente.** Se evaluó: `GET
