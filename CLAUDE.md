@@ -172,7 +172,14 @@ Reglas que no se negocian:
   primer `--` comenta el resto completo: el editor de Supabase regresa
   "Success. No rows returned" (no un error) y no insertó nada. Pasó con la
   carga de dentistas del 7 de septiembre: dos intentos silenciosos antes de
-  notar que el conteo seguía en 0. **Antes de convertir un `.sql` a una sola
+  notar que el conteo seguía en 0 — se detectó corriendo un `select
+  count(*)` directo contra `contacts` en una pestaña nueva del editor, NO
+  por el mensaje de la UI de la corrida original. Es la tercera vez en la
+  misma sesión que un "éxito" de Supabase no significaba nada (antes: el
+  exit code 22 opaco del workflow de Vercel, y "Success. No rows returned"
+  de una migración que en realidad no había corrido) — la disciplina real
+  no es leer el mensaje, es verificar el dato con una consulta aparte
+  después de cada corrida que escribe algo. **Antes de convertir un `.sql` a una sola
   línea para pegarlo, quita primero las líneas que empiezan con `--`**
   (`grep -v '^[[:space:]]*--'`) y **después** une con `tr`/`sed` — nunca al
   revés. Esto es aparte del bug de auto-duplicado de paréntesis al pegar

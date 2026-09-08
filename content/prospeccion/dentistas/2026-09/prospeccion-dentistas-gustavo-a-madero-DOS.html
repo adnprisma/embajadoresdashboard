@@ -1,0 +1,2621 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dentistas Gustavo A. Madero — Digital Owner System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Open+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#00071a; --bg2:#0a1628; --panel:#0e1b30; --panel2:#122240; --border:#1c2f4d;
+    --text:#f0eefa; --muted:#8a849e; --blue:#1586f5; --blue-light:#4aa3ff; --purple:#8148FD; --purple-light:#c4b0ff;
+    --red:#f87171; --amber:#f5c842; --green:#25D366; --orange:#e67e22;
+    --font-head:'Space Grotesk',system-ui,sans-serif; --font-body:'Open Sans',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);background-image:radial-gradient(ellipse 900px 500px at 15% -10%, rgba(129,72,253,.18), transparent),radial-gradient(ellipse 800px 600px at 100% 0%, rgba(21,134,245,.14), transparent);color:var(--text);font-family:var(--font-body);line-height:1.65}
+
+  .header { background:linear-gradient(135deg, #050b1f 0%, #0a1332 50%, #0f1d4d 100%); padding:60px 40px; text-align:center; border-bottom:2px solid var(--blue); }
+  .header .brandline { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:18px; }
+  .header .brandline .dot { width:9px; height:9px; border-radius:50%; background:linear-gradient(135deg,var(--blue),var(--purple)); box-shadow:0 0 12px rgba(21,134,245,.7); }
+  .header .brandline span { font-family:var(--font-head); font-weight:600; font-size:13px; letter-spacing:.08em; color:var(--purple-light); }
+  .header h1 { font-family:var(--font-head); font-size:2.3em; font-weight:700; color:#fff; margin-bottom:10px; background:linear-gradient(90deg,#fff,var(--purple-light)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .header .subtitle { color:var(--muted); font-size:1.05em; }
+  .header .date { color:var(--blue-light); margin-top:10px; font-weight:600; font-family:var(--font-head); }
+  .header .stats { display:flex; justify-content:center; gap:24px; margin-top:32px; flex-wrap:wrap; }
+  .stat-box { background:rgba(21,134,245,.08); border:1px solid rgba(21,134,245,.3); border-radius:12px; padding:18px 26px; text-align:center; min-width:120px; }
+  .stat-box .number { font-family:var(--font-head); font-size:2.3em; color:var(--blue-light); font-weight:800; }
+  .stat-box .label { color:var(--muted); font-size:.78em; text-transform:uppercase; letter-spacing:1px; }
+
+  .container { max-width:1400px; margin:0 auto; padding:44px 22px; }
+  .section { margin-bottom:58px; }
+  .section-title { font-family:var(--font-head); font-weight:600; font-size:1.4em; color:#fff; margin-bottom:22px; padding-bottom:11px; border-bottom:2px solid var(--blue); }
+
+  .score { display:inline-flex; align-items:center; justify-content:center; width:42px; height:42px; border-radius:50%; font-weight:800; font-size:1.05em; flex-shrink:0; font-family:var(--font-head); }
+  .s10,.s9 { background:rgba(248,113,113,.15); color:var(--red); border:2px solid var(--red); }
+  .s8 { background:rgba(230,126,34,.15); color:var(--orange); border:2px solid var(--orange); }
+  .s7,.s6 { background:rgba(245,200,66,.15); color:var(--amber); border:2px solid var(--amber); }
+  .s5,.s4 { background:rgba(21,134,245,.15); color:var(--blue-light); border:2px solid var(--blue-light); }
+  .s3,.s2,.s1,.s0 { background:rgba(37,211,102,.15); color:var(--green); border:2px solid var(--green); }
+
+  .badge-urgente { background:var(--red); color:#000d2e; font-size:.68em; padding:2px 8px; border-radius:10px; font-weight:800; text-transform:uppercase; margin-left:6px; font-family:var(--font-head); }
+  .badge-alta { background:var(--orange); color:#000d2e; font-size:.68em; padding:2px 8px; border-radius:10px; font-weight:800; text-transform:uppercase; margin-left:6px; font-family:var(--font-head); }
+  .badge-media { background:var(--blue); color:#fff; font-size:.68em; padding:2px 8px; border-radius:10px; font-weight:800; text-transform:uppercase; margin-left:6px; font-family:var(--font-head); }
+  .badge-baja { background:var(--green); color:#000d2e; font-size:.68em; padding:2px 8px; border-radius:10px; font-weight:800; text-transform:uppercase; margin-left:6px; font-family:var(--font-head); }
+
+  .table-wrapper { overflow-x:auto; border-radius:12px; }
+  table { width:100%; border-collapse:collapse; background:var(--panel); border-radius:12px; overflow:hidden; min-width:920px; }
+  thead th { background:var(--panel2); color:var(--blue-light); padding:12px 9px; text-align:left; font-size:.72em; text-transform:uppercase; letter-spacing:1px; font-family:var(--font-head); }
+  tbody td { padding:10px 9px; border-bottom:1px solid var(--border); font-size:.86em; }
+  tbody tr:hover { background:rgba(21,134,245,.05); }
+  .negocio-name { font-weight:700; color:#fff; display:block; }
+  .zona-tag { color:var(--blue-light); font-size:.78em; display:block; margin-top:2px; }
+  .check { color:var(--green); font-size:1.1em; }
+  .cross { color:var(--red); font-size:1.1em; }
+  .partial { color:var(--amber); font-size:1.1em; }
+  .carencias-num { font-weight:800; font-size:1.05em; color:var(--red); }
+  .legend { margin-top:12px; color:var(--muted); font-size:.82em; }
+
+  .grid-2 { display:grid; grid-template-columns:repeat(auto-fit, minmax(390px, 1fr)); gap:22px; }
+  .card { background:linear-gradient(145deg, var(--panel), var(--panel2)); border:1px solid var(--border); border-radius:16px; padding:26px; transition:transform .2s, border-color .2s; }
+  .card:hover { transform:translateY(-3px); border-color:var(--blue); }
+  .card.highlight { border-color:var(--red); background:linear-gradient(145deg, #1a0d0f, #250d12); }
+  .card.highlight:hover { border-color:#ff8a8a; }
+  .card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; gap:10px; }
+  .card h3 { color:#fff; font-size:1.1em; line-height:1.35; font-family:var(--font-head); font-weight:600; }
+  .card .zona { color:var(--blue-light); font-size:.83em; margin-top:4px; }
+  .card .contact { margin:14px 0; padding:14px; background:rgba(0,0,0,.35); border-radius:10px; }
+  .card .contact p { margin:3px 0; font-size:.85em; }
+  .lbl { color:var(--purple-light); font-weight:600; }
+  .analysis { margin-top:14px; }
+  .analysis h4 { color:var(--amber); font-size:.8em; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; font-family:var(--font-head); }
+  .analysis ul { list-style:none; padding:0; }
+  .analysis li { padding:3px 0 3px 18px; font-size:.85em; position:relative; }
+  .analysis li::before { content:"✕"; color:var(--red); font-weight:700; position:absolute; left:0; }
+  .oportunidad h4 { color:var(--green); }
+  .oportunidad li::before { content:"✓"; color:var(--green); font-weight:700; }
+  .context-note { margin-top:14px; padding-top:12px; border-top:1px solid var(--border); font-size:.82em; color:var(--muted); font-style:italic; }
+
+  .msg-card { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:24px; margin-bottom:18px; }
+  .msg-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--border); flex-wrap:wrap; gap:8px; }
+  .msg-for { font-weight:700; color:#fff; font-size:1.02em; font-family:var(--font-head); }
+  .msg-for small { display:block; color:var(--blue-light); font-size:.78em; font-weight:400; font-family:var(--font-body); margin-top:2px; }
+  .msg-via { padding:4px 14px; border-radius:20px; font-size:.76em; font-weight:700; background:rgba(37,211,102,.15); color:var(--green); font-family:var(--font-head); }
+  .msg-body { background:rgba(0,0,0,.3); border-radius:10px; padding:20px; font-size:.9em; line-height:1.75; white-space:pre-line; border-left:3px solid var(--blue); }
+  .copy-btn { display:inline-block; margin-top:12px; padding:8px 20px; background:var(--blue); color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:.83em; font-weight:700; transition:background .2s; font-family:var(--font-head); }
+  .copy-btn:hover { background:var(--purple); }
+
+  .zonas-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px; }
+  .zona-box { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px; text-align:center; }
+  .zona-box .count { font-family:var(--font-head); font-size:1.8em; font-weight:800; color:var(--blue-light); }
+  .zona-box .name { color:#fff; font-size:.85em; margin-top:4px; }
+
+  .footer { text-align:center; padding:40px; border-top:1px solid var(--border); color:var(--muted); font-size:.85em; font-family:var(--font-head); }
+  .footer a { color:var(--blue-light); text-decoration:none; }
+
+  @media (max-width:768px) { .header h1{font-size:1.5em} .grid-2{grid-template-columns:1fr} .container{padding:24px 12px} }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brandline"><span class="dot"></span><span>DIGITAL OWNER SYSTEM · PROSPECCIÓN</span></div>
+  <h1>Dentistas en Gustavo A. Madero, CDMX</h1>
+  <p class="subtitle">Análisis de presencia digital, comparativa de carencias y mensajes listos para contactar</p>
+  <p class="date">5 de septiembre de 2026</p>
+  <div class="stats">
+    <div class="stat-box"><div class="number">48</div><div class="label">Clínicas dentales analizadas</div></div>
+    <div class="stat-box"><div class="number">17</div><div class="label">Colonias cubiertas</div></div>
+    <div class="stat-box"><div class="number">45</div><div class="label">Alta oportunidad</div></div>
+    <div class="stat-box"><div class="number">48</div><div class="label">Mensajes listos</div></div>
+  </div>
+</div>
+
+
+<div class="container">
+
+  <div class="section">
+    <h2 class="section-title">Colonias analizadas</h2>
+    <div class="zonas-grid"><div class="zona-box"><div class="count">20</div><div class="name">Lindavista</div></div><div class="zona-box"><div class="count">7</div><div class="name">San Juan de Aragón</div></div><div class="zona-box"><div class="count">4</div><div class="name">Vallejo</div></div><div class="zona-box"><div class="count">2</div><div class="name">Aragón La Villa</div></div><div class="zona-box"><div class="count">2</div><div class="name">Lindavista Sur</div></div><div class="zona-box"><div class="count">2</div><div class="name">San Felipe de Jesús</div></div><div class="zona-box"><div class="count">1</div><div class="name">Acueducto de Guadalupe</div></div><div class="zona-box"><div class="count">1</div><div class="name">Guadalupe Tepeyac</div></div><div class="zona-box"><div class="count">1</div><div class="name">Industrial Vallejo</div></div><div class="zona-box"><div class="count">1</div><div class="name">Lindavista Norte</div></div><div class="zona-box"><div class="count">1</div><div class="name">Lindavista Vallejo</div></div><div class="zona-box"><div class="count">1</div><div class="name">Nueva Industrial Vallejo</div></div><div class="zona-box"><div class="count">1</div><div class="name">Residencial Zacatenco</div></div><div class="zona-box"><div class="count">1</div><div class="name">Tres Estrellas</div></div><div class="zona-box"><div class="count">1</div><div class="name">Industrial</div></div><div class="zona-box"><div class="count">1</div><div class="name">Gertrudis Sánchez</div></div><div class="zona-box"><div class="count">1</div><div class="name">Magdalena de las Salinas</div></div></div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Tabla comparativa completa</h2>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr>
+          <th>Oport.</th><th>Clínica dental</th><th>Colonia</th><th>Web/HTTPS</th><th>WhatsApp</th><th>Reservas</th><th>CRM</th><th>Chat</th><th>Blog</th><th>Redes</th><th>Carencias</th><th>Prioridad</th>
+        </tr></thead>
+        <tbody>
+        <tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Farmaclinic</span><span class="zona-tag">Boulevard del Temoluco 374, Interior 1, Acueducto de Guadalupe, Gustavo A. Madero, CDMX</span></td>
+  <td>Acueducto de Guadalupe</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental (Aragón La Villa)</span><span class="zona-tag">Moctezuma 88, Aragón La Villa, Gustavo A. Madero, CDMX</span></td>
+  <td>Aragón La Villa</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental Talismán</span><span class="zona-tag">Av. Talismán 163, Aragón La Villa, Gustavo A. Madero, CDMX</span></td>
+  <td>Aragón La Villa</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental — Dra. Rocío Yamamoto Vázquez</span><span class="zona-tag">Alicia 170, Interior 2, Guadalupe Tepeyac, Gustavo A. Madero, CDMX</span></td>
+  <td>Guadalupe Tepeyac</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Especialidades Dentales Tepeyac, S.A. de C.V.</span><span class="zona-tag">Av. Henry Ford 63, Gustavo A. Madero, CDMX</span></td>
+  <td>Industrial Vallejo</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Centro Integral Lindavista</span><span class="zona-tag">Sierravista 394, Lindavista, Gustavo A. Madero, CDMX</span></td>
+  <td>Lindavista</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Clínica Dental Centauro Lindavista</span><span class="zona-tag">Av. Instituto Politécnico Nacional 1728, Gustavo A. Madero, CDMX</span></td>
+  <td>Lindavista</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental — Brenda Berenice Monroy Martínez</span><span class="zona-tag">Buenavista 212, Gustavo A. Madero, CDMX</span></td>
+  <td>Lindavista</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dental Lindavista</span><span class="zona-tag">Mollendo 625, Gustavo A. Madero, 07300, CDMX</span></td>
+  <td>Lindavista</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dentalendo — Dra. Alejandra Heredia Morán</span><span class="zona-tag">Riobamba 737, Interior 7, Gustavo A. Madero, CDMX</span></td>
+  <td>Lindavista</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dr. Alejandro Alcocer Flores (Consultorio Dental)</span><span class="zona-tag">Cerrada de Otavalo 45, Gustavo A. Madero, CDMX</span></td>
+  <td>Lindavista</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dr. Mario Jorge Jáuregui Nava (Consultorio Dental)</span><span class="zona-tag">Calle Riobamba 737, Gustavo A. Madero, CDMX</span></td>
+  <td>Lindavista</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dr. Miguel Ángel Morales Pérez (Consultorio Dental)</span><span class="zona-tag">Ejido 50, Gustavo A. Madero, CDMX</span></td>
+  <td>Lindavista</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dra. Andrea Castro (Consultorio Dental)</span><span class="zona-tag">Recife 655, Gustavo A. Madero, CDMX</span></td>
+  <td>Lindavista</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dra. Beatriz Pineda (Consultorio Dental)</span><span class="zona-tag">Bogotá 659, Interior 103, Lindavista, Gustavo A. Madero, CDMX</span></td>
+  <td>Lindavista</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dra. Diana Escolástica Pinal García (Consultorio Dental)</span><span class="zona-tag">Linares 631, Gustavo A. Madero, CDMX</span></td>
+  <td>Lindavista</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dra. Iliana Ivonne Bravo Carmona (Consultorio Dental)</span><span class="zona-tag">Av. Montevideo 160, Gustavo A. Madero, CDMX</span></td>
+  <td>Lindavista</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dra. María del Carmen Chargoy Lácima (Consultorio Dental)</span><span class="zona-tag">Salaverry 987, Gustavo A. Madero, CDMX</span></td>
+  <td>Lindavista</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dra. María del Consuelo Ambrosio I. (Consultorio Dental)</span><span class="zona-tag">Matanzas 659, Interior 6, Gustavo A. Madero, CDMX</span></td>
+  <td>Lindavista</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dra. Vanessa Hernández Infante (Consultorio Dental)</span><span class="zona-tag">Buenavista 24, Lindavista, Gustavo A. Madero, CDMX</span></td>
+  <td>Lindavista</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dra. Viridiana Figueroa (Consultorio Dental)</span><span class="zona-tag">Av. Insurgentes Norte 1478, Gustavo A. Madero, CDMX</span></td>
+  <td>Lindavista</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Humancare Clinic</span><span class="zona-tag">Riobamba 642, Lindavista, Gustavo A. Madero, CDMX</span></td>
+  <td>Lindavista</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Oralface</span><span class="zona-tag">Av. Montevideo 189, Interior 3, Lindavista, Gustavo A. Madero, CDMX</span></td>
+  <td>Lindavista</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Virtuodent Boutique Dental</span><span class="zona-tag">Av. Montevideo 368, Gustavo A. Madero, 07300, CDMX</span></td>
+  <td>Lindavista</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental (Calz. Ticomán 258)</span><span class="zona-tag">Calz. Ticomán 258, Lindavista Nte., Gustavo A. Madero, CDMX</span></td>
+  <td>Lindavista Norte</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dr. Juan José Estrada Orozco (Consultorio Dental)</span><span class="zona-tag">Av. Montevideo 303, Interior 408, Lindavista Sur, Gustavo A. Madero, CDMX</span></td>
+  <td>Lindavista Sur</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dra. Arelyz Noyovani Rodríguez Cano (Consultorio Dental)</span><span class="zona-tag">Trujillo 730, Lindavista Sur, Gustavo A. Madero, CDMX</span></td>
+  <td>Lindavista Sur</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">MC Dent</span><span class="zona-tag">Nte. 25 #58, Lindavista Vallejo, Gustavo A. Madero, 07750, CDMX</span></td>
+  <td>Lindavista Vallejo</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Clínica Dental Láser</span><span class="zona-tag">Av. Miguel Othón de Mendizábal Ote. 343, Nueva Industrial Vallejo, Gustavo A. Madero, CDMX</span></td>
+  <td>Nueva Industrial Vallejo</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental (Residencial Zacatenco)</span><span class="zona-tag">Ticomán 449, Interior 103, Residencial Zacatenco, Gustavo A. Madero, 07369, CDMX</span></td>
+  <td>Residencial Zacatenco</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dr. Héctor Tomás Nava Moctezuma (Consultorio Dental)</span><span class="zona-tag">Puerto Coatzacoalcos 3, Gustavo A. Madero, CDMX</span></td>
+  <td>San Felipe de Jesús</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dra. Leslie Michelle Galán Bahena (Consultorio Dental)</span><span class="zona-tag">3er Anillo de Circunvalación 36, Gustavo A. Madero, CDMX</span></td>
+  <td>San Felipe de Jesús</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental (Eje Vial 3 Norte)</span><span class="zona-tag">Eje Vial 3 Norte (Av. 506), San Juan de Aragón 1a Secc., Gustavo A. Madero, CDMX</span></td>
+  <td>San Juan de Aragón</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental Aragón</span><span class="zona-tag">Calle 651 #39, San Juan de Aragón V Secc., 07979, Gustavo A. Madero, CDMX</span></td>
+  <td>San Juan de Aragón</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dental Aragón</span><span class="zona-tag">Av. Río Consulado 2724, San Juan de Aragón II Secc., 07969, Gustavo A. Madero, CDMX</span></td>
+  <td>San Juan de Aragón</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dentista de Niños Aragón</span><span class="zona-tag">Esquina Av. 608 y Av. 613, San Juan de Aragón IV Secc., 07979, Gustavo A. Madero, CDMX</span></td>
+  <td>San Juan de Aragón</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Odontología &amp; Specialites</span><span class="zona-tag">Av. 414 #166, San Juan de Aragón VII Secc., 07910, Gustavo A. Madero, CDMX</span></td>
+  <td>San Juan de Aragón</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Odontología Integral Cirujano Dentista</span><span class="zona-tag">Calle 1537 #66, San Juan de Aragón VI Secc., 07918, Gustavo A. Madero, CDMX</span></td>
+  <td>San Juan de Aragón</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Alianza Dentales Mx</span><span class="zona-tag">Av. Victoria Ote. 3808, Local C, Tres Estrellas, Gustavo A. Madero, CDMX</span></td>
+  <td>Tres Estrellas</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental Dr. José Manuel Quintero Alcázar</span><span class="zona-tag">Av. Ing. Alfredo Robles Domínguez 70-A, Consultorio 1, Vallejo, Gustavo A. Madero, CDMX</span></td>
+  <td>Vallejo</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental Morell (Dentista 24 hrs)</span><span class="zona-tag">Calle Gustavo E. Campa 10, Vallejo, Gustavo A. Madero, CDMX</span></td>
+  <td>Vallejo</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dentista Dr. Jorge Miranda Lapray</span><span class="zona-tag">Av. Ing. Alfredo Robles Domínguez 146, Local 1, Vallejo, Gustavo A. Madero, CDMX</span></td>
+  <td>Vallejo</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">SUNRISA Consultorio Dental</span><span class="zona-tag">Calz. Ochoa de Miranda 8, Vallejo, Gustavo A. Madero, CDMX</span></td>
+  <td>Vallejo</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s8">8</span></td>
+  <td><span class="negocio-name">Avydent Clínica Dental Especializada</span><span class="zona-tag">Ideal 2, Industrial, Gustavo A. Madero, CDMX</span></td>
+  <td>Industrial</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="check">&#x2714;</span></td>  <td class="carencias-num">7</td>
+  <td><span class="badge-alta">ALTA</span></td>
+</tr><tr>
+  <td><span class="score s8">8</span></td>
+  <td><span class="negocio-name">Clínica Dental Odontología Máxima</span><span class="zona-tag">Calz. San Juan de Aragón 1025, San Juan de Aragón, 07950, Gustavo A. Madero, CDMX</span></td>
+  <td>San Juan de Aragón</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="check">&#x2714;</span></td>  <td class="carencias-num">7</td>
+  <td><span class="badge-alta">ALTA</span></td>
+</tr><tr>
+  <td><span class="score s4">4</span></td>
+  <td><span class="negocio-name">Dental Perfect</span><span class="zona-tag">Av. Victoria Ote. 4010, Gertrudis Sánchez II Secc., 07839, Gustavo A. Madero, CDMX</span></td>
+  <td>Gertrudis Sánchez</td>
+<td><span class="check">&#x2714;</span></td><td><span class="check">&#x2714;</span></td><td><span class="check">&#x2714;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="check">&#x2714;</span></td>  <td class="carencias-num">3</td>
+  <td><span class="badge-baja">BAJA</span></td>
+</tr><tr>
+  <td><span class="score s3">3</span></td>
+  <td><span class="negocio-name">La Clínica Dental (Lindavista)</span><span class="zona-tag">Av. Montevideo 272, Lindavista, 07300, Gustavo A. Madero, CDMX</span></td>
+  <td>Lindavista</td>
+<td><span class="check">&#x2714;</span></td><td><span class="check">&#x2714;</span></td><td><span class="check">&#x2714;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="check">&#x2714;</span></td><td><span class="check">&#x2714;</span></td>  <td class="carencias-num">2</td>
+  <td><span class="badge-baja">BAJA</span></td>
+</tr><tr>
+  <td><span class="score s3">3</span></td>
+  <td><span class="negocio-name">dentalia Parque Lindavista</span><span class="zona-tag">Plaza Parque Lindavista, Sótano 1 (junto al casino), Magdalena de las Salinas, Gustavo A. Madero, CDMX</span></td>
+  <td>Magdalena de las Salinas</td>
+<td><span class="check">&#x2714;</span></td><td><span class="check">&#x2714;</span></td><td><span class="check">&#x2714;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="check">&#x2714;</span></td><td><span class="check">&#x2714;</span></td>  <td class="carencias-num">2</td>
+  <td><span class="badge-baja">BAJA</span></td>
+</tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="legend">&#x2714; Tiene &nbsp; &#x2718; No tiene &nbsp; ~ Parcial (plantilla gratuita / sin funcionar) | Oportunidad: 9-10 = urgente, 7-8 = alta, 5-6 = media, 0-4 = baja</p>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Análisis detallado — Las 48 clínicas dentales</h2>
+    <div class="grid-2">
+    <div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Farmaclinic <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Acueducto de Guadalupe, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Boulevard del Temoluco 374, Interior 1, Acueducto de Guadalupe, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental (Aragón La Villa) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Aragón La Villa, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Moctezuma 88, Aragón La Villa, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Ofrece prótesis dentales, tratamiento de encías, carillas de porcelana y selladores. Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental Talismán <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Aragón La Villa, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Talismán 163, Aragón La Villa, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental — Dra. Rocío Yamamoto Vázquez <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Guadalupe Tepeyac, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Alicia 170, Interior 2, Guadalupe Tepeyac, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Ofrece blanqueamiento dental, ortodoncia, radiografías y consulta odontológica. Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Especialidades Dentales Tepeyac, S.A. de C.V. <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Industrial Vallejo, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Henry Ford 63, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Centro Integral Lindavista <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lindavista, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Sierravista 394, Lindavista, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Clínica Dental Centauro Lindavista <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lindavista, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Instituto Politécnico Nacional 1728, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 1523 8566</p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Clínica privada de primer nivel operando desde 2021. Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental — Brenda Berenice Monroy Martínez <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lindavista, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Buenavista 212, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dental Lindavista <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lindavista, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Mollendo 625, Gustavo A. Madero, 07300, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dentalendo — Dra. Alejandra Heredia Morán <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lindavista, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Riobamba 737, Interior 7, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Distinguida como una de las dentistas mejor evaluadas de México 2022-2023 en directorios, pero sin sitio web propio, WhatsApp Business ni redes sociales propias detectadas.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dr. Alejandro Alcocer Flores (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lindavista, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Cerrada de Otavalo 45, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dr. Mario Jorge Jáuregui Nava (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lindavista, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Calle Riobamba 737, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dr. Miguel Ángel Morales Pérez (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lindavista, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Ejido 50, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dra. Andrea Castro (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lindavista, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Recife 655, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dra. Beatriz Pineda (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lindavista, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Bogotá 659, Interior 103, Lindavista, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dra. Diana Escolástica Pinal García (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lindavista, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Linares 631, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dra. Iliana Ivonne Bravo Carmona (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lindavista, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Montevideo 160, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dra. María del Carmen Chargoy Lácima (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lindavista, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Salaverry 987, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dra. María del Consuelo Ambrosio I. (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lindavista, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Matanzas 659, Interior 6, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dra. Vanessa Hernández Infante (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lindavista, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Buenavista 24, Lindavista, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dra. Viridiana Figueroa (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lindavista, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Insurgentes Norte 1478, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Humancare Clinic <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lindavista, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Riobamba 642, Lindavista, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Oralface <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lindavista, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Montevideo 189, Interior 3, Lindavista, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Virtuodent Boutique Dental <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lindavista, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Montevideo 368, Gustavo A. Madero, 07300, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio boutique liderado por la Dra. Anayansi Victoria Otero Guzmán. Solo aparece listada en directorios de terceros (Doctoralia, Dental Departures). Sin sitio propio, Facebook ni Instagram detectados.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental (Calz. Ticomán 258) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lindavista Norte, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Calz. Ticomán 258, Lindavista Nte., Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dr. Juan José Estrada Orozco (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lindavista Sur, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Montevideo 303, Interior 408, Lindavista Sur, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dra. Arelyz Noyovani Rodríguez Cano (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lindavista Sur, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Trujillo 730, Lindavista Sur, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>MC Dent <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lindavista Vallejo, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Nte. 25 #58, Lindavista Vallejo, Gustavo A. Madero, 07750, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Clínica Dental Láser <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Nueva Industrial Vallejo, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Miguel Othón de Mendizábal Ote. 343, Nueva Industrial Vallejo, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental (Residencial Zacatenco) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Residencial Zacatenco, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Ticomán 449, Interior 103, Residencial Zacatenco, Gustavo A. Madero, 07369, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dr. Héctor Tomás Nava Moctezuma (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Felipe de Jesús, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Puerto Coatzacoalcos 3, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dra. Leslie Michelle Galán Bahena (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Felipe de Jesús, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> 3er Anillo de Circunvalación 36, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental (Eje Vial 3 Norte) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Juan de Aragón, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Eje Vial 3 Norte (Av. 506), San Juan de Aragón 1a Secc., Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental Aragón <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Juan de Aragón, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Calle 651 #39, San Juan de Aragón V Secc., 07979, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 1920 3772</p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dental Aragón <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Juan de Aragón, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Río Consulado 2724, San Juan de Aragón II Secc., 07969, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 8791 7249</p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dentista de Niños Aragón <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Juan de Aragón, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Esquina Av. 608 y Av. 613, San Juan de Aragón IV Secc., 07979, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 2590 7037</p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Odontología &amp; Specialites <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Juan de Aragón, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. 414 #166, San Juan de Aragón VII Secc., 07910, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 9103 1026</p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Odontología Integral Cirujano Dentista <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Juan de Aragón, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Calle 1537 #66, San Juan de Aragón VI Secc., 07918, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Alianza Dentales Mx <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Tres Estrellas, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Victoria Ote. 3808, Local C, Tres Estrellas, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental Dr. José Manuel Quintero Alcázar <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Vallejo, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Ing. Alfredo Robles Domínguez 70-A, Consultorio 1, Vallejo, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental Morell (Dentista 24 hrs) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Vallejo, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Calle Gustavo E. Campa 10, Vallejo, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Se anuncia como dentista de 24 horas en directorios, pero sin sitio web propio, WhatsApp Business visible ni redes sociales propias detectadas.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dentista Dr. Jorge Miranda Lapray <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Vallejo, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Ing. Alfredo Robles Domínguez 146, Local 1, Vallejo, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>SUNRISA Consultorio Dental <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Vallejo, Gustavo A. Madero</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Calz. Ochoa de Miranda 8, Vallejo, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card">
+  <div class="card-top">
+    <div>
+      <h3>Avydent Clínica Dental Especializada <span class="badge-alta">ALTA</span></h3>
+      <div class="zona">Industrial, Gustavo A. Madero</div>
+    </div>
+    <span class="score s8">8</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Ideal 2, Industrial, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es alta prioridad (7 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li></ul>
+  </div>
+  <p class="context-note">Presencia únicamente en Facebook (facebook.com/avydentclinicadental, ~518 me gusta). Sin sitio web propio, WhatsApp Business visible, sistema de citas online, CRM, chat en vivo ni blog detectados.</p>
+</div><div class="card">
+  <div class="card-top">
+    <div>
+      <h3>Clínica Dental Odontología Máxima <span class="badge-alta">ALTA</span></h3>
+      <div class="zona">San Juan de Aragón, Gustavo A. Madero</div>
+    </div>
+    <span class="score s8">8</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Calz. San Juan de Aragón 1025, San Juan de Aragón, 07950, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 2603 6928</p>
+    
+  </div>
+  <div class="analysis">
+    <h4>Por qué es alta prioridad (7 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li></ul>
+  </div>
+  <p class="context-note">Presencia únicamente en Facebook (facebook.com/clinicadentalodontologiamaxima, ~604 me gusta). Sin sitio web propio, WhatsApp Business visible, sistema de citas online, CRM, chat en vivo ni blog detectados.</p>
+</div><div class="card">
+  <div class="card-top">
+    <div>
+      <h3>Dental Perfect <span class="badge-baja">BAJA</span></h3>
+      <div class="zona">Gertrudis Sánchez, Gustavo A. Madero</div>
+    </div>
+    <span class="score s4">4</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Victoria Ote. 4010, Gertrudis Sánchez II Secc., 07839, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 5551 6119</p>
+    <p><span class="lbl">Web:</span> dentalperfect.com.mx</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es baja prioridad (3 carencias)</h4>
+    <ul><li>CRM</li><li>Chat en vivo</li><li>Blog</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li></ul>
+  </div>
+  <p class="context-note">Sitio propio con WhatsApp directo (wa.me), reservas vía Doctoralia y redes activas (Facebook, Instagram @dentalperfectoficial). Sin blog, CRM ni chat en vivo detectados.</p>
+</div><div class="card">
+  <div class="card-top">
+    <div>
+      <h3>La Clínica Dental (Lindavista) <span class="badge-baja">BAJA</span></h3>
+      <div class="zona">Lindavista, Gustavo A. Madero</div>
+    </div>
+    <span class="score s3">3</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Montevideo 272, Lindavista, 07300, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 9435 7117</p>
+    <p><span class="lbl">Web:</span> laclinica.com.mx</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es baja prioridad (2 carencias)</h4>
+    <ul><li>CRM</li><li>Chat en vivo</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li></ul>
+  </div>
+  <p class="context-note">Sitio web profesional (laclinica.com.mx) con HTTPS, diseño responsive, botón de WhatsApp, sistema de citas online, formulario de contacto, blog y redes activas en 5 plataformas — posible unidad insignia de la cadena La Clínica Dental / Red Dental Premium (misma red que sucursales en Coapa y Polanco/Palmas). Sin CRM propio ni chat en vivo detectados.</p>
+</div><div class="card">
+  <div class="card-top">
+    <div>
+      <h3>dentalia Parque Lindavista <span class="badge-baja">BAJA</span></h3>
+      <div class="zona">Magdalena de las Salinas, Gustavo A. Madero</div>
+    </div>
+    <span class="score s3">3</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Plaza Parque Lindavista, Sótano 1 (junto al casino), Magdalena de las Salinas, Gustavo A. Madero, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 5119 9966</p>
+    <p><span class="lbl">Web:</span> dentalia.com</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es baja prioridad (2 carencias)</h4>
+    <ul><li>CRM</li><li>Chat en vivo</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li></ul>
+  </div>
+  <p class="context-note">Cadena nacional Dentalia — sitio, agenda en línea (citas.dentalia.com), WhatsApp vía bot, blog y redes resueltas a nivel de cadena. Sin CRM local ni chat en vivo detectados para esta sucursal.</p>
+</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Mensajes de contacto listos</h2>
+    <div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Farmaclinic
+      <small>Acueducto de Guadalupe, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Farmaclinic buscando clínicas dentales en Acueducto de Guadalupe, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental (Aragón La Villa)
+      <small>Aragón La Villa, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental (Aragón La Villa) buscando clínicas dentales en Aragón La Villa, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Ofrece prótesis dentales, tratamiento de encías, carillas de porcelana y selladores. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental Talismán
+      <small>Aragón La Villa, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental Talismán buscando clínicas dentales en Aragón La Villa, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental — Dra. Rocío Yamamoto Vázquez
+      <small>Guadalupe Tepeyac, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental — Dra. Rocío Yamamoto Vázquez buscando clínicas dentales en Guadalupe Tepeyac, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Ofrece blanqueamiento dental, ortodoncia, radiografías y consulta odontológica. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Especialidades Dentales Tepeyac, S.A. de C.V.
+      <small>Industrial Vallejo, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Especialidades Dentales Tepeyac, S.A. de C.V. buscando clínicas dentales en Industrial Vallejo, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Centro Integral Lindavista
+      <small>Lindavista, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Centro Integral Lindavista buscando clínicas dentales en Lindavista, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Clínica Dental Centauro Lindavista
+      <small>Lindavista, Gustavo A. Madero &middot; Tel: 55 1523 8566</small>
+    </div>
+    <span class="msg-via">WhatsApp</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Clínica Dental Centauro Lindavista buscando clínicas dentales en Lindavista, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Clínica privada de primer nivel operando desde 2021. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental — Brenda Berenice Monroy Martínez
+      <small>Lindavista, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental — Brenda Berenice Monroy Martínez buscando clínicas dentales en Lindavista, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dental Lindavista
+      <small>Lindavista, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dental Lindavista buscando clínicas dentales en Lindavista, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dentalendo — Dra. Alejandra Heredia Morán
+      <small>Lindavista, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dentalendo — Dra. Alejandra Heredia Morán buscando clínicas dentales en Lindavista, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Distinguida como una de las dentistas mejor evaluadas de México 2022-2023 en directorios, pero sin sitio web propio, WhatsApp Business ni redes sociales propias detectadas.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dr. Alejandro Alcocer Flores (Consultorio Dental)
+      <small>Lindavista, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dr. Alejandro Alcocer Flores (Consultorio Dental) buscando clínicas dentales en Lindavista, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dr. Mario Jorge Jáuregui Nava (Consultorio Dental)
+      <small>Lindavista, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dr. Mario Jorge Jáuregui Nava (Consultorio Dental) buscando clínicas dentales en Lindavista, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dr. Miguel Ángel Morales Pérez (Consultorio Dental)
+      <small>Lindavista, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dr. Miguel Ángel Morales Pérez (Consultorio Dental) buscando clínicas dentales en Lindavista, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dra. Andrea Castro (Consultorio Dental)
+      <small>Lindavista, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dra. Andrea Castro (Consultorio Dental) buscando clínicas dentales en Lindavista, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dra. Beatriz Pineda (Consultorio Dental)
+      <small>Lindavista, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dra. Beatriz Pineda (Consultorio Dental) buscando clínicas dentales en Lindavista, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dra. Diana Escolástica Pinal García (Consultorio Dental)
+      <small>Lindavista, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dra. Diana Escolástica Pinal García (Consultorio Dental) buscando clínicas dentales en Lindavista, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dra. Iliana Ivonne Bravo Carmona (Consultorio Dental)
+      <small>Lindavista, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dra. Iliana Ivonne Bravo Carmona (Consultorio Dental) buscando clínicas dentales en Lindavista, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dra. María del Carmen Chargoy Lácima (Consultorio Dental)
+      <small>Lindavista, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dra. María del Carmen Chargoy Lácima (Consultorio Dental) buscando clínicas dentales en Lindavista, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dra. María del Consuelo Ambrosio I. (Consultorio Dental)
+      <small>Lindavista, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dra. María del Consuelo Ambrosio I. (Consultorio Dental) buscando clínicas dentales en Lindavista, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dra. Vanessa Hernández Infante (Consultorio Dental)
+      <small>Lindavista, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dra. Vanessa Hernández Infante (Consultorio Dental) buscando clínicas dentales en Lindavista, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dra. Viridiana Figueroa (Consultorio Dental)
+      <small>Lindavista, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dra. Viridiana Figueroa (Consultorio Dental) buscando clínicas dentales en Lindavista, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Humancare Clinic
+      <small>Lindavista, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Humancare Clinic buscando clínicas dentales en Lindavista, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Oralface
+      <small>Lindavista, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Oralface buscando clínicas dentales en Lindavista, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Virtuodent Boutique Dental
+      <small>Lindavista, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Virtuodent Boutique Dental buscando clínicas dentales en Lindavista, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Consultorio boutique liderado por la Dra. Anayansi Victoria Otero Guzmán. Solo aparece listada en directorios de terceros (Doctoralia, Dental Departures). Sin sitio propio, Facebook ni Instagram detectados.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental (Calz. Ticomán 258)
+      <small>Lindavista Norte, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental (Calz. Ticomán 258) buscando clínicas dentales en Lindavista Norte, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dr. Juan José Estrada Orozco (Consultorio Dental)
+      <small>Lindavista Sur, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dr. Juan José Estrada Orozco (Consultorio Dental) buscando clínicas dentales en Lindavista Sur, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dra. Arelyz Noyovani Rodríguez Cano (Consultorio Dental)
+      <small>Lindavista Sur, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dra. Arelyz Noyovani Rodríguez Cano (Consultorio Dental) buscando clínicas dentales en Lindavista Sur, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">MC Dent
+      <small>Lindavista Vallejo, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi MC Dent buscando clínicas dentales en Lindavista Vallejo, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Clínica Dental Láser
+      <small>Nueva Industrial Vallejo, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Clínica Dental Láser buscando clínicas dentales en Nueva Industrial Vallejo, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental (Residencial Zacatenco)
+      <small>Residencial Zacatenco, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental (Residencial Zacatenco) buscando clínicas dentales en Residencial Zacatenco, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dr. Héctor Tomás Nava Moctezuma (Consultorio Dental)
+      <small>San Felipe de Jesús, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dr. Héctor Tomás Nava Moctezuma (Consultorio Dental) buscando clínicas dentales en San Felipe de Jesús, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dra. Leslie Michelle Galán Bahena (Consultorio Dental)
+      <small>San Felipe de Jesús, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dra. Leslie Michelle Galán Bahena (Consultorio Dental) buscando clínicas dentales en San Felipe de Jesús, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental (Eje Vial 3 Norte)
+      <small>San Juan de Aragón, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental (Eje Vial 3 Norte) buscando clínicas dentales en San Juan de Aragón, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental Aragón
+      <small>San Juan de Aragón, Gustavo A. Madero &middot; Tel: 55 1920 3772</small>
+    </div>
+    <span class="msg-via">WhatsApp</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental Aragón buscando clínicas dentales en San Juan de Aragón, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dental Aragón
+      <small>San Juan de Aragón, Gustavo A. Madero &middot; Tel: 55 8791 7249</small>
+    </div>
+    <span class="msg-via">WhatsApp</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dental Aragón buscando clínicas dentales en San Juan de Aragón, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dentista de Niños Aragón
+      <small>San Juan de Aragón, Gustavo A. Madero &middot; Tel: 55 2590 7037</small>
+    </div>
+    <span class="msg-via">WhatsApp</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dentista de Niños Aragón buscando clínicas dentales en San Juan de Aragón, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Odontología &amp; Specialites
+      <small>San Juan de Aragón, Gustavo A. Madero &middot; Tel: 55 9103 1026</small>
+    </div>
+    <span class="msg-via">WhatsApp</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Odontología &amp; Specialites buscando clínicas dentales en San Juan de Aragón, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Odontología Integral Cirujano Dentista
+      <small>San Juan de Aragón, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Odontología Integral Cirujano Dentista buscando clínicas dentales en San Juan de Aragón, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Alianza Dentales Mx
+      <small>Tres Estrellas, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Alianza Dentales Mx buscando clínicas dentales en Tres Estrellas, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental Dr. José Manuel Quintero Alcázar
+      <small>Vallejo, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental Dr. José Manuel Quintero Alcázar buscando clínicas dentales en Vallejo, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental Morell (Dentista 24 hrs)
+      <small>Vallejo, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental Morell (Dentista 24 hrs) buscando clínicas dentales en Vallejo, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Se anuncia como dentista de 24 horas en directorios, pero sin sitio web propio, WhatsApp Business visible ni redes sociales propias detectadas.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dentista Dr. Jorge Miranda Lapray
+      <small>Vallejo, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dentista Dr. Jorge Miranda Lapray buscando clínicas dentales en Vallejo, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">SUNRISA Consultorio Dental
+      <small>Vallejo, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi SUNRISA Consultorio Dental buscando clínicas dentales en Vallejo, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Avydent Clínica Dental Especializada
+      <small>Industrial, Gustavo A. Madero &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Avydent Clínica Dental Especializada buscando clínicas dentales en Industrial, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Presencia únicamente en Facebook (facebook.com/avydentclinicadental, ~518 me gusta). Sin sitio web propio, WhatsApp Business visible, sistema de citas online, CRM, chat en vivo ni blog detectados.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Clínica Dental Odontología Máxima
+      <small>San Juan de Aragón, Gustavo A. Madero &middot; Tel: 55 2603 6928</small>
+    </div>
+    <span class="msg-via">WhatsApp</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Clínica Dental Odontología Máxima buscando clínicas dentales en San Juan de Aragón, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Presencia únicamente en Facebook (facebook.com/clinicadentalodontologiamaxima, ~604 me gusta). Sin sitio web propio, WhatsApp Business visible, sistema de citas online, CRM, chat en vivo ni blog detectados.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dental Perfect
+      <small>Gertrudis Sánchez, Gustavo A. Madero &middot; Tel: 55 5551 6119</small>
+    </div>
+    <span class="msg-via">WhatsApp</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dental Perfect buscando clínicas dentales en Gertrudis Sánchez, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sitio propio con WhatsApp directo (wa.me), reservas vía Doctoralia y redes activas (Facebook, Instagram @dentalperfectoficial). Sin blog, CRM ni chat en vivo detectados.
+
+Con Digital Owner System podrían tener:
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">La Clínica Dental (Lindavista)
+      <small>Lindavista, Gustavo A. Madero &middot; Tel: 55 9435 7117</small>
+    </div>
+    <span class="msg-via">WhatsApp</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi La Clínica Dental (Lindavista) buscando clínicas dentales en Lindavista, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sitio web profesional (laclinica.com.mx) con HTTPS, diseño responsive, botón de WhatsApp, sistema de citas online, formulario de contacto, blog y redes activas en 5 plataformas — posible unidad insignia de la cadena La Clínica Dental / Red Dental Premium (misma red que sucursales en Coapa y Polanco/Palmas). Sin CRM propio ni chat en vivo detectados.
+
+Con Digital Owner System podrían tener:
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">dentalia Parque Lindavista
+      <small>Magdalena de las Salinas, Gustavo A. Madero &middot; Tel: 55 5119 9966</small>
+    </div>
+    <span class="msg-via">WhatsApp</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi dentalia Parque Lindavista buscando clínicas dentales en Magdalena de las Salinas, Gustavo A. Madero, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Cadena nacional Dentalia — sitio, agenda en línea (citas.dentalia.com), WhatsApp vía bot, blog y redes resueltas a nivel de cadena. Sin CRM local ni chat en vivo detectados para esta sucursal.
+
+Con Digital Owner System podrían tener:
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Plan de acción — Esta semana</h2>
+    <div class="grid-2">
+    <div class="card">
+  <h3 style="color:var(--blue-light); margin-bottom:15px; font-family:var(--font-head);">Lunes</h3>
+  <div class="analysis oportunidad"><ul><li><strong>Farmaclinic</strong> — ver ficha</li><li><strong>Consultorio Dental (Aragón La Villa)</strong> — ver ficha</li><li><strong>Consultorio Dental Talismán</strong> — ver ficha</li><li><strong>Consultorio Dental — Dra. Rocío Yamamoto Vázquez</strong> — ver ficha</li><li><strong>Especialidades Dentales Tepeyac, S.A. de C.V.</strong> — ver ficha</li><li><strong>Centro Integral Lindavista</strong> — ver ficha</li><li><strong>Clínica Dental Centauro Lindavista</strong> — 55 1523 8566</li><li><strong>Consultorio Dental — Brenda Berenice Monroy Martínez</strong> — ver ficha</li><li><strong>Dental Lindavista</strong> — ver ficha</li><li><strong>Dentalendo — Dra. Alejandra Heredia Morán</strong> — ver ficha</li></ul></div>
+</div><div class="card">
+  <h3 style="color:var(--blue-light); margin-bottom:15px; font-family:var(--font-head);">Martes</h3>
+  <div class="analysis oportunidad"><ul><li><strong>Dr. Alejandro Alcocer Flores (Consultorio Dental)</strong> — ver ficha</li><li><strong>Dr. Mario Jorge Jáuregui Nava (Consultorio Dental)</strong> — ver ficha</li><li><strong>Dr. Miguel Ángel Morales Pérez (Consultorio Dental)</strong> — ver ficha</li><li><strong>Dra. Andrea Castro (Consultorio Dental)</strong> — ver ficha</li><li><strong>Dra. Beatriz Pineda (Consultorio Dental)</strong> — ver ficha</li><li><strong>Dra. Diana Escolástica Pinal García (Consultorio Dental)</strong> — ver ficha</li><li><strong>Dra. Iliana Ivonne Bravo Carmona (Consultorio Dental)</strong> — ver ficha</li><li><strong>Dra. María del Carmen Chargoy Lácima (Consultorio Dental)</strong> — ver ficha</li><li><strong>Dra. María del Consuelo Ambrosio I. (Consultorio Dental)</strong> — ver ficha</li><li><strong>Dra. Vanessa Hernández Infante (Consultorio Dental)</strong> — ver ficha</li></ul></div>
+</div><div class="card">
+  <h3 style="color:var(--blue-light); margin-bottom:15px; font-family:var(--font-head);">Miércoles</h3>
+  <div class="analysis oportunidad"><ul><li><strong>Dra. Viridiana Figueroa (Consultorio Dental)</strong> — ver ficha</li><li><strong>Humancare Clinic</strong> — ver ficha</li><li><strong>Oralface</strong> — ver ficha</li><li><strong>Virtuodent Boutique Dental</strong> — ver ficha</li><li><strong>Consultorio Dental (Calz. Ticomán 258)</strong> — ver ficha</li><li><strong>Dr. Juan José Estrada Orozco (Consultorio Dental)</strong> — ver ficha</li><li><strong>Dra. Arelyz Noyovani Rodríguez Cano (Consultorio Dental)</strong> — ver ficha</li><li><strong>MC Dent</strong> — ver ficha</li><li><strong>Clínica Dental Láser</strong> — ver ficha</li><li><strong>Consultorio Dental (Residencial Zacatenco)</strong> — ver ficha</li></ul></div>
+</div><div class="card">
+  <h3 style="color:var(--blue-light); margin-bottom:15px; font-family:var(--font-head);">Jueves</h3>
+  <div class="analysis oportunidad"><ul><li><strong>Dr. Héctor Tomás Nava Moctezuma (Consultorio Dental)</strong> — ver ficha</li><li><strong>Dra. Leslie Michelle Galán Bahena (Consultorio Dental)</strong> — ver ficha</li><li><strong>Consultorio Dental (Eje Vial 3 Norte)</strong> — ver ficha</li><li><strong>Consultorio Dental Aragón</strong> — 55 1920 3772</li><li><strong>Dental Aragón</strong> — 55 8791 7249</li><li><strong>Dentista de Niños Aragón</strong> — 55 2590 7037</li><li><strong>Odontología &amp; Specialites</strong> — 55 9103 1026</li><li><strong>Odontología Integral Cirujano Dentista</strong> — ver ficha</li><li><strong>Alianza Dentales Mx</strong> — ver ficha</li><li><strong>Consultorio Dental Dr. José Manuel Quintero Alcázar</strong> — ver ficha</li></ul></div>
+</div><div class="card">
+  <h3 style="color:var(--blue-light); margin-bottom:15px; font-family:var(--font-head);">Viernes</h3>
+  <div class="analysis oportunidad"><ul><li><strong>Consultorio Dental Morell (Dentista 24 hrs)</strong> — ver ficha</li><li><strong>Dentista Dr. Jorge Miranda Lapray</strong> — ver ficha</li><li><strong>SUNRISA Consultorio Dental</strong> — ver ficha</li><li><strong>Avydent Clínica Dental Especializada</strong> — ver ficha</li><li><strong>Clínica Dental Odontología Máxima</strong> — 55 2603 6928</li><li><strong>Dental Perfect</strong> — 55 5551 6119</li><li><strong>La Clínica Dental (Lindavista)</strong> — 55 9435 7117</li><li><strong>dentalia Parque Lindavista</strong> — 55 5119 9966</li></ul></div>
+</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <p>Informe generado para <a href="https://digitalownersystem.com">Digital Owner System</a> — Base de prospección, Alcaldía Gustavo A. Madero, CDMX</p>
+  <p style="margin-top:5px;">Sector: Dentistas / Clínicas dentales · 48 negocios verificados vía búsqueda web y análisis de sitios oficiales</p>
+</div>
+
+<script>
+function copyMsg(btn) {
+    const body = btn.previousElementSibling;
+    navigator.clipboard.writeText(body.innerText).then(() => {
+        btn.textContent = '¡Copiado!';
+        btn.style.background = '#25D366';
+        setTimeout(() => { btn.textContent = 'Copiar mensaje'; btn.style.background = '#1586f5'; }, 2200);
+    });
+}
+</script>
+
+
+</body></html>

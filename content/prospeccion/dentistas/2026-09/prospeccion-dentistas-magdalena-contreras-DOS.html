@@ -1,0 +1,2278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dentistas La Magdalena Contreras — Digital Owner System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Open+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#00071a; --bg2:#0a1628; --panel:#0e1b30; --panel2:#122240; --border:#1c2f4d;
+    --text:#f0eefa; --muted:#8a849e; --blue:#1586f5; --blue-light:#4aa3ff; --purple:#8148FD; --purple-light:#c4b0ff;
+    --red:#f87171; --amber:#f5c842; --green:#25D366; --orange:#e67e22;
+    --font-head:'Space Grotesk',system-ui,sans-serif; --font-body:'Open Sans',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);background-image:radial-gradient(ellipse 900px 500px at 15% -10%, rgba(129,72,253,.18), transparent),radial-gradient(ellipse 800px 600px at 100% 0%, rgba(21,134,245,.14), transparent);color:var(--text);font-family:var(--font-body);line-height:1.65}
+
+  .header { background:linear-gradient(135deg, #050b1f 0%, #0a1332 50%, #0f1d4d 100%); padding:60px 40px; text-align:center; border-bottom:2px solid var(--blue); }
+  .header .brandline { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:18px; }
+  .header .brandline .dot { width:9px; height:9px; border-radius:50%; background:linear-gradient(135deg,var(--blue),var(--purple)); box-shadow:0 0 12px rgba(21,134,245,.7); }
+  .header .brandline span { font-family:var(--font-head); font-weight:600; font-size:13px; letter-spacing:.08em; color:var(--purple-light); }
+  .header h1 { font-family:var(--font-head); font-size:2.3em; font-weight:700; color:#fff; margin-bottom:10px; background:linear-gradient(90deg,#fff,var(--purple-light)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .header .subtitle { color:var(--muted); font-size:1.05em; }
+  .header .date { color:var(--blue-light); margin-top:10px; font-weight:600; font-family:var(--font-head); }
+  .header .stats { display:flex; justify-content:center; gap:24px; margin-top:32px; flex-wrap:wrap; }
+  .stat-box { background:rgba(21,134,245,.08); border:1px solid rgba(21,134,245,.3); border-radius:12px; padding:18px 26px; text-align:center; min-width:120px; }
+  .stat-box .number { font-family:var(--font-head); font-size:2.3em; color:var(--blue-light); font-weight:800; }
+  .stat-box .label { color:var(--muted); font-size:.78em; text-transform:uppercase; letter-spacing:1px; }
+
+  .container { max-width:1400px; margin:0 auto; padding:44px 22px; }
+  .section { margin-bottom:58px; }
+  .section-title { font-family:var(--font-head); font-weight:600; font-size:1.4em; color:#fff; margin-bottom:22px; padding-bottom:11px; border-bottom:2px solid var(--blue); }
+
+  .score { display:inline-flex; align-items:center; justify-content:center; width:42px; height:42px; border-radius:50%; font-weight:800; font-size:1.05em; flex-shrink:0; font-family:var(--font-head); }
+  .s10,.s9 { background:rgba(248,113,113,.15); color:var(--red); border:2px solid var(--red); }
+  .s8 { background:rgba(230,126,34,.15); color:var(--orange); border:2px solid var(--orange); }
+  .s7,.s6 { background:rgba(245,200,66,.15); color:var(--amber); border:2px solid var(--amber); }
+  .s5,.s4 { background:rgba(21,134,245,.15); color:var(--blue-light); border:2px solid var(--blue-light); }
+  .s3,.s2,.s1,.s0 { background:rgba(37,211,102,.15); color:var(--green); border:2px solid var(--green); }
+
+  .badge-urgente { background:var(--red); color:#000d2e; font-size:.68em; padding:2px 8px; border-radius:10px; font-weight:800; text-transform:uppercase; margin-left:6px; font-family:var(--font-head); }
+  .badge-alta { background:var(--orange); color:#000d2e; font-size:.68em; padding:2px 8px; border-radius:10px; font-weight:800; text-transform:uppercase; margin-left:6px; font-family:var(--font-head); }
+  .badge-media { background:var(--blue); color:#fff; font-size:.68em; padding:2px 8px; border-radius:10px; font-weight:800; text-transform:uppercase; margin-left:6px; font-family:var(--font-head); }
+  .badge-baja { background:var(--green); color:#000d2e; font-size:.68em; padding:2px 8px; border-radius:10px; font-weight:800; text-transform:uppercase; margin-left:6px; font-family:var(--font-head); }
+
+  .table-wrapper { overflow-x:auto; border-radius:12px; }
+  table { width:100%; border-collapse:collapse; background:var(--panel); border-radius:12px; overflow:hidden; min-width:920px; }
+  thead th { background:var(--panel2); color:var(--blue-light); padding:12px 9px; text-align:left; font-size:.72em; text-transform:uppercase; letter-spacing:1px; font-family:var(--font-head); }
+  tbody td { padding:10px 9px; border-bottom:1px solid var(--border); font-size:.86em; }
+  tbody tr:hover { background:rgba(21,134,245,.05); }
+  .negocio-name { font-weight:700; color:#fff; display:block; }
+  .zona-tag { color:var(--blue-light); font-size:.78em; display:block; margin-top:2px; }
+  .check { color:var(--green); font-size:1.1em; }
+  .cross { color:var(--red); font-size:1.1em; }
+  .partial { color:var(--amber); font-size:1.1em; }
+  .carencias-num { font-weight:800; font-size:1.05em; color:var(--red); }
+  .legend { margin-top:12px; color:var(--muted); font-size:.82em; }
+
+  .grid-2 { display:grid; grid-template-columns:repeat(auto-fit, minmax(390px, 1fr)); gap:22px; }
+  .card { background:linear-gradient(145deg, var(--panel), var(--panel2)); border:1px solid var(--border); border-radius:16px; padding:26px; transition:transform .2s, border-color .2s; }
+  .card:hover { transform:translateY(-3px); border-color:var(--blue); }
+  .card.highlight { border-color:var(--red); background:linear-gradient(145deg, #1a0d0f, #250d12); }
+  .card.highlight:hover { border-color:#ff8a8a; }
+  .card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; gap:10px; }
+  .card h3 { color:#fff; font-size:1.1em; line-height:1.35; font-family:var(--font-head); font-weight:600; }
+  .card .zona { color:var(--blue-light); font-size:.83em; margin-top:4px; }
+  .card .contact { margin:14px 0; padding:14px; background:rgba(0,0,0,.35); border-radius:10px; }
+  .card .contact p { margin:3px 0; font-size:.85em; }
+  .lbl { color:var(--purple-light); font-weight:600; }
+  .analysis { margin-top:14px; }
+  .analysis h4 { color:var(--amber); font-size:.8em; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; font-family:var(--font-head); }
+  .analysis ul { list-style:none; padding:0; }
+  .analysis li { padding:3px 0 3px 18px; font-size:.85em; position:relative; }
+  .analysis li::before { content:"✕"; color:var(--red); font-weight:700; position:absolute; left:0; }
+  .oportunidad h4 { color:var(--green); }
+  .oportunidad li::before { content:"✓"; color:var(--green); font-weight:700; }
+  .context-note { margin-top:14px; padding-top:12px; border-top:1px solid var(--border); font-size:.82em; color:var(--muted); font-style:italic; }
+
+  .msg-card { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:24px; margin-bottom:18px; }
+  .msg-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--border); flex-wrap:wrap; gap:8px; }
+  .msg-for { font-weight:700; color:#fff; font-size:1.02em; font-family:var(--font-head); }
+  .msg-for small { display:block; color:var(--blue-light); font-size:.78em; font-weight:400; font-family:var(--font-body); margin-top:2px; }
+  .msg-via { padding:4px 14px; border-radius:20px; font-size:.76em; font-weight:700; background:rgba(37,211,102,.15); color:var(--green); font-family:var(--font-head); }
+  .msg-body { background:rgba(0,0,0,.3); border-radius:10px; padding:20px; font-size:.9em; line-height:1.75; white-space:pre-line; border-left:3px solid var(--blue); }
+  .copy-btn { display:inline-block; margin-top:12px; padding:8px 20px; background:var(--blue); color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:.83em; font-weight:700; transition:background .2s; font-family:var(--font-head); }
+  .copy-btn:hover { background:var(--purple); }
+
+  .zonas-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px; }
+  .zona-box { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px; text-align:center; }
+  .zona-box .count { font-family:var(--font-head); font-size:1.8em; font-weight:800; color:var(--blue-light); }
+  .zona-box .name { color:#fff; font-size:.85em; margin-top:4px; }
+
+  .footer { text-align:center; padding:40px; border-top:1px solid var(--border); color:var(--muted); font-size:.85em; font-family:var(--font-head); }
+  .footer a { color:var(--blue-light); text-decoration:none; }
+
+  @media (max-width:768px) { .header h1{font-size:1.5em} .grid-2{grid-template-columns:1fr} .container{padding:24px 12px} }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="brandline"><span class="dot"></span><span>DIGITAL OWNER SYSTEM · PROSPECCIÓN</span></div>
+  <h1>Dentistas en La Magdalena Contreras, CDMX</h1>
+  <p class="subtitle">Análisis de presencia digital, comparativa de carencias y mensajes listos para contactar</p>
+  <p class="date">6 de septiembre de 2026</p>
+  <div class="stats">
+    <div class="stat-box"><div class="number">42</div><div class="label">Clínicas dentales analizadas</div></div>
+    <div class="stat-box"><div class="number">17</div><div class="label">Colonias cubiertas</div></div>
+    <div class="stat-box"><div class="number">39</div><div class="label">Alta oportunidad</div></div>
+    <div class="stat-box"><div class="number">42</div><div class="label">Mensajes listos</div></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="section">
+    <h2 class="section-title">Colonias analizadas</h2>
+    <div class="zonas-grid"><div class="zona-box"><div class="count">6</div><div class="name">San Jerónimo Lídice</div></div><div class="zona-box"><div class="count">5</div><div class="name">El Rosal</div></div><div class="zona-box"><div class="count">5</div><div class="name">San Bernabé Ocotepec</div></div><div class="zona-box"><div class="count">4</div><div class="name">Cuauhtémoc</div></div><div class="zona-box"><div class="count">3</div><div class="name">La Guadalupe</div></div><div class="zona-box"><div class="count">3</div><div class="name">La Malinche</div></div><div class="zona-box"><div class="count">2</div><div class="name">Barranca Seca</div></div><div class="zona-box"><div class="count">2</div><div class="name">Barrio San Francisco</div></div><div class="zona-box"><div class="count">2</div><div class="name">El Toro</div></div><div class="zona-box"><div class="count">2</div><div class="name">Héroes de Padierna</div></div><div class="zona-box"><div class="count">2</div><div class="name">San Jerónimo Aculco</div></div><div class="zona-box"><div class="count">1</div><div class="name">Ampliación Lomas de San Bernabé</div></div><div class="zona-box"><div class="count">1</div><div class="name">Barros Sierra</div></div><div class="zona-box"><div class="count">1</div><div class="name">Huayatla</div></div><div class="zona-box"><div class="count">1</div><div class="name">Lomas Quebradas</div></div><div class="zona-box"><div class="count">1</div><div class="name">San Bartolo Ameyalco</div></div><div class="zona-box"><div class="count">1</div><div class="name">Santa Teresa</div></div></div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Tabla comparativa completa</h2>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr>
+          <th>Oport.</th><th>Clínica dental</th><th>Colonia</th><th>Web/HTTPS</th><th>WhatsApp</th><th>Reservas</th><th>CRM</th><th>Chat</th><th>Blog</th><th>Redes</th><th>Carencias</th><th>Prioridad</th>
+        </tr></thead>
+        <tbody>
+<tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">AHR Clínica Dental</span><span class="zona-tag">Oaxaca 101, San Jerónimo Aculco, La Magdalena Contreras, CDMX</span></td>
+  <td>San Jerónimo Aculco</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Alberto Lezama Huicochea, Dentista</span><span class="zona-tag">Malva No. 1, Piso 1, Col. El Toro, La Magdalena Contreras, 10610, CDMX</span></td>
+  <td>El Toro</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Amalia Pérez Sarmiento, Dentista</span><span class="zona-tag">Av. San Bernabé 1106, Col. Cuauhtémoc, La Magdalena Contreras, 10020, CDMX</span></td>
+  <td>Cuauhtémoc</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Benjamín Téllez Mendoza, Dentista</span><span class="zona-tag">Palmas 315, El Toro, La Magdalena Contreras, 10610, CDMX</span></td>
+  <td>El Toro</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Berenice Zavaleta Hernández, Dentista - Odontóloga</span><span class="zona-tag">Av. San Bernabé 789 (cerca de Magnolia), San Jerónimo Lídice, La Magdalena Contreras, 10200, CDMX</span></td>
+  <td>San Jerónimo Lídice</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Bio Orthodontics</span><span class="zona-tag">Av. Luis Cabrera #6, Local 2, La Malinche, La Magdalena Contreras, CDMX</span></td>
+  <td>La Malinche</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Carlos Robledo Herrada, Dentista</span><span class="zona-tag">Av. Luis Cabrera Lt. 1, Mza. 47-A, Col. La Malinche, La Magdalena Contreras, CDMX</span></td>
+  <td>La Malinche</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Clínica Beladent</span><span class="zona-tag">Av. San Francisco 147, Barrio San Francisco, La Magdalena Contreras, 10500, CDMX</span></td>
+  <td>Barrio San Francisco</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Clínica Dental CD José Elías López</span><span class="zona-tag">Av. Guerrero 2677, San Bernabé Ocotepec, La Magdalena Contreras, 10300, CDMX</span></td>
+  <td>San Bernabé Ocotepec</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Clínica Dental UG</span><span class="zona-tag">Calle 1a. #4, Ampliación Progreso Nacional, San Bernabé Ocotepec, La Magdalena Contreras, CDMX</span></td>
+  <td>San Bernabé Ocotepec</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Clínica Dental Ángeles</span><span class="zona-tag">Coahuila 27, Santa Teresa, La Magdalena Contreras, 10710, CDMX</span></td>
+  <td>Santa Teresa</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental (Av. San Jerónimo 2031-A)</span><span class="zona-tag">Av. San Jerónimo #2031-A, San Jerónimo Lídice, La Magdalena Contreras, 10600, CDMX</span></td>
+  <td>San Jerónimo Lídice</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental (Calle Juana de Arco)</span><span class="zona-tag">Calle Juana de Arco, El Rosal, La Magdalena Contreras, 10600, CDMX</span></td>
+  <td>El Rosal</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental (Emiliano Zapata 28)</span><span class="zona-tag">C. Emiliano Zapata 28, La Malinche, La Magdalena Contreras, CDMX</span></td>
+  <td>La Malinche</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental (J. Moreno Salido 51)</span><span class="zona-tag">Calle J. Moreno Salido 51, Barranca Seca, La Magdalena Contreras, CDMX</span></td>
+  <td>Barranca Seca</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental (López Mateos 5)</span><span class="zona-tag">Calle López Mateos No. 5, San Bartolo Ameyalco, La Magdalena Contreras, 10010, CDMX</span></td>
+  <td>San Bartolo Ameyalco</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental (Querétaro 85)</span><span class="zona-tag">Calle Querétaro #85, Héroes de Padierna, La Magdalena Contreras, 10700, CDMX</span></td>
+  <td>Héroes de Padierna</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental (Río Pánuco 15)</span><span class="zona-tag">Río Pánuco 15, Ampliación Lomas de San Bernabé, La Magdalena Contreras, CDMX</span></td>
+  <td>Ampliación Lomas de San Bernabé</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental Aga</span><span class="zona-tag">Alfonso Priani 137, La Guadalupe, La Magdalena Contreras, CDMX</span></td>
+  <td>La Guadalupe</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental DXA Odontología Integral</span><span class="zona-tag">Palmas 447, El Toro, El Rosal, La Magdalena Contreras, 10610, CDMX</span></td>
+  <td>El Rosal</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental Odontología Integral</span><span class="zona-tag">Av. San Bernabé 79, Local 1, Col. Cuauhtémoc, La Magdalena Contreras, 10020, CDMX</span></td>
+  <td>Cuauhtémoc</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental RICARDENT</span><span class="zona-tag">Av. Guerrero 25, San Bernabé Ocotepec, La Magdalena Contreras, 10300, CDMX</span></td>
+  <td>San Bernabé Ocotepec</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dental JM</span><span class="zona-tag">El Rosal #64, Local G, esquina Perita, El Rosal, La Magdalena Contreras, 10640, CDMX</span></td>
+  <td>El Rosal</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">DentalSan</span><span class="zona-tag">Del Rosal 37, El Rosal, La Magdalena Contreras, 10640, CDMX</span></td>
+  <td>El Rosal</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dentistería (Av. México 1342)</span><span class="zona-tag">Av. México 1342, La Guadalupe, La Magdalena Contreras, 10820, CDMX</span></td>
+  <td>La Guadalupe</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dentistería (Av. Ojo de Agua)</span><span class="zona-tag">Av. Ojo de Agua Mz. 287, Lt. 1-C, Huayatla, La Magdalena Contreras, 10360, CDMX</span></td>
+  <td>Huayatla</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dentistetic Implantología Avanzada</span><span class="zona-tag">Av. México 516, 3er piso, consultorio 7, San Jerónimo Aculco, La Magdalena Contreras, 10400, CDMX</span></td>
+  <td>San Jerónimo Aculco</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dra. Alejandra Dávila García, Dentista</span><span class="zona-tag">Violeta 165, El Rosal, La Magdalena Contreras, 10610, CDMX</span></td>
+  <td>El Rosal</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Ernesto Quiroz Lanz, Dentista</span><span class="zona-tag">Av. San Bernabé 57, Col. Cuauhtémoc, La Magdalena Contreras, 10020, CDMX</span></td>
+  <td>Cuauhtémoc</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Francisco Javier Hernández Guerreiro, Dentista</span><span class="zona-tag">Camino a Santa Teresa 1055, PB 04, Héroes de Padierna, La Magdalena Contreras, 10700, CDMX</span></td>
+  <td>Héroes de Padierna</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Mari Carmen Sánchez Aguirre, Dentista</span><span class="zona-tag">Av. San Jerónimo 727, Lomas Quebradas, La Magdalena Contreras, 10000, CDMX</span></td>
+  <td>Lomas Quebradas</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">María Guadalupe Cervantes Gómez, Dentista</span><span class="zona-tag">Hortensia 1, Mza. 504, Lt. 17, Barros Sierra, La Magdalena Contreras, 10380, CDMX</span></td>
+  <td>Barros Sierra</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Médica Dental CAOR</span><span class="zona-tag">2da Cerrada de Emiliano Zapata #38, San Bernabé Ocotepec, La Magdalena Contreras, CDMX</span></td>
+  <td>San Bernabé Ocotepec</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Odontología Integral Góngora</span><span class="zona-tag">Héroes de Padierna 138, San Jerónimo Lídice, La Magdalena Contreras, CDMX</span></td>
+  <td>San Jerónimo Lídice</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Verónica Vanegas Vidaurreta, Dentista</span><span class="zona-tag">Av. México 1346, Col. Guadalupe, La Magdalena Contreras, 10820, CDMX</span></td>
+  <td>La Guadalupe</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s8">8</span></td>
+  <td><span class="negocio-name">CEM Colibri Magdalena Contreras</span><span class="zona-tag">Calle Oyametla Mz.82 Lt.41, San Bernabé Ocotepec, La Magdalena Contreras, 10300, CDMX</span></td>
+  <td>San Bernabé Ocotepec</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="check">&#x2714;</span></td>  <td class="carencias-num">7</td>
+  <td><span class="badge-alta">ALTA</span></td>
+</tr><tr>
+  <td><span class="score s8">8</span></td>
+  <td><span class="negocio-name">Consultorio Dental (Av. San Francisco 569)</span><span class="zona-tag">Av. San Francisco 569, Barrio San Francisco, La Magdalena Contreras, CDMX</span></td>
+  <td>Barrio San Francisco</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="check">&#x2714;</span></td>  <td class="carencias-num">7</td>
+  <td><span class="badge-alta">ALTA</span></td>
+</tr><tr>
+  <td><span class="score s8">8</span></td>
+  <td><span class="negocio-name">Grupo Dental Punta México</span><span class="zona-tag">Edificio Punta México, Av. México 700, consultorio 206, San Jerónimo Lídice, La Magdalena Contreras, CDMX</span></td>
+  <td>San Jerónimo Lídice</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="check">&#x2714;</span></td>  <td class="carencias-num">7</td>
+  <td><span class="badge-alta">ALTA</span></td>
+</tr><tr>
+  <td><span class="score s7">7</span></td>
+  <td><span class="negocio-name">Kondera Clínica Dental</span><span class="zona-tag">Av. México 386 int. 13, Plaza Luis Cabrera (Superama), San Jerónimo Lídice, La Magdalena Contreras, 10200, CDMX</span></td>
+  <td>San Jerónimo Lídice</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="check">&#x2714;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="check">&#x2714;</span></td>  <td class="carencias-num">6</td>
+  <td><span class="badge-alta">ALTA</span></td>
+</tr><tr>
+  <td><span class="score s6">6</span></td>
+  <td><span class="negocio-name">Smile Design Center México</span><span class="zona-tag">Plaza Lídice, Héroes de Padierna 132, Local 55, San Jerónimo Lídice, La Magdalena Contreras, CDMX</span></td>
+  <td>San Jerónimo Lídice</td>
+<td><span class="check">&#x2714;</span></td><td><span class="check">&#x2714;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="check">&#x2714;</span></td>  <td class="carencias-num">5</td>
+  <td><span class="badge-media">MEDIA</span></td>
+</tr><tr>
+  <td><span class="score s5">5</span></td>
+  <td><span class="negocio-name">Dentheus</span><span class="zona-tag">Av. Luis Cabrera 806, Col. Cuauhtémoc, La Magdalena Contreras, CDMX</span></td>
+  <td>Cuauhtémoc</td>
+<td><span class="check">&#x2714;</span></td><td><span class="check">&#x2714;</span></td><td><span class="check">&#x2714;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="check">&#x2714;</span></td>  <td class="carencias-num">4</td>
+  <td><span class="badge-media">MEDIA</span></td>
+</tr><tr>
+  <td><span class="score s5">5</span></td>
+  <td><span class="negocio-name">Xcaanda Clínica Dental</span><span class="zona-tag">Av. Álvaro Obregón 103, Barranca Seca, La Magdalena Contreras, 10580, CDMX</span></td>
+  <td>Barranca Seca</td>
+<td><span class="check">&#x2714;</span></td><td><span class="check">&#x2714;</span></td><td><span class="check">&#x2714;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="check">&#x2714;</span></td>  <td class="carencias-num">4</td>
+  <td><span class="badge-media">MEDIA</span></td>
+</tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="legend">&#x2714; Tiene &nbsp; &#x2718; No tiene &nbsp; ~ Parcial (plantilla gratuita / sin funcionar) | Oportunidad: 9-10 = urgente, 7-8 = alta, 5-6 = media, 0-4 = baja</p>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Análisis detallado — Las 42 clínicas dentales</h2>
+    <div class="grid-2">
+<div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>AHR Clínica Dental <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Jerónimo Aculco, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Oaxaca 101, San Jerónimo Aculco, La Magdalena Contreras, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Clínica dental de barrio en San Jerónimo Aculco. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Alberto Lezama Huicochea, Dentista <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">El Toro, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Malva No. 1, Piso 1, Col. El Toro, La Magdalena Contreras, 10610, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 5683 6521</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental particular en la colonia El Toro. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Amalia Pérez Sarmiento, Dentista <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Cuauhtémoc, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. San Bernabé 1106, Col. Cuauhtémoc, La Magdalena Contreras, 10020, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 5033 8201</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental particular en la colonia Cuauhtémoc. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Benjamín Téllez Mendoza, Dentista <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">El Toro, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Palmas 315, El Toro, La Magdalena Contreras, 10610, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 5668 3232</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental particular en la colonia El Toro. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Berenice Zavaleta Hernández, Dentista - Odontóloga <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Jerónimo Lídice, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. San Bernabé 789 (cerca de Magnolia), San Jerónimo Lídice, La Magdalena Contreras, 10200, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 5595 9042</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental particular en San Jerónimo Lídice. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Bio Orthodontics <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">La Malinche, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Luis Cabrera #6, Local 2, La Malinche, La Magdalena Contreras, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio especializado en ortodoncia, ortopedia maxilar y blanqueamiento dental en La Malinche. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Carlos Robledo Herrada, Dentista <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">La Malinche, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Luis Cabrera Lt. 1, Mza. 47-A, Col. La Malinche, La Magdalena Contreras, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 5681 1754</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental particular en la colonia La Malinche. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Clínica Beladent <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Barrio San Francisco, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. San Francisco 147, Barrio San Francisco, La Magdalena Contreras, 10500, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 6252 4984</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Clínica dental en el Barrio San Francisco. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Clínica Dental CD José Elías López <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Bernabé Ocotepec, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Guerrero 2677, San Bernabé Ocotepec, La Magdalena Contreras, 10300, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Clínica dental en el pueblo de San Bernabé Ocotepec. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Clínica Dental UG <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Bernabé Ocotepec, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Calle 1a. #4, Ampliación Progreso Nacional, San Bernabé Ocotepec, La Magdalena Contreras, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Clínica dental en Ampliación Progreso Nacional, San Bernabé Ocotepec. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Clínica Dental Ángeles <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Santa Teresa, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Coahuila 27, Santa Teresa, La Magdalena Contreras, 10710, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 56 1523 4375</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Clínica dental en la colonia Santa Teresa. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental (Av. San Jerónimo 2031-A) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Jerónimo Lídice, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. San Jerónimo #2031-A, San Jerónimo Lídice, La Magdalena Contreras, 10600, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 3521 2476</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental de barrio que ofrece ortodoncia, endodoncia, tratamiento de caries y coronas dentales. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental (Calle Juana de Arco) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">El Rosal, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Calle Juana de Arco, El Rosal, La Magdalena Contreras, 10600, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental del sector privado que ofrece extracciones, restauraciones, limpieza dental y periodoncia. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental (Emiliano Zapata 28) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">La Malinche, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> C. Emiliano Zapata 28, La Malinche, La Magdalena Contreras, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental que ofrece blanqueamiento, carillas, odontología preventiva y tratamiento de conducto. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental (J. Moreno Salido 51) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Barranca Seca, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Calle J. Moreno Salido 51, Barranca Seca, La Magdalena Contreras, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental que ofrece prótesis dentales, ortodoncia, periodoncia y extracciones. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental (López Mateos 5) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Bartolo Ameyalco, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Calle López Mateos No. 5, San Bartolo Ameyalco, La Magdalena Contreras, 10010, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental del sector privado en el pueblo de San Bartolo Ameyalco. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental (Querétaro 85) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Héroes de Padierna, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Calle Querétaro #85, Héroes de Padierna, La Magdalena Contreras, 10700, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 5135 5058</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental del sector privado en Héroes de Padierna. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental (Río Pánuco 15) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Ampliación Lomas de San Bernabé, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Río Pánuco 15, Ampliación Lomas de San Bernabé, La Magdalena Contreras, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental que atiende muelas del juicio, blanqueamiento, endodoncia e implantes dentales. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental Aga <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">La Guadalupe, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Alfonso Priani 137, La Guadalupe, La Magdalena Contreras, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental en la colonia La Guadalupe. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental DXA Odontología Integral <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">El Rosal, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Palmas 447, El Toro, El Rosal, La Magdalena Contreras, 10610, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 2478 1966</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio de odontología integral que ofrece ortodoncia (convencional e invisible), periodoncia y endodoncia. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental Odontología Integral <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Cuauhtémoc, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. San Bernabé 79, Local 1, Col. Cuauhtémoc, La Magdalena Contreras, 10020, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental de barrio en la colonia Cuauhtémoc de La Magdalena Contreras. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental RICARDENT <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Bernabé Ocotepec, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Guerrero 25, San Bernabé Ocotepec, La Magdalena Contreras, 10300, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental en San Bernabé Ocotepec. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dental JM <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">El Rosal, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> El Rosal #64, Local G, esquina Perita, El Rosal, La Magdalena Contreras, 10640, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 4350 4174</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental de estética e implantología en El Rosal, abierto de lunes a sábado. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>DentalSan <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">El Rosal, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Del Rosal 37, El Rosal, La Magdalena Contreras, 10640, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 56 2752 1702</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental en la colonia El Rosal. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dentistería (Av. México 1342) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">La Guadalupe, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. México 1342, La Guadalupe, La Magdalena Contreras, 10820, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 4170 3578</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental en la colonia La Guadalupe. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dentistería (Av. Ojo de Agua) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Huayatla, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Ojo de Agua Mz. 287, Lt. 1-C, Huayatla, La Magdalena Contreras, 10360, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 4170 3578</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental en la colonia Huayatla; comparte número de contacto con otro consultorio del mismo directorio en Av. México 1342, posiblemente del mismo operador. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dentistetic Implantología Avanzada <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Jerónimo Aculco, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. México 516, 3er piso, consultorio 7, San Jerónimo Aculco, La Magdalena Contreras, 10400, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio especializado en implantología dental. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dra. Alejandra Dávila García, Dentista <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">El Rosal, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Violeta 165, El Rosal, La Magdalena Contreras, 10610, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 4879 0565</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental particular en El Rosal. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Ernesto Quiroz Lanz, Dentista <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Cuauhtémoc, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. San Bernabé 57, Col. Cuauhtémoc, La Magdalena Contreras, 10020, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 5033 8909</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental particular en la colonia Cuauhtémoc. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Francisco Javier Hernández Guerreiro, Dentista <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Héroes de Padierna, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Camino a Santa Teresa 1055, PB 04, Héroes de Padierna, La Magdalena Contreras, 10700, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 5652 8597</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental dentro de torre de consultorios cerca del Hospital Ángeles Pedregal. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Mari Carmen Sánchez Aguirre, Dentista <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lomas Quebradas, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. San Jerónimo 727, Lomas Quebradas, La Magdalena Contreras, 10000, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 6835 5374</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental particular en Lomas Quebradas. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>María Guadalupe Cervantes Gómez, Dentista <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Barros Sierra, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Hortensia 1, Mza. 504, Lt. 17, Barros Sierra, La Magdalena Contreras, 10380, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 2104 5389</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental particular en la colonia Barros Sierra. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Médica Dental CAOR <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Bernabé Ocotepec, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> 2da Cerrada de Emiliano Zapata #38, San Bernabé Ocotepec, La Magdalena Contreras, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio médico-dental en San Bernabé Ocotepec. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Odontología Integral Góngora <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Jerónimo Lídice, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Héroes de Padierna 138, San Jerónimo Lídice, La Magdalena Contreras, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental listado en directorios médicos de la zona de San Jerónimo Lídice. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Verónica Vanegas Vidaurreta, Dentista <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">La Guadalupe, La Magdalena Contreras</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. México 1346, Col. Guadalupe, La Magdalena Contreras, 10820, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 9117 0616</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental particular en la colonia La Guadalupe. Sin presencia digital propia detectada más allá de directorios médicos.</p>
+</div><div class="card">
+  <div class="card-top">
+    <div>
+      <h3>CEM Colibri Magdalena Contreras <span class="badge-alta">ALTA</span></h3>
+      <div class="zona">San Bernabé Ocotepec, La Magdalena Contreras</div>
+    </div>
+    <span class="score s8">8</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Calle Oyametla Mz.82 Lt.41, San Bernabé Ocotepec, La Magdalena Contreras, 10300, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es prioritario (7 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li></ul>
+  </div>
+  <p class="context-note">Clínica de especialidades médicas (cirugía, coloproctología, ginecología) que incluye odontología entre sus servicios, con consultas desde $300. Presencia limitada a su perfil de Doctoralia con reseñas de pacientes; sin sitio web propio, WhatsApp visible, reservas online, CRM, chat ni blog.</p>
+</div><div class="card">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental (Av. San Francisco 569) <span class="badge-alta">ALTA</span></h3>
+      <div class="zona">Barrio San Francisco, La Magdalena Contreras</div>
+    </div>
+    <span class="score s8">8</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. San Francisco 569, Barrio San Francisco, La Magdalena Contreras, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es prioritario (7 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li></ul>
+  </div>
+  <p class="context-note">Consultorio dental con perfil activo en Instagram (@dentisjan) ofreciendo ortodoncia, endodoncia y cirugía oral. Sin sitio web propio, WhatsApp visible, reservas online, CRM, chat ni blog detectados.</p>
+</div><div class="card">
+  <div class="card-top">
+    <div>
+      <h3>Grupo Dental Punta México <span class="badge-alta">ALTA</span></h3>
+      <div class="zona">San Jerónimo Lídice, La Magdalena Contreras</div>
+    </div>
+    <span class="score s8">8</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Edificio Punta México, Av. México 700, consultorio 206, San Jerónimo Lídice, La Magdalena Contreras, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es prioritario (7 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li></ul>
+  </div>
+  <p class="context-note">Grupo de especialistas dentales con presencia en Facebook e Instagram (@grupodentalpuntamx), pero sin sitio web propio, WhatsApp visible, reservas online, CRM, chat ni blog detectados.</p>
+</div><div class="card">
+  <div class="card-top">
+    <div>
+      <h3>Kondera Clínica Dental <span class="badge-alta">ALTA</span></h3>
+      <div class="zona">San Jerónimo Lídice, La Magdalena Contreras</div>
+    </div>
+    <span class="score s7">7</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. México 386 int. 13, Plaza Luis Cabrera (Superama), San Jerónimo Lídice, La Magdalena Contreras, 10200, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 6269 1097</p>
+    <p><span class="lbl">WhatsApp:</span> 55 7753 0653</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es prioritario (6 carencias)</h4>
+    <ul><li>Web propia</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li></ul>
+  </div>
+  <p class="context-note">Clínica dental activa en redes sociales (Facebook e X/Twitter con el usuario @KonderaDental) y con línea directa de WhatsApp para agendar. Sin sitio web propio, sin sistema de reservas online, sin CRM, chat ni blog detectados.</p>
+</div><div class="card">
+  <div class="card-top">
+    <div>
+      <h3>Smile Design Center México <span class="badge-media">MEDIA</span></h3>
+      <div class="zona">San Jerónimo Lídice, La Magdalena Contreras</div>
+    </div>
+    <span class="score s6">6</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Plaza Lídice, Héroes de Padierna 132, Local 55, San Jerónimo Lídice, La Magdalena Contreras, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 5594 7633 / 55 5671 0758</p>
+    <p><span class="lbl">WhatsApp:</span> 55 3271 4442</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es prioritario (5 carencias)</h4>
+    <ul><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li></ul>
+  </div>
+  <p class="context-note">Clínica con más de 47 años de experiencia en el sur de la Ciudad de México. Cuenta con sitio web propio (smiledesigncentermexico.com), WhatsApp y redes sociales activas (Facebook e Instagram @sdcmexico), pero sin sistema de reservas online, CRM, chat en vivo ni blog.</p>
+</div><div class="card">
+  <div class="card-top">
+    <div>
+      <h3>Dentheus <span class="badge-media">MEDIA</span></h3>
+      <div class="zona">Cuauhtémoc, La Magdalena Contreras</div>
+    </div>
+    <span class="score s5">5</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Luis Cabrera 806, Col. Cuauhtémoc, La Magdalena Contreras, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 6262 5066</p>
+    <p><span class="lbl">WhatsApp:</span> Sí (agenda por WhatsApp)</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es prioritario (4 carencias)</h4>
+    <ul><li>Formulario</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Formulario conectado directo a WhatsApp y CRM</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li></ul>
+  </div>
+  <p class="context-note">Clínica con sitio web propio (dentheus.mx), HTTPS, agenda de citas por WhatsApp, sistema de reservas en línea y redes sociales activas (Facebook 'Dientessanosmx' e Instagram). Sin blog, CRM ni chat con IA detectados.</p>
+</div><div class="card">
+  <div class="card-top">
+    <div>
+      <h3>Xcaanda Clínica Dental <span class="badge-media">MEDIA</span></h3>
+      <div class="zona">Barranca Seca, La Magdalena Contreras</div>
+    </div>
+    <span class="score s5">5</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Álvaro Obregón 103, Barranca Seca, La Magdalena Contreras, 10580, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 2747 1532</p>
+    <p><span class="lbl">Email:</span> citas@xcaandadental.com</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es prioritario (4 carencias)</h4>
+    <ul><li>Formulario</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Formulario conectado directo a WhatsApp y CRM</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li></ul>
+  </div>
+  <p class="context-note">Clínica con más de 10 años de experiencia, sitio web propio (xcaandadental.com) con botón de WhatsApp, sistema de 'Agenda en línea' y redes sociales activas (Facebook e Instagram @xcaandaclinicadental). Sin blog, CRM ni chat con IA detectados.</p>
+</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Mensajes de contacto listos para enviar</h2>
+    <div>
+<div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">AHR Clínica Dental
+      <small>San Jerónimo Aculco, La Magdalena Contreras &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi AHR Clínica Dental buscando clínicas dentales en San Jerónimo Aculco, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Alberto Lezama Huicochea, Dentista
+      <small>El Toro, La Magdalena Contreras &middot; Tel: 55 5683 6521</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Alberto Lezama Huicochea, Dentista buscando clínicas dentales en El Toro, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Amalia Pérez Sarmiento, Dentista
+      <small>Cuauhtémoc, La Magdalena Contreras &middot; Tel: 55 5033 8201</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Amalia Pérez Sarmiento, Dentista buscando clínicas dentales en Cuauhtémoc, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Benjamín Téllez Mendoza, Dentista
+      <small>El Toro, La Magdalena Contreras &middot; Tel: 55 5668 3232</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Benjamín Téllez Mendoza, Dentista buscando clínicas dentales en El Toro, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Berenice Zavaleta Hernández, Dentista - Odontóloga
+      <small>San Jerónimo Lídice, La Magdalena Contreras &middot; Tel: 55 5595 9042</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Berenice Zavaleta Hernández, Dentista - Odontóloga buscando clínicas dentales en San Jerónimo Lídice, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Bio Orthodontics
+      <small>La Malinche, La Magdalena Contreras &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Bio Orthodontics buscando clínicas dentales en La Malinche, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Carlos Robledo Herrada, Dentista
+      <small>La Malinche, La Magdalena Contreras &middot; Tel: 55 5681 1754</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Carlos Robledo Herrada, Dentista buscando clínicas dentales en La Malinche, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Clínica Beladent
+      <small>Barrio San Francisco, La Magdalena Contreras &middot; Tel: 55 6252 4984</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Clínica Beladent buscando clínicas dentales en Barrio San Francisco, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Clínica Dental CD José Elías López
+      <small>San Bernabé Ocotepec, La Magdalena Contreras &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Clínica Dental CD José Elías López buscando clínicas dentales en San Bernabé Ocotepec, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Clínica Dental UG
+      <small>San Bernabé Ocotepec, La Magdalena Contreras &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Clínica Dental UG buscando clínicas dentales en San Bernabé Ocotepec, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Clínica Dental Ángeles
+      <small>Santa Teresa, La Magdalena Contreras &middot; Tel: 56 1523 4375</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Clínica Dental Ángeles buscando clínicas dentales en Santa Teresa, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental (Av. San Jerónimo 2031-A)
+      <small>San Jerónimo Lídice, La Magdalena Contreras &middot; Tel: 55 3521 2476</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental (Av. San Jerónimo 2031-A) buscando clínicas dentales en San Jerónimo Lídice, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental (Calle Juana de Arco)
+      <small>El Rosal, La Magdalena Contreras &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental (Calle Juana de Arco) buscando clínicas dentales en El Rosal, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental (Emiliano Zapata 28)
+      <small>La Malinche, La Magdalena Contreras &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental (Emiliano Zapata 28) buscando clínicas dentales en La Malinche, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental (J. Moreno Salido 51)
+      <small>Barranca Seca, La Magdalena Contreras &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental (J. Moreno Salido 51) buscando clínicas dentales en Barranca Seca, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental (López Mateos 5)
+      <small>San Bartolo Ameyalco, La Magdalena Contreras &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental (López Mateos 5) buscando clínicas dentales en San Bartolo Ameyalco, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental (Querétaro 85)
+      <small>Héroes de Padierna, La Magdalena Contreras &middot; Tel: 55 5135 5058</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental (Querétaro 85) buscando clínicas dentales en Héroes de Padierna, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental (Río Pánuco 15)
+      <small>Ampliación Lomas de San Bernabé, La Magdalena Contreras &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental (Río Pánuco 15) buscando clínicas dentales en Ampliación Lomas de San Bernabé, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental Aga
+      <small>La Guadalupe, La Magdalena Contreras &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental Aga buscando clínicas dentales en La Guadalupe, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental DXA Odontología Integral
+      <small>El Rosal, La Magdalena Contreras &middot; Tel: 55 2478 1966</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental DXA Odontología Integral buscando clínicas dentales en El Rosal, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental Odontología Integral
+      <small>Cuauhtémoc, La Magdalena Contreras &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental Odontología Integral buscando clínicas dentales en Cuauhtémoc, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental RICARDENT
+      <small>San Bernabé Ocotepec, La Magdalena Contreras &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental RICARDENT buscando clínicas dentales en San Bernabé Ocotepec, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dental JM
+      <small>El Rosal, La Magdalena Contreras &middot; Tel: 55 4350 4174</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dental JM buscando clínicas dentales en El Rosal, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">DentalSan
+      <small>El Rosal, La Magdalena Contreras &middot; Tel: 56 2752 1702</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi DentalSan buscando clínicas dentales en El Rosal, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dentistería (Av. México 1342)
+      <small>La Guadalupe, La Magdalena Contreras &middot; Tel: 55 4170 3578</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dentistería (Av. México 1342) buscando clínicas dentales en La Guadalupe, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dentistería (Av. Ojo de Agua)
+      <small>Huayatla, La Magdalena Contreras &middot; Tel: 55 4170 3578</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dentistería (Av. Ojo de Agua) buscando clínicas dentales en Huayatla, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dentistetic Implantología Avanzada
+      <small>San Jerónimo Aculco, La Magdalena Contreras &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dentistetic Implantología Avanzada buscando clínicas dentales en San Jerónimo Aculco, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dra. Alejandra Dávila García, Dentista
+      <small>El Rosal, La Magdalena Contreras &middot; Tel: 55 4879 0565</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dra. Alejandra Dávila García, Dentista buscando clínicas dentales en El Rosal, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Ernesto Quiroz Lanz, Dentista
+      <small>Cuauhtémoc, La Magdalena Contreras &middot; Tel: 55 5033 8909</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Ernesto Quiroz Lanz, Dentista buscando clínicas dentales en Cuauhtémoc, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Francisco Javier Hernández Guerreiro, Dentista
+      <small>Héroes de Padierna, La Magdalena Contreras &middot; Tel: 55 5652 8597</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Francisco Javier Hernández Guerreiro, Dentista buscando clínicas dentales en Héroes de Padierna, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Mari Carmen Sánchez Aguirre, Dentista
+      <small>Lomas Quebradas, La Magdalena Contreras &middot; Tel: 55 6835 5374</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Mari Carmen Sánchez Aguirre, Dentista buscando clínicas dentales en Lomas Quebradas, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">María Guadalupe Cervantes Gómez, Dentista
+      <small>Barros Sierra, La Magdalena Contreras &middot; Tel: 55 2104 5389</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi María Guadalupe Cervantes Gómez, Dentista buscando clínicas dentales en Barros Sierra, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Médica Dental CAOR
+      <small>San Bernabé Ocotepec, La Magdalena Contreras &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Médica Dental CAOR buscando clínicas dentales en San Bernabé Ocotepec, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Odontología Integral Góngora
+      <small>San Jerónimo Lídice, La Magdalena Contreras &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Odontología Integral Góngora buscando clínicas dentales en San Jerónimo Lídice, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Verónica Vanegas Vidaurreta, Dentista
+      <small>La Guadalupe, La Magdalena Contreras &middot; Tel: 55 9117 0616</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Verónica Vanegas Vidaurreta, Dentista buscando clínicas dentales en La Guadalupe, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">CEM Colibri Magdalena Contreras
+      <small>San Bernabé Ocotepec, La Magdalena Contreras &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi CEM Colibri Magdalena Contreras buscando clínicas dentales en San Bernabé Ocotepec, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental (Av. San Francisco 569)
+      <small>Barrio San Francisco, La Magdalena Contreras &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental (Av. San Francisco 569) buscando clínicas dentales en Barrio San Francisco, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Grupo Dental Punta México
+      <small>San Jerónimo Lídice, La Magdalena Contreras &middot; Tel: </small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Grupo Dental Punta México buscando clínicas dentales en San Jerónimo Lídice, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin presencia digital propia detectada más allá de directorios médicos.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Kondera Clínica Dental
+      <small>San Jerónimo Lídice, La Magdalena Contreras &middot; Tel: 55 6269 1097</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Kondera Clínica Dental buscando clínicas dentales en San Jerónimo Lídice, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Cuenta con presencia digital básica, pero con carencias claras frente a lo que un paciente espera hoy.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Smile Design Center México
+      <small>San Jerónimo Lídice, La Magdalena Contreras &middot; Tel: 55 5594 7633 / 55 5671 0758</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Smile Design Center México buscando clínicas dentales en San Jerónimo Lídice, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Cuenta con presencia digital básica, pero con carencias claras frente a lo que un paciente espera hoy.
+
+Con Digital Owner System podrían tener:
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dentheus
+      <small>Cuauhtémoc, La Magdalena Contreras &middot; Tel: 55 6262 5066</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dentheus buscando clínicas dentales en Cuauhtémoc, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Cuenta con presencia digital básica, pero con carencias claras frente a lo que un paciente espera hoy.
+
+Con Digital Owner System podrían tener:
+- Formulario conectado directo a WhatsApp y CRM
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Xcaanda Clínica Dental
+      <small>Barranca Seca, La Magdalena Contreras &middot; Tel: 55 2747 1532</small>
+    </div>
+    <span class="msg-via">Teléfono</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Xcaanda Clínica Dental buscando clínicas dentales en Barranca Seca, La Magdalena Contreras, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Cuenta con presencia digital básica, pero con carencias claras frente a lo que un paciente espera hoy.
+
+Con Digital Owner System podrían tener:
+- Formulario conectado directo a WhatsApp y CRM
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Plan de acción — Esta semana</h2>
+    <div class="grid-2">
+<div class="card">
+  <h3 style="color:var(--blue-light); margin-bottom:15px; font-family:var(--font-head);">Lunes</h3>
+  <div class="analysis oportunidad"><ul><li><strong>AHR Clínica Dental</strong> — ver ficha</li><li><strong>Bio Orthodontics</strong> — ver ficha</li><li><strong>Clínica Dental Ángeles</strong> — 56 1523 4375</li><li><strong>Consultorio Dental (López Mateos 5)</strong> — ver ficha</li><li><strong>Consultorio Dental Odontología Integral</strong> — ver ficha</li><li><strong>Dentistería (Av. Ojo de Agua)</strong> — 55 4170 3578</li><li><strong>Mari Carmen Sánchez Aguirre, Dentista</strong> — 55 6835 5374</li><li><strong>CEM Colibri Magdalena Contreras</strong> — ver ficha</li></ul></div>
+</div><div class="card">
+  <h3 style="color:var(--blue-light); margin-bottom:15px; font-family:var(--font-head);">Martes</h3>
+  <div class="analysis oportunidad"><ul><li><strong>Alberto Lezama Huicochea, Dentista</strong> — 55 5683 6521</li><li><strong>Carlos Robledo Herrada, Dentista</strong> — 55 5681 1754</li><li><strong>Consultorio Dental (Av. San Jerónimo 2031-A)</strong> — 55 3521 2476</li><li><strong>Consultorio Dental (Querétaro 85)</strong> — 55 5135 5058</li><li><strong>Consultorio Dental RICARDENT</strong> — ver ficha</li><li><strong>Dentistetic Implantología Avanzada</strong> — ver ficha</li><li><strong>María Guadalupe Cervantes Gómez, Dentista</strong> — 55 2104 5389</li><li><strong>Consultorio Dental (Av. San Francisco 569)</strong> — ver ficha</li></ul></div>
+</div><div class="card">
+  <h3 style="color:var(--blue-light); margin-bottom:15px; font-family:var(--font-head);">Miércoles</h3>
+  <div class="analysis oportunidad"><ul><li><strong>Amalia Pérez Sarmiento, Dentista</strong> — 55 5033 8201</li><li><strong>Clínica Beladent</strong> — 55 6252 4984</li><li><strong>Consultorio Dental (Calle Juana de Arco)</strong> — ver ficha</li><li><strong>Consultorio Dental (Río Pánuco 15)</strong> — ver ficha</li><li><strong>Dental JM</strong> — 55 4350 4174</li><li><strong>Dra. Alejandra Dávila García, Dentista</strong> — 55 4879 0565</li><li><strong>Médica Dental CAOR</strong> — ver ficha</li><li><strong>Grupo Dental Punta México</strong> — ver ficha</li></ul></div>
+</div><div class="card">
+  <h3 style="color:var(--blue-light); margin-bottom:15px; font-family:var(--font-head);">Jueves</h3>
+  <div class="analysis oportunidad"><ul><li><strong>Benjamín Téllez Mendoza, Dentista</strong> — 55 5668 3232</li><li><strong>Clínica Dental CD José Elías López</strong> — ver ficha</li><li><strong>Consultorio Dental (Emiliano Zapata 28)</strong> — ver ficha</li><li><strong>Consultorio Dental Aga</strong> — ver ficha</li><li><strong>DentalSan</strong> — 56 2752 1702</li><li><strong>Ernesto Quiroz Lanz, Dentista</strong> — 55 5033 8909</li><li><strong>Odontología Integral Góngora</strong> — ver ficha</li><li><strong>Kondera Clínica Dental</strong> — 55 6269 1097</li></ul></div>
+</div><div class="card">
+  <h3 style="color:var(--blue-light); margin-bottom:15px; font-family:var(--font-head);">Viernes</h3>
+  <div class="analysis oportunidad"><ul><li><strong>Berenice Zavaleta Hernández, Dentista - Odontóloga</strong> — 55 5595 9042</li><li><strong>Clínica Dental UG</strong> — ver ficha</li><li><strong>Consultorio Dental (J. Moreno Salido 51)</strong> — ver ficha</li><li><strong>Consultorio Dental DXA Odontología Integral</strong> — 55 2478 1966</li><li><strong>Dentistería (Av. México 1342)</strong> — 55 4170 3578</li><li><strong>Francisco Javier Hernández Guerreiro, Dentista</strong> — 55 5652 8597</li><li><strong>Verónica Vanegas Vidaurreta, Dentista</strong> — 55 9117 0616</li></ul></div>
+</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <p>Informe generado para <a href="https://digitalownersystem.com">Digital Owner System</a> — Base de prospección, Alcaldía La Magdalena Contreras, CDMX</p>
+  <p style="margin-top:5px;">Sector: Dentistas / Clínicas dentales · 42 negocios verificados vía búsqueda web y análisis de sitios oficiales</p>
+</div>
+
+<script>
+function copyMsg(btn) {
+    const body = btn.previousElementSibling;
+    navigator.clipboard.writeText(body.innerText).then(() => {
+        btn.textContent = '¡Copiado!';
+        btn.style.background = '#25D366';
+        setTimeout(() => { btn.textContent = 'Copiar mensaje'; btn.style.background = '#1586f5'; }, 2200);
+    });
+}
+</script>
+</body></html>

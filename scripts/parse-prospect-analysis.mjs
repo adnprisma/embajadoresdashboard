@@ -87,8 +87,12 @@ function iconState($cell) {
   return false;
 }
 
+// El H1 varía por giro ("Veterinarias en X, CDMX", "Dentistas en X, CDMX",
+// etc.) — el patrón no fija la primera palabra a propósito, para no repetir
+// el bug de asumir un solo giro que ya nos costó una revisión completa de
+// oferta.ts (ver CLAUDE.md).
 function alcaldiaFromTitle(h1) {
-  const match = h1.match(/^Veterinarias en (.+), CDMX$/);
+  const match = h1.match(/^\S+ en (.+), CDMX$/);
   return match ? match[1] : h1;
 }
 
@@ -357,19 +361,24 @@ if (allRecords.length === 0) {
 
 // ---------------------------------------------------------------
 // SQL de salida: el match contra contacts es por nombre de negocio EXACTO
-// (mismo texto que se usó al importar el lote a contacts.business_name),
-// insensible a mayúsculas y a espacios sobrantes — no por acentos, porque
-// el nombre en contacts viene del MISMO archivo fuente. owner_id y
-// contact_id salen del contacto real vía este join: si un negocio no
-// aparece en contacts (o el nombre no calza exacto), la fila se reporta
-// al final para revisión manual — nunca se inserta con owner_id null,
-// porque la columna es NOT NULL.
+// Y alcaldía — no solo nombre. Nombre solo no basta: dentro de un mismo
+// lote, una cadena real puede tener dos sucursales con el mismo nombre en
+// alcaldías distintas (Dentalia, La Clínica Dental, Dentis+a, MC Dent,
+// Consultorio de Especialidades Dentales — todos casos reales del lote de
+// dentistas del 7 de septiembre de 2026). Cruzar solo por nombre ahí no
+// falla con un error: hace un producto cruzado silencioso (2 fichas × 2
+// contactos = 4 combinaciones que pasan el JOIN), y con contact_id sin
+// restricción de unicidad en prospect_analysis nada impide insertar las 4
+// — pegando la ficha de una sucursal al contacto de otra. Insensible a
+// mayúsculas y a espacios sobrantes en el nombre; la alcaldía se compara
+// normalizada (sin acentos, sin espacios, minúscula) contra las etiquetas
+// de alcaldía en contacts.tags, que ya se cargan en ese mismo formato.
 //
-// El INSERT lleva "and not exists (... prospect_analysis ...)" como ÚNICA
-// barrera de idempotencia real — --known ya no excluye filas (ver cabecera
-// del archivo), así que esta es la que de verdad decide, y decide por
-// contact_id, no por texto: si dos contactos comparten business_name, cada
-// uno con su propio contact_id recibe su propia fila sin pisar la del otro.
+// El INSERT lleva "and not exists (... prospect_analysis ...)" como barrera
+// de idempotencia adicional — --known ya no excluye filas (ver cabecera
+// del archivo) — pero ya no es la única defensa contra filas cruzadas: el
+// match por alcaldía es lo que evita que el cruce sea ambiguo desde el
+// principio, no algo que se limpie después.
 // ---------------------------------------------------------------
 
 const rows = allRecords
@@ -378,47 +387,105 @@ const rows = allRecords
   })
   .join(",\n");
 
+const VALUES_COLUMNS =
+  "business_name, alcaldia, colonia, address, phone, email, web_note, score, is_urgent, has_web, has_whatsapp, has_reservas, has_crm, has_chat, has_blog, has_redes, gaps, note, source_file";
+
+// Normaliza el texto de alcaldía del H1 (sin acentos, sin espacios ni
+// puntuación, minúscula) — pero NO compara por igualdad exacta contra
+// contacts.tags, porque el nombre que trae el H1 no siempre es el mismo
+// texto que la etiqueta corta que se usó al cargar el lote: los HTML de
+// veterinarias traen el nombre OFICIAL completo ("Cuajimalpa de Morelos",
+// "La Magdalena Contreras"), mientras que las etiquetas de alcaldía en
+// contacts.tags son la forma corta ("cuajimalpa", "magdalenacontreras") —
+// verificado contra las 539 fichas de veterinaria ya cargadas: comparar
+// por igualdad exacta fallaba en 62 de 539, todas por esta diferencia de
+// formato, no por un error real de datos. Por eso el match es "la
+// etiqueta de alcaldía aparece como subcadena del texto normalizado del
+// H1" — cubre el caso corto (dentistas: "Gustavo A. Madero" ya es igual a
+// la etiqueta) y el caso largo (veterinarias: "cuajimalpademorelos"
+// contiene "cuajimalpa") con la misma expresión.
+const ALCALDIA_NORMALIZE_SQL = (col) =>
+  `lower(regexp_replace(translate(${col}, 'áéíóúÁÉÍÓÚñÑ', 'aeiouAEIOUnN'), '[^a-zA-Z0-9]', '', 'g'))`;
+
+const JOIN_CONDITION = `lower(trim(c.business_name)) = lower(trim(v.business_name)) and exists (select 1 from unnest(c.tags) t where ${ALCALDIA_NORMALIZE_SQL("v.alcaldia")} like '%' || t || '%')`;
+
 console.log(`-- ---------------------------------------------------------------
 -- Carga de prospect_analysis generada por scripts/parse-prospect-analysis.mjs
 -- — no editar a mano, volver a correr el script si hay que corregir algo
 -- en el origen.
 --
--- owner_id/contact_id salen de un LEFT JOIN por nombre exacto contra
--- contacts. El bloque 2) es una guarda dura: si algún negocio de la ficha
--- no tiene fila en contacts, ABORTA con una excepción y lista cuáles —
--- antes el JOIN del INSERT simplemente los saltaba sin insertar nada y sin
--- avisar (así se nos escapó "Veterinaria Molinos", ver
--- 30-crea-contacto-veterinaria-molinos.sql). No corras el bloque 3) si el
--- 2) no pasó limpio.
+-- owner_id/contact_id salen de cruzar cada ficha contra contacts POR
+-- NOMBRE Y ALCALDÍA (ver comentario arriba de VALUES_COLUMNS en el script:
+-- nombre solo no basta cuando una cadena real repite nombre entre
+-- sucursales de distinta alcaldía). El bloque 2) es una guarda dura con
+-- DOS chequeos, no uno — ABORTA si cualquiera de los dos encuentra algo:
+--   2a) fichas sin ningún contacto candidato (nombre+alcaldía sin match)
+--       — así se nos escapó "Veterinaria Molinos" antes, ver
+--       30-crea-contacto-veterinaria-molinos.sql.
+--   2b) contactos con MÁS DE UNA ficha candidata — el lado que antes no
+--       se veía: con nombre+alcaldía esto no debería pasar nunca (alcaldía
+--       ya desambigua sucursales), así que si aparece es una señal real
+--       de otro problema (nombre+alcaldía duplicados de verdad en
+--       contacts, o un HTML con el mismo negocio repetido dos veces en la
+--       misma alcaldía) — nunca "seguir de todos modos" en silencio.
+-- No corras el bloque 3) si el 2) no pasó limpio.
+--
+-- Las fichas se cargan UNA VEZ en una tabla temporal (_pa_load) y los
+-- bloques 1/2/3 la reutilizan — antes cada bloque repetía el VALUES(...)
+-- completo (hasta 4 veces), y con lotes grandes (690 fichas x 19 columnas,
+-- con arreglos de carencias) eso generaba más de 1 MB de SQL, poco
+-- práctico para pegar en el editor de Supabase.
 -- ---------------------------------------------------------------
 
--- 1) Verificación legible: negocios del lote sin match en contacts
--- (informativo — el bloque 2) es el que de verdad bloquea).
-select v.business_name
-from (values
-${rows}
-) as v(business_name, alcaldia, colonia, address, phone, email, web_note, score, is_urgent, has_web, has_whatsapp, has_reservas, has_crm, has_chat, has_blog, has_redes, gaps, note, source_file)
-left join contacts c on lower(trim(c.business_name)) = lower(trim(v.business_name))
+drop table if exists _pa_load;
+
+create temporary table _pa_load (
+  business_name text, alcaldia text, colonia text, address text, phone text, email text, web_note text,
+  score int, is_urgent boolean, has_web boolean, has_whatsapp boolean, has_reservas boolean, has_crm boolean,
+  has_chat boolean, has_blog boolean, has_redes boolean, gaps text[], note text, source_file text
+);
+
+insert into _pa_load (${VALUES_COLUMNS}) values
+${rows};
+
+-- 1) Verificación legible (informativo — el bloque 2 es el que bloquea):
+--    negocios del lote sin ningún contacto candidato por nombre+alcaldía.
+select v.business_name, v.alcaldia
+from _pa_load v
+left join contacts c on ${JOIN_CONDITION}
 where c.id is null;
 
--- 2) Guarda de cobertura — corre esto ANTES del INSERT. Si algún negocio
--- de la ficha no tiene fila en contacts, aborta con excepción y los lista.
--- No hay forma de "seguir de todos modos" desde aquí a propósito: crear el
--- contacto que falta (o corregir el nombre) es un paso separado y
--- deliberado, no algo que este script deba decidir solo.
+-- 2) Guarda de cobertura — corre esto ANTES del INSERT.
 do $$
 declare
   v_missing text;
+  v_ambiguous text;
 begin
-  select string_agg(v.business_name, ', ') into v_missing
-  from (values
-${rows}
-  ) as v(business_name, alcaldia, colonia, address, phone, email, web_note, score, is_urgent, has_web, has_whatsapp, has_reservas, has_crm, has_chat, has_blog, has_redes, gaps, note, source_file)
-  left join contacts c on lower(trim(c.business_name)) = lower(trim(v.business_name))
+  -- 2a) fichas sin contacto candidato
+  select string_agg(format('%s (%s)', v.business_name, v.alcaldia), ', ') into v_missing
+  from _pa_load v
+  left join contacts c on ${JOIN_CONDITION}
   where c.id is null;
 
   if v_missing is not null then
-    raise exception 'Cobertura incompleta: sin fila en contacts para: %. Créalos (o corrige el nombre) antes de cargar prospect_analysis.', v_missing;
+    raise exception 'Cobertura incompleta: sin contacto candidato (nombre+alcaldía) para: %. Créalos (o corrige el nombre/alcaldía) antes de cargar prospect_analysis.', v_missing;
+  end if;
+
+  -- 2b) contactos con más de una ficha candidata (no debería pasar con
+  -- alcaldía ya en el match — si pasa, es señal de un duplicado real que
+  -- hay que revisar a mano, nunca resolverlo solo aquí).
+  select string_agg(format('%s (contact_id %s): %s fichas candidatas', t.business_name, t.id, t.n), ', ')
+  into v_ambiguous
+  from (
+    select c.id, c.business_name, count(*) as n
+    from _pa_load v
+    join contacts c on ${JOIN_CONDITION}
+    group by c.id, c.business_name
+    having count(*) > 1
+  ) as t;
+
+  if v_ambiguous is not null then
+    raise exception 'Cruce ambiguo: contacto(s) con más de una ficha candidata por nombre+alcaldía (no debería pasar): %. Revisa a mano antes de cargar.', v_ambiguous;
   end if;
 end $$;
 
@@ -433,11 +500,11 @@ select
   c.owner_id, c.id, v.business_name, v.alcaldia, v.colonia, v.address, v.phone, v.email,
   v.web_note, v.score, v.is_urgent, v.has_web, v.has_whatsapp, v.has_reservas, v.has_crm, v.has_chat,
   v.has_blog, v.has_redes, v.gaps, v.note, v.source_file
-from (values
-${rows}
-) as v(business_name, alcaldia, colonia, address, phone, email, web_note, score, is_urgent, has_web, has_whatsapp, has_reservas, has_crm, has_chat, has_blog, has_redes, gaps, note, source_file)
-join contacts c on lower(trim(c.business_name)) = lower(trim(v.business_name))
+from _pa_load v
+join contacts c on ${JOIN_CONDITION}
 and not exists (
   select 1 from prospect_analysis pa where pa.contact_id = c.id
 );
+
+drop table _pa_load;
 `);

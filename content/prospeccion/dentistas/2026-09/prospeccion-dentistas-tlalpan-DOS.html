@@ -1,0 +1,2080 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dentistas Tlalpan — Digital Owner System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Open+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#00071a; --bg2:#0a1628; --panel:#0e1b30; --panel2:#122240; --border:#1c2f4d;
+    --text:#f0eefa; --muted:#8a849e; --blue:#1586f5; --blue-light:#4aa3ff; --purple:#8148FD; --purple-light:#c4b0ff;
+    --red:#f87171; --amber:#f5c842; --green:#25D366; --orange:#e67e22;
+    --font-head:'Space Grotesk',system-ui,sans-serif; --font-body:'Open Sans',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);background-image:radial-gradient(ellipse 900px 500px at 15% -10%, rgba(129,72,253,.18), transparent),radial-gradient(ellipse 800px 600px at 100% 0%, rgba(21,134,245,.14), transparent);color:var(--text);font-family:var(--font-body);line-height:1.65}
+
+  .header { background:linear-gradient(135deg, #050b1f 0%, #0a1332 50%, #0f1d4d 100%); padding:60px 40px; text-align:center; border-bottom:2px solid var(--blue); }
+  .header .brandline { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:18px; }
+  .header .brandline .dot { width:9px; height:9px; border-radius:50%; background:linear-gradient(135deg,var(--blue),var(--purple)); box-shadow:0 0 12px rgba(21,134,245,.7); }
+  .header .brandline span { font-family:var(--font-head); font-weight:600; font-size:13px; letter-spacing:.08em; color:var(--purple-light); }
+  .header h1 { font-family:var(--font-head); font-size:2.3em; font-weight:700; color:#fff; margin-bottom:10px; background:linear-gradient(90deg,#fff,var(--purple-light)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .header .subtitle { color:var(--muted); font-size:1.05em; }
+  .header .date { color:var(--blue-light); margin-top:10px; font-weight:600; font-family:var(--font-head); }
+  .header .stats { display:flex; justify-content:center; gap:24px; margin-top:32px; flex-wrap:wrap; }
+  .stat-box { background:rgba(21,134,245,.08); border:1px solid rgba(21,134,245,.3); border-radius:12px; padding:18px 26px; text-align:center; min-width:120px; }
+  .stat-box .number { font-family:var(--font-head); font-size:2.3em; color:var(--blue-light); font-weight:800; }
+  .stat-box .label { color:var(--muted); font-size:.78em; text-transform:uppercase; letter-spacing:1px; }
+
+  .container { max-width:1400px; margin:0 auto; padding:44px 22px; }
+  .section { margin-bottom:58px; }
+  .section-title { font-family:var(--font-head); font-weight:600; font-size:1.4em; color:#fff; margin-bottom:22px; padding-bottom:11px; border-bottom:2px solid var(--blue); }
+
+  .score { display:inline-flex; align-items:center; justify-content:center; width:42px; height:42px; border-radius:50%; font-weight:800; font-size:1.05em; flex-shrink:0; font-family:var(--font-head); }
+  .s10,.s9 { background:rgba(248,113,113,.15); color:var(--red); border:2px solid var(--red); }
+  .s8 { background:rgba(230,126,34,.15); color:var(--orange); border:2px solid var(--orange); }
+  .s7,.s6 { background:rgba(245,200,66,.15); color:var(--amber); border:2px solid var(--amber); }
+  .s5,.s4 { background:rgba(21,134,245,.15); color:var(--blue-light); border:2px solid var(--blue-light); }
+  .s3,.s2,.s1,.s0 { background:rgba(37,211,102,.15); color:var(--green); border:2px solid var(--green); }
+
+  .badge-urgente { background:var(--red); color:#000d2e; font-size:.68em; padding:2px 8px; border-radius:10px; font-weight:800; text-transform:uppercase; margin-left:6px; font-family:var(--font-head); }
+  .badge-alta { background:var(--orange); color:#000d2e; font-size:.68em; padding:2px 8px; border-radius:10px; font-weight:800; text-transform:uppercase; margin-left:6px; font-family:var(--font-head); }
+  .badge-media { background:var(--blue); color:#fff; font-size:.68em; padding:2px 8px; border-radius:10px; font-weight:800; text-transform:uppercase; margin-left:6px; font-family:var(--font-head); }
+  .badge-baja { background:var(--green); color:#000d2e; font-size:.68em; padding:2px 8px; border-radius:10px; font-weight:800; text-transform:uppercase; margin-left:6px; font-family:var(--font-head); }
+
+  .table-wrapper { overflow-x:auto; border-radius:12px; }
+  table { width:100%; border-collapse:collapse; background:var(--panel); border-radius:12px; overflow:hidden; min-width:920px; }
+  thead th { background:var(--panel2); color:var(--blue-light); padding:12px 9px; text-align:left; font-size:.72em; text-transform:uppercase; letter-spacing:1px; font-family:var(--font-head); }
+  tbody td { padding:10px 9px; border-bottom:1px solid var(--border); font-size:.86em; }
+  tbody tr:hover { background:rgba(21,134,245,.05); }
+  .negocio-name { font-weight:700; color:#fff; display:block; }
+  .zona-tag { color:var(--blue-light); font-size:.78em; display:block; margin-top:2px; }
+  .check { color:var(--green); font-size:1.1em; }
+  .cross { color:var(--red); font-size:1.1em; }
+  .partial { color:var(--amber); font-size:1.1em; }
+  .carencias-num { font-weight:800; font-size:1.05em; color:var(--red); }
+  .legend { margin-top:12px; color:var(--muted); font-size:.82em; }
+
+  .grid-2 { display:grid; grid-template-columns:repeat(auto-fit, minmax(390px, 1fr)); gap:22px; }
+  .card { background:linear-gradient(145deg, var(--panel), var(--panel2)); border:1px solid var(--border); border-radius:16px; padding:26px; transition:transform .2s, border-color .2s; }
+  .card:hover { transform:translateY(-3px); border-color:var(--blue); }
+  .card.highlight { border-color:var(--red); background:linear-gradient(145deg, #1a0d0f, #250d12); }
+  .card.highlight:hover { border-color:#ff8a8a; }
+  .card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; gap:10px; }
+  .card h3 { color:#fff; font-size:1.1em; line-height:1.35; font-family:var(--font-head); font-weight:600; }
+  .card .zona { color:var(--blue-light); font-size:.83em; margin-top:4px; }
+  .card .contact { margin:14px 0; padding:14px; background:rgba(0,0,0,.35); border-radius:10px; }
+  .card .contact p { margin:3px 0; font-size:.85em; }
+  .lbl { color:var(--purple-light); font-weight:600; }
+  .analysis { margin-top:14px; }
+  .analysis h4 { color:var(--amber); font-size:.8em; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; font-family:var(--font-head); }
+  .analysis ul { list-style:none; padding:0; }
+  .analysis li { padding:3px 0 3px 18px; font-size:.85em; position:relative; }
+  .analysis li::before { content:"✕"; color:var(--red); font-weight:700; position:absolute; left:0; }
+  .oportunidad h4 { color:var(--green); }
+  .oportunidad li::before { content:"✓"; color:var(--green); font-weight:700; }
+  .context-note { margin-top:14px; padding-top:12px; border-top:1px solid var(--border); font-size:.82em; color:var(--muted); font-style:italic; }
+
+  .msg-card { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:24px; margin-bottom:18px; }
+  .msg-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--border); flex-wrap:wrap; gap:8px; }
+  .msg-for { font-weight:700; color:#fff; font-size:1.02em; font-family:var(--font-head); }
+  .msg-for small { display:block; color:var(--blue-light); font-size:.78em; font-weight:400; font-family:var(--font-body); margin-top:2px; }
+  .msg-via { padding:4px 14px; border-radius:20px; font-size:.76em; font-weight:700; background:rgba(37,211,102,.15); color:var(--green); font-family:var(--font-head); }
+  .msg-body { background:rgba(0,0,0,.3); border-radius:10px; padding:20px; font-size:.9em; line-height:1.75; white-space:pre-line; border-left:3px solid var(--blue); }
+  .copy-btn { display:inline-block; margin-top:12px; padding:8px 20px; background:var(--blue); color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:.83em; font-weight:700; transition:background .2s; font-family:var(--font-head); }
+  .copy-btn:hover { background:var(--purple); }
+
+  .zonas-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px; }
+  .zona-box { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px; text-align:center; }
+  .zona-box .count { font-family:var(--font-head); font-size:1.8em; font-weight:800; color:var(--blue-light); }
+  .zona-box .name { color:#fff; font-size:.85em; margin-top:4px; }
+
+  .footer { text-align:center; padding:40px; border-top:1px solid var(--border); color:var(--muted); font-size:.85em; font-family:var(--font-head); }
+  .footer a { color:var(--blue-light); text-decoration:none; }
+
+  @media (max-width:768px) { .header h1{font-size:1.5em} .grid-2{grid-template-columns:1fr} .container{padding:24px 12px} }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brandline"><span class="dot"></span><span>DIGITAL OWNER SYSTEM · PROSPECCIÓN</span></div>
+  <h1>Dentistas en Tlalpan, CDMX</h1>
+  <p class="subtitle">Análisis de presencia digital, comparativa de carencias y mensajes listos para contactar</p>
+  <p class="date">5 de septiembre de 2026</p>
+  <div class="stats">
+    <div class="stat-box"><div class="number">38</div><div class="label">Clínicas dentales analizadas</div></div>
+    <div class="stat-box"><div class="number">18</div><div class="label">Colonias cubiertas</div></div>
+    <div class="stat-box"><div class="number">34</div><div class="label">Alta oportunidad</div></div>
+    <div class="stat-box"><div class="number">38</div><div class="label">Mensajes listos</div></div>
+  </div>
+</div>
+
+
+<div class="container">
+
+  <div class="section">
+    <h2 class="section-title">Colonias analizadas</h2>
+    <div class="zonas-grid"><div class="zona-box"><div class="count">9</div><div class="name">San Andrés Totoltepec</div></div><div class="zona-box"><div class="count">6</div><div class="name">Toriello Guerra</div></div><div class="zona-box"><div class="count">4</div><div class="name">Villa Coapa</div></div><div class="zona-box"><div class="count">3</div><div class="name">Tlalpan Centro</div></div><div class="zona-box"><div class="count">2</div><div class="name">Exhacienda Coapa</div></div><div class="zona-box"><div class="count">2</div><div class="name">Prado Coapa</div></div><div class="zona-box"><div class="count">1</div><div class="name">2 de Octubre</div></div><div class="zona-box"><div class="count">1</div><div class="name">Ajusco</div></div><div class="zona-box"><div class="count">1</div><div class="name">Belisario Domínguez</div></div><div class="zona-box"><div class="count">1</div><div class="name">Fuentes del Pedregal</div></div><div class="zona-box"><div class="count">1</div><div class="name">La Joya</div></div><div class="zona-box"><div class="count">1</div><div class="name">Lomas de Padierna</div></div><div class="zona-box"><div class="count">1</div><div class="name">Miguel Hidalgo 1ra Sección</div></div><div class="zona-box"><div class="count">1</div><div class="name">Pedregal de Santa Úrsula Xitla</div></div><div class="zona-box"><div class="count">1</div><div class="name">Peña Pobre</div></div><div class="zona-box"><div class="count">1</div><div class="name">San Miguel Ajusco</div></div><div class="zona-box"><div class="count">1</div><div class="name">Pedregal de San Nicolás</div></div><div class="zona-box"><div class="count">1</div><div class="name">Héroes de Padierna</div></div></div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Tabla comparativa completa</h2>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr>
+          <th>Oport.</th><th>Clínica dental</th><th>Colonia</th><th>Web/HTTPS</th><th>WhatsApp</th><th>Reservas</th><th>CRM</th><th>Chat</th><th>Blog</th><th>Redes</th><th>Carencias</th><th>Prioridad</th>
+        </tr></thead>
+        <tbody>
+        <tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental (Chicoasén)</span><span class="zona-tag">Chicoasén Manzana 54, Lote 3, Col. 2 de Octubre, 14739, Tlalpan, CDMX</span></td>
+  <td>2 de Octubre</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dra. Perla Leticia Jaimes Plata (Consultorio Dental)</span><span class="zona-tag">Carretera Picacho al Ajusco 735, Ajusco, Tlalpan, CDMX</span></td>
+  <td>Ajusco</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dental Clinic AOZ (Ortodental)</span><span class="zona-tag">Fray Pedro de Gante 13, Belisario Domínguez Secc. 16, 14080, Tlalpan, CDMX</span></td>
+  <td>Belisario Domínguez</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Clínica de Periodoncia e Implantes</span><span class="zona-tag">Prolongación División del Norte 4199, Local 6, Ex-hacienda Coapa, Tlalpan, CDMX</span></td>
+  <td>Exhacienda Coapa</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio de Especialidades Dentales</span><span class="zona-tag">Prolongación División del Norte 4199, Local 14, Exhacienda Coapa, Tlalpan, CDMX</span></td>
+  <td>Exhacienda Coapa</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dra. María del Carmen Nava Jiménez (Consultorio Dental)</span><span class="zona-tag">Circuito Fuentes del Pedregal 563, Fuentes del Pedregal, Tlalpan, CDMX</span></td>
+  <td>Fuentes del Pedregal</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dentista Susana Margarita Ahedo Hernández</span><span class="zona-tag">Av. Insurgentes Sur 4342, La Joya, 14090, Tlalpan, CDMX</span></td>
+  <td>La Joya</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Prima Digestio In Ore Odontología Especializada</span><span class="zona-tag">Tekax Mza. 12, Lote 13, Lomas de Padierna, Tlalpan, CDMX</span></td>
+  <td>Lomas de Padierna</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental (Plaza Espacio Sur)</span><span class="zona-tag">Av. Insurgentes Sur 3655, Interior 10, 1er piso, Col. Miguel Hidalgo 1ra Secc., Tlalpan, CDMX</span></td>
+  <td>Miguel Hidalgo 1ra Sección</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental Aviladent (Dr. Daniel Ávila)</span><span class="zona-tag">Tirampies 39, Pedregal de Santa Úrsula Xitla, 14438, Tlalpan, CDMX</span></td>
+  <td>Pedregal de Santa Úrsula Xitla</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental (Insurgentes Sur 3656)</span><span class="zona-tag">Av. Insurgentes Sur 3656, Interior 101, Col. Peña Pobre, Tlalpan, CDMX</span></td>
+  <td>Peña Pobre</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Hein Lym Dental Clinic</span><span class="zona-tag">Calz. Acoxpa 550, Local 8, Prado Coapa 1a Sección, Tlalpan, CDMX</span></td>
+  <td>Prado Coapa</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Clínica Odontología Integral</span><span class="zona-tag">Calle Morelos 49, San Andrés Totoltepec, Tlalpan, CDMX</span></td>
+  <td>San Andrés Totoltepec</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Clínica de Especialidades Dentales CED</span><span class="zona-tag">San Andrés Tlalaxco 337, San Andrés Totoltepec, Tlalpan, CDMX</span></td>
+  <td>San Andrés Totoltepec</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental Alfa y Omega</span><span class="zona-tag">Calle Morelos 50, San Andrés Totoltepec, Tlalpan, CDMX</span></td>
+  <td>San Andrés Totoltepec</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dental Glass</span><span class="zona-tag">16 de Septiembre, San Andrés Totoltepec, Tlalpan, CDMX</span></td>
+  <td>San Andrés Totoltepec</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dental Happy</span><span class="zona-tag">Reforma 128, Interior 4, San Andrés Totoltepec, Tlalpan, CDMX</span></td>
+  <td>San Andrés Totoltepec</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dr. Paul Miranda (Consultorio Dental)</span><span class="zona-tag">Reforma 43, San Andrés Totoltepec, Tlalpan, CDMX</span></td>
+  <td>San Andrés Totoltepec</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">KAISEN Servicio Dental</span><span class="zona-tag">Calle Reforma 155, San Andrés Totoltepec, Tlalpan, CDMX</span></td>
+  <td>San Andrés Totoltepec</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Smile Dental Center</span><span class="zona-tag">Camino Al Cedral 116, San Andrés Totoltepec, Tlalpan, CDMX</span></td>
+  <td>San Andrés Totoltepec</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Clínica Dental Ajusco</span><span class="zona-tag">Cda. Mariano Abasolo 16, San Miguel Ajusco, Tlalpan, CDMX</span></td>
+  <td>San Miguel Ajusco</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Consultorio Dental DenTalk</span><span class="zona-tag">Av. Insurgentes Sur 4050, Tlalpan Centro, CDMX</span></td>
+  <td>Tlalpan Centro</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dr. Arturo Zamora Espinosa (Consultorio Dental)</span><span class="zona-tag">Av. San Fernando 410, Tlalpan Centro, CDMX</span></td>
+  <td>Tlalpan Centro</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dr. Javier Enrique Sánchez Ordaz (Consultorio Dental)</span><span class="zona-tag">Ejido 252, Tlalpan Centro, CDMX</span></td>
+  <td>Tlalpan Centro</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dra. Fernanda González Gamiño (Consultorio Dental)</span><span class="zona-tag">Coapa 11, Toriello Guerra, Tlalpan, CDMX</span></td>
+  <td>Toriello Guerra</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dra. Griselda Mejía Barrientos (Consultorio Dental)</span><span class="zona-tag">Av. Renato Leduc 174, Toriello Guerra, Tlalpan, CDMX</span></td>
+  <td>Toriello Guerra</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dra. Montserrat Cerqueda (Consultorio Dental)</span><span class="zona-tag">Av. Renato Leduc 339, Toriello Guerra, Tlalpan, CDMX</span></td>
+  <td>Toriello Guerra</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dra. Paulina Reynoso Mercado (Consultorio Dental)</span><span class="zona-tag">Coapa 9, Toriello Guerra, Tlalpan, CDMX</span></td>
+  <td>Toriello Guerra</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">La Clínica Becerra</span><span class="zona-tag">Hospital Médica Sur, Puente de Piedra 150, Torre I de Consultorios Médicos, Piso 6, Col. Toriello Guerra, Tlalpan, CDMX</span></td>
+  <td>Toriello Guerra</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s9">9</span></td>
+  <td><span class="negocio-name">Dra. Roxana Y. Vilchis Villa (Consultorio Dental)</span><span class="zona-tag">Calzada Acoxpa 488, Villa Coapa, Tlalpan, CDMX</span></td>
+  <td>Villa Coapa</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">8</td>
+  <td><span class="badge-urgente">URGENTE</span></td>
+</tr><tr>
+  <td><span class="score s8">8</span></td>
+  <td><span class="negocio-name">Dental Pedregal</span><span class="zona-tag">Av. Maní 134, Local 7, Pedregal de San Nicolás 1ra Sección, 14100, Tlalpan, CDMX</span></td>
+  <td>Pedregal de San Nicolás</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="check">&#x2714;</span></td>  <td class="carencias-num">7</td>
+  <td><span class="badge-alta">ALTA</span></td>
+</tr><tr>
+  <td><span class="score s8">8</span></td>
+  <td><span class="negocio-name">Odentica San Andrés Totoltepec</span><span class="zona-tag">San Andrés Totoltepec, Tlalpan, CDMX (dirección exacta no publicada)</span></td>
+  <td>San Andrés Totoltepec</td>
+<td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="check">&#x2714;</span></td>  <td class="carencias-num">7</td>
+  <td><span class="badge-alta">ALTA</span></td>
+</tr><tr>
+  <td><span class="score s8">8</span></td>
+  <td><span class="negocio-name">Ortos Tu Estilo (Clínica Dental)</span><span class="zona-tag">Av. El Riego (Andador) 81, Casa 12, Villa Coapa, 14390, Tlalpan, CDMX</span></td>
+  <td>Villa Coapa</td>
+<td><span class="check">&#x2714;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">7</td>
+  <td><span class="badge-alta">ALTA</span></td>
+</tr><tr>
+  <td><span class="score s7">7</span></td>
+  <td><span class="negocio-name">Dentista de Niños (sucursal Toriello Guerra)</span><span class="zona-tag">Consultorio 103, Calz. de Tlalpan 4456, Toriello Guerra, 14050, Tlalpan, CDMX</span></td>
+  <td>Toriello Guerra</td>
+<td><span class="check">&#x2714;</span></td><td><span class="check">&#x2714;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td>  <td class="carencias-num">6</td>
+  <td><span class="badge-alta">ALTA</span></td>
+</tr><tr>
+  <td><span class="score s6">6</span></td>
+  <td><span class="negocio-name">CAOS Dental (Carlos Ayala Odontologic Service)</span><span class="zona-tag">Cancún 273, Piso 3, Consultorio 1, Territorio Torres, Héroes de Padierna, 14208, Tlalpan, CDMX</span></td>
+  <td>Héroes de Padierna</td>
+<td><span class="check">&#x2714;</span></td><td><span class="check">&#x2714;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="check">&#x2714;</span></td>  <td class="carencias-num">5</td>
+  <td><span class="badge-media">MEDIA</span></td>
+</tr><tr>
+  <td><span class="score s6">6</span></td>
+  <td><span class="negocio-name">MOA Dental</span><span class="zona-tag">Av. Acequia 6, Interior 1, esq. Calz. Acoxpa, Villa Coapa, CDMX</span></td>
+  <td>Villa Coapa</td>
+<td><span class="check">&#x2714;</span></td><td><span class="check">&#x2714;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="check">&#x2714;</span></td>  <td class="carencias-num">5</td>
+  <td><span class="badge-media">MEDIA</span></td>
+</tr><tr>
+  <td><span class="score s4">4</span></td>
+  <td><span class="negocio-name">dentalia Coapa</span><span class="zona-tag">Calzada Acoxpa 610, Villa Coapa, 14390, Tlalpan, CDMX</span></td>
+  <td>Villa Coapa</td>
+<td><span class="check">&#x2714;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="check">&#x2714;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="check">&#x2714;</span></td><td><span class="check">&#x2714;</span></td>  <td class="carencias-num">3</td>
+  <td><span class="badge-baja">BAJA</span></td>
+</tr><tr>
+  <td><span class="score s3">3</span></td>
+  <td><span class="negocio-name">La Clínica Dental (Coapa)</span><span class="zona-tag">Calz. Acoxpa 480, Coapa, Prado Coapa, 14357, Tlalpan, CDMX</span></td>
+  <td>Prado Coapa</td>
+<td><span class="check">&#x2714;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="check">&#x2714;</span></td><td><span class="cross">&#x2718;</span></td><td><span class="check">&#x2714;</span></td><td><span class="check">&#x2714;</span></td><td><span class="check">&#x2714;</span></td>  <td class="carencias-num">2</td>
+  <td><span class="badge-baja">BAJA</span></td>
+</tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="legend">&#x2714; Tiene &nbsp; &#x2718; No tiene &nbsp; ~ Parcial (plantilla gratuita / sin funcionar) | Oportunidad: 9-10 = urgente, 7-8 = alta, 5-6 = media, 0-4 = baja</p>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Análisis detallado — Las 38 clínicas dentales</h2>
+    <div class="grid-2">
+    <div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental (Chicoasén) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">2 de Octubre, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Chicoasén Manzana 54, Lote 3, Col. 2 de Octubre, 14739, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dra. Perla Leticia Jaimes Plata (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Ajusco, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Carretera Picacho al Ajusco 735, Ajusco, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Solo aparece listada en directorios de terceros (Doctoralia). Sin presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dental Clinic AOZ (Ortodental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Belisario Domínguez, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Fray Pedro de Gante 13, Belisario Domínguez Secc. 16, 14080, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Clínica de Periodoncia e Implantes <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Exhacienda Coapa, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Prolongación División del Norte 4199, Local 6, Ex-hacienda Coapa, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio de Especialidades Dentales <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Exhacienda Coapa, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Prolongación División del Norte 4199, Local 14, Exhacienda Coapa, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dra. María del Carmen Nava Jiménez (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Fuentes del Pedregal, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Circuito Fuentes del Pedregal 563, Fuentes del Pedregal, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Solo aparece listada en directorios de terceros (Doctoralia). Sin presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dentista Susana Margarita Ahedo Hernández <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">La Joya, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Insurgentes Sur 4342, La Joya, 14090, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Solo aparece listada en directorios de terceros (Doctoralia). Sin presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Prima Digestio In Ore Odontología Especializada <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Lomas de Padierna, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Tekax Mza. 12, Lote 13, Lomas de Padierna, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental (Plaza Espacio Sur) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Miguel Hidalgo 1ra Sección, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Insurgentes Sur 3655, Interior 10, 1er piso, Col. Miguel Hidalgo 1ra Secc., Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Ofrece blanqueamiento, estética dental, odontopediatría y limpieza según el directorio de la plaza. Sin sitio web propio, WhatsApp, formulario, reservas, CRM, chat, blog ni redes verificables.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental Aviladent (Dr. Daniel Ávila) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Pedregal de Santa Úrsula Xitla, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Tirampies 39, Pedregal de Santa Úrsula Xitla, 14438, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 2457 6155</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Solo aparece listado en directorios de terceros (InfoisInfo, PueblosAmerica). Sin sitio web, WhatsApp, formulario, reservas, CRM, chat, blog ni redes verificables.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental (Insurgentes Sur 3656) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Peña Pobre, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Insurgentes Sur 3656, Interior 101, Col. Peña Pobre, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Ofrece extracciones, endodoncia y ortodoncia según directorios. Sin sitio web propio, WhatsApp, formulario, reservas, CRM, chat, blog ni redes verificables.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Hein Lym Dental Clinic <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Prado Coapa, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Calz. Acoxpa 550, Local 8, Prado Coapa 1a Sección, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 5679 9416</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Dos sucursales en Prado Coapa listadas solo en directorios (Cinri, InfoisInfo). Sin presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Clínica Odontología Integral <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Andrés Totoltepec, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Calle Morelos 49, San Andrés Totoltepec, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Clínica de Especialidades Dentales CED <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Andrés Totoltepec, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> San Andrés Tlalaxco 337, San Andrés Totoltepec, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental Alfa y Omega <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Andrés Totoltepec, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Calle Morelos 50, San Andrés Totoltepec, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dental Glass <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Andrés Totoltepec, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> 16 de Septiembre, San Andrés Totoltepec, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Ofrece atención de urgencias según directorios, pero sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dental Happy <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Andrés Totoltepec, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Reforma 128, Interior 4, San Andrés Totoltepec, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dr. Paul Miranda (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Andrés Totoltepec, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Reforma 43, San Andrés Totoltepec, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>KAISEN Servicio Dental <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Andrés Totoltepec, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Calle Reforma 155, San Andrés Totoltepec, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Smile Dental Center <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Andrés Totoltepec, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Camino Al Cedral 116, San Andrés Totoltepec, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Sin ninguna presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Clínica Dental Ajusco <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">San Miguel Ajusco, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Cda. Mariano Abasolo 16, San Miguel Ajusco, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 7243 1029</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Tiene teléfono público, pero sin sitio web, WhatsApp visible, formulario, reservas, CRM, chat, blog ni redes verificables.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Consultorio Dental DenTalk <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Tlalpan Centro, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Insurgentes Sur 4050, Tlalpan Centro, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio especializado en odontopediatría según directorios. Sin sitio web propio, WhatsApp, formulario, reservas, CRM, chat, blog ni redes verificables.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dr. Arturo Zamora Espinosa (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Tlalpan Centro, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. San Fernando 410, Tlalpan Centro, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Solo aparece listado en directorios de terceros (Doctoralia, Top Doctors). Sin sitio web propio, WhatsApp, formulario, reservas, CRM, chat, blog ni redes verificables.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dr. Javier Enrique Sánchez Ordaz (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Tlalpan Centro, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Ejido 252, Tlalpan Centro, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Solo aparece listado en directorios de terceros (Doctoralia). Sin presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dra. Fernanda González Gamiño (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Toriello Guerra, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Coapa 11, Toriello Guerra, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Solo aparece listada en directorios de terceros (Doctoralia). Sin presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dra. Griselda Mejía Barrientos (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Toriello Guerra, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Renato Leduc 174, Toriello Guerra, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Solo aparece listada en directorios de terceros (Doctoralia). Sin presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dra. Montserrat Cerqueda (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Toriello Guerra, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Renato Leduc 339, Toriello Guerra, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Solo aparece listada en directorios de terceros (Doctoralia). Sin presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dra. Paulina Reynoso Mercado (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Toriello Guerra, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Coapa 9, Toriello Guerra, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Solo aparece listada en directorios de terceros (Doctoralia). Sin presencia digital propia detectada.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>La Clínica Becerra <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Toriello Guerra, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Hospital Médica Sur, Puente de Piedra 150, Torre I de Consultorios Médicos, Piso 6, Col. Toriello Guerra, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Consultorio dentro del Hospital Médica Sur. Sin sitio web propio, WhatsApp, formulario, reservas, CRM, chat, blog ni redes verificables a nombre del consultorio.</p>
+</div><div class="card highlight">
+  <div class="card-top">
+    <div>
+      <h3>Dra. Roxana Y. Vilchis Villa (Consultorio Dental) <span class="badge-urgente">URGENTE</span></h3>
+      <div class="zona">Villa Coapa, Tlalpan</div>
+    </div>
+    <span class="score s9">9</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Calzada Acoxpa 488, Villa Coapa, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es urgente (8 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Solo aparece listada en directorios de terceros (Doctoralia). Sin presencia digital propia detectada.</p>
+</div><div class="card">
+  <div class="card-top">
+    <div>
+      <h3>Dental Pedregal <span class="badge-alta">ALTA</span></h3>
+      <div class="zona">Pedregal de San Nicolás, Tlalpan</div>
+    </div>
+    <span class="score s8">8</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Maní 134, Local 7, Pedregal de San Nicolás 1ra Sección, 14100, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es alta prioridad (7 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li></ul>
+  </div>
+  <p class="context-note">Solo tiene página de Facebook (facebook.com/dentalpedregal). Sin sitio web propio, WhatsApp visible, formulario, reservas online, CRM ni chat en vivo detectados.</p>
+</div><div class="card">
+  <div class="card-top">
+    <div>
+      <h3>Odentica San Andrés Totoltepec <span class="badge-alta">ALTA</span></h3>
+      <div class="zona">San Andrés Totoltepec, Tlalpan</div>
+    </div>
+    <span class="score s8">8</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> San Andrés Totoltepec, Tlalpan, CDMX (dirección exacta no publicada)</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es alta prioridad (7 carencias)</h4>
+    <ul><li>Web propia</li><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Sitio web profesional incluido en el plan, sin que tengan que programar nada</li><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li></ul>
+  </div>
+  <p class="context-note">Solo tiene página de Facebook (Odentica San Andrés Totoltepec). Sin sitio web propio, WhatsApp visible, formulario, reservas online, CRM ni chat en vivo detectados.</p>
+</div><div class="card">
+  <div class="card-top">
+    <div>
+      <h3>Ortos Tu Estilo (Clínica Dental) <span class="badge-alta">ALTA</span></h3>
+      <div class="zona">Villa Coapa, Tlalpan</div>
+    </div>
+    <span class="score s8">8</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. El Riego (Andador) 81, Casa 12, Villa Coapa, 14390, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 4800 9574</p>
+    <p><span class="lbl">Web:</span> ortos.mx</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es alta prioridad (7 carencias)</h4>
+    <ul><li>WhatsApp visible</li><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Tiene sitio web propio (ortos.mx) pero sin WhatsApp visible, formulario, reservas online, CRM, chat, blog ni redes sociales detectadas.</p>
+</div><div class="card">
+  <div class="card-top">
+    <div>
+      <h3>Dentista de Niños (sucursal Toriello Guerra) <span class="badge-alta">ALTA</span></h3>
+      <div class="zona">Toriello Guerra, Tlalpan</div>
+    </div>
+    <span class="score s7">7</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Consultorio 103, Calz. de Tlalpan 4456, Toriello Guerra, 14050, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 7045 1608</p>
+    <p><span class="lbl">Web:</span> dentistadeninos.com</p>
+    <p><span class="lbl">WhatsApp:</span> 55 7045 1608</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es alta prioridad (6 carencias)</h4>
+    <ul><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li><li>Redes sociales</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li><li>Presencia profesional en redes sociales que atrae pacientes nuevos</li></ul>
+  </div>
+  <p class="context-note">Cadena de odontopediatría con sitio propio y agenda solo por WhatsApp/teléfono. Sin formulario ni sistema de reservas online real, sin CRM propio, sin chat en vivo, sin blog ni redes sociales verificables para esta sucursal.</p>
+</div><div class="card">
+  <div class="card-top">
+    <div>
+      <h3>CAOS Dental (Carlos Ayala Odontologic Service) <span class="badge-media">MEDIA</span></h3>
+      <div class="zona">Héroes de Padierna, Tlalpan</div>
+    </div>
+    <span class="score s6">6</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Cancún 273, Piso 3, Consultorio 1, Territorio Torres, Héroes de Padierna, 14208, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 1705 6344</p>
+    <p><span class="lbl">Web:</span> caosdental.com.mx</p>
+    <p><span class="lbl">WhatsApp:</span> 55 1705 6344</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es media prioridad (5 carencias)</h4>
+    <ul><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li></ul>
+  </div>
+  <p class="context-note">Sitio propio con WhatsApp, Facebook e Instagram activos (@caosdental), pero sin sistema de reservas online, sin CRM, sin chat en vivo y sin blog detectado.</p>
+</div><div class="card">
+  <div class="card-top">
+    <div>
+      <h3>MOA Dental <span class="badge-media">MEDIA</span></h3>
+      <div class="zona">Villa Coapa, Tlalpan</div>
+    </div>
+    <span class="score s6">6</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Av. Acequia 6, Interior 1, esq. Calz. Acoxpa, Villa Coapa, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 2652 1484</p>
+    <p><span class="lbl">Web:</span> moadental.mx</p>
+    <p><span class="lbl">WhatsApp:</span> 56 1608 7692</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es media prioridad (5 carencias)</h4>
+    <ul><li>Formulario</li><li>Reservas online</li><li>CRM</li><li>Chat en vivo</li><li>Blog</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>Formulario conectado directo a WhatsApp y CRM</li><li>Sistema de citas online real para que el paciente agende solo</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li><li>Blog y contenido para posicionarse en Google en su colonia</li></ul>
+  </div>
+  <p class="context-note">Sitio propio con WhatsApp, Facebook e Instagram activos, pero sin sistema de reservas online, sin formulario propio, sin CRM ni chat en vivo, y sin blog detectado.</p>
+</div><div class="card">
+  <div class="card-top">
+    <div>
+      <h3>dentalia Coapa <span class="badge-baja">BAJA</span></h3>
+      <div class="zona">Villa Coapa, Tlalpan</div>
+    </div>
+    <span class="score s4">4</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Calzada Acoxpa 610, Villa Coapa, 14390, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> </p>
+    <p><span class="lbl">Web:</span> dentalia.com</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es baja prioridad (3 carencias)</h4>
+    <ul><li>WhatsApp visible</li><li>CRM</li><li>Chat en vivo</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li><li>Chat con IA que atiende consultas fuera de horario</li></ul>
+  </div>
+  <p class="context-note">Cadena nacional Dentalia — sitio, agenda en línea, blog y redes resueltos a nivel de cadena. Sin WhatsApp propio, CRM local ni chat en vivo detectados para esta sucursal.</p>
+</div><div class="card">
+  <div class="card-top">
+    <div>
+      <h3>La Clínica Dental (Coapa) <span class="badge-baja">BAJA</span></h3>
+      <div class="zona">Prado Coapa, Tlalpan</div>
+    </div>
+    <span class="score s3">3</span>
+  </div>
+  <div class="contact">
+    <p><span class="lbl">Dirección:</span> Calz. Acoxpa 480, Coapa, Prado Coapa, 14357, Tlalpan, CDMX</p>
+    <p><span class="lbl">Teléfono:</span> 55 8993 9339</p>
+    <p><span class="lbl">Web:</span> laclinicadentalcoapa.com</p>
+  </div>
+  <div class="analysis">
+    <h4>Por qué es baja prioridad (2 carencias)</h4>
+    <ul><li>WhatsApp visible</li><li>CRM</li></ul>
+  </div>
+  <div class="analysis oportunidad">
+    <h4>Lo que Digital Owner System le da</h4>
+    <ul><li>WhatsApp Business con IA que responde y agenda citas 24/7</li><li>CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza</li></ul>
+  </div>
+  <p class="context-note">Red Dental Premium (misma cadena que La Clínica Dental Polanco/Palmas en Miguel Hidalgo). Sitio con agenda en línea (softwaredentalink), chat, blog y redes activas. Sin WhatsApp visible ni CRM propio detectado.</p>
+</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Mensajes de contacto listos</h2>
+    <div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental (Chicoasén)
+      <small>2 de Octubre, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental (Chicoasén) buscando clínicas dentales en 2 de Octubre, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dra. Perla Leticia Jaimes Plata (Consultorio Dental)
+      <small>Ajusco, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dra. Perla Leticia Jaimes Plata (Consultorio Dental) buscando clínicas dentales en Ajusco, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Solo aparece listada en directorios de terceros (Doctoralia). Sin presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dental Clinic AOZ (Ortodental)
+      <small>Belisario Domínguez, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dental Clinic AOZ (Ortodental) buscando clínicas dentales en Belisario Domínguez, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Clínica de Periodoncia e Implantes
+      <small>Exhacienda Coapa, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Clínica de Periodoncia e Implantes buscando clínicas dentales en Exhacienda Coapa, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio de Especialidades Dentales
+      <small>Exhacienda Coapa, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio de Especialidades Dentales buscando clínicas dentales en Exhacienda Coapa, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dra. María del Carmen Nava Jiménez (Consultorio Dental)
+      <small>Fuentes del Pedregal, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dra. María del Carmen Nava Jiménez (Consultorio Dental) buscando clínicas dentales en Fuentes del Pedregal, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Solo aparece listada en directorios de terceros (Doctoralia). Sin presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dentista Susana Margarita Ahedo Hernández
+      <small>La Joya, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dentista Susana Margarita Ahedo Hernández buscando clínicas dentales en La Joya, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Solo aparece listada en directorios de terceros (Doctoralia). Sin presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Prima Digestio In Ore Odontología Especializada
+      <small>Lomas de Padierna, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Prima Digestio In Ore Odontología Especializada buscando clínicas dentales en Lomas de Padierna, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental (Plaza Espacio Sur)
+      <small>Miguel Hidalgo 1ra Sección, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental (Plaza Espacio Sur) buscando clínicas dentales en Miguel Hidalgo 1ra Sección, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Ofrece blanqueamiento, estética dental, odontopediatría y limpieza según el directorio de la plaza. Sin sitio web propio, WhatsApp, formulario, reservas, CRM, chat, blog ni redes verificables.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental Aviladent (Dr. Daniel Ávila)
+      <small>Pedregal de Santa Úrsula Xitla, Tlalpan · Tel: 55 2457 6155</small>
+    </div>
+    <span class="msg-via">WhatsApp</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental Aviladent (Dr. Daniel Ávila) buscando clínicas dentales en Pedregal de Santa Úrsula Xitla, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Solo aparece listado en directorios de terceros (InfoisInfo, PueblosAmerica). Sin sitio web, WhatsApp, formulario, reservas, CRM, chat, blog ni redes verificables.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental (Insurgentes Sur 3656)
+      <small>Peña Pobre, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental (Insurgentes Sur 3656) buscando clínicas dentales en Peña Pobre, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Ofrece extracciones, endodoncia y ortodoncia según directorios. Sin sitio web propio, WhatsApp, formulario, reservas, CRM, chat, blog ni redes verificables.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Hein Lym Dental Clinic
+      <small>Prado Coapa, Tlalpan · Tel: 55 5679 9416</small>
+    </div>
+    <span class="msg-via">WhatsApp</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Hein Lym Dental Clinic buscando clínicas dentales en Prado Coapa, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Dos sucursales en Prado Coapa listadas solo en directorios (Cinri, InfoisInfo). Sin presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Clínica Odontología Integral
+      <small>San Andrés Totoltepec, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Clínica Odontología Integral buscando clínicas dentales en San Andrés Totoltepec, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Clínica de Especialidades Dentales CED
+      <small>San Andrés Totoltepec, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Clínica de Especialidades Dentales CED buscando clínicas dentales en San Andrés Totoltepec, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental Alfa y Omega
+      <small>San Andrés Totoltepec, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental Alfa y Omega buscando clínicas dentales en San Andrés Totoltepec, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dental Glass
+      <small>San Andrés Totoltepec, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dental Glass buscando clínicas dentales en San Andrés Totoltepec, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Ofrece atención de urgencias según directorios, pero sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dental Happy
+      <small>San Andrés Totoltepec, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dental Happy buscando clínicas dentales en San Andrés Totoltepec, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dr. Paul Miranda (Consultorio Dental)
+      <small>San Andrés Totoltepec, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dr. Paul Miranda (Consultorio Dental) buscando clínicas dentales en San Andrés Totoltepec, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">KAISEN Servicio Dental
+      <small>San Andrés Totoltepec, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi KAISEN Servicio Dental buscando clínicas dentales en San Andrés Totoltepec, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Smile Dental Center
+      <small>San Andrés Totoltepec, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Smile Dental Center buscando clínicas dentales en San Andrés Totoltepec, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sin ninguna presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Clínica Dental Ajusco
+      <small>San Miguel Ajusco, Tlalpan · Tel: 55 7243 1029</small>
+    </div>
+    <span class="msg-via">WhatsApp</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Clínica Dental Ajusco buscando clínicas dentales en San Miguel Ajusco, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Tiene teléfono público, pero sin sitio web, WhatsApp visible, formulario, reservas, CRM, chat, blog ni redes verificables.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Consultorio Dental DenTalk
+      <small>Tlalpan Centro, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Consultorio Dental DenTalk buscando clínicas dentales en Tlalpan Centro, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Consultorio especializado en odontopediatría según directorios. Sin sitio web propio, WhatsApp, formulario, reservas, CRM, chat, blog ni redes verificables.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dr. Arturo Zamora Espinosa (Consultorio Dental)
+      <small>Tlalpan Centro, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dr. Arturo Zamora Espinosa (Consultorio Dental) buscando clínicas dentales en Tlalpan Centro, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Solo aparece listado en directorios de terceros (Doctoralia, Top Doctors). Sin sitio web propio, WhatsApp, formulario, reservas, CRM, chat, blog ni redes verificables.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dr. Javier Enrique Sánchez Ordaz (Consultorio Dental)
+      <small>Tlalpan Centro, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dr. Javier Enrique Sánchez Ordaz (Consultorio Dental) buscando clínicas dentales en Tlalpan Centro, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Solo aparece listado en directorios de terceros (Doctoralia). Sin presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dra. Fernanda González Gamiño (Consultorio Dental)
+      <small>Toriello Guerra, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dra. Fernanda González Gamiño (Consultorio Dental) buscando clínicas dentales en Toriello Guerra, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Solo aparece listada en directorios de terceros (Doctoralia). Sin presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dra. Griselda Mejía Barrientos (Consultorio Dental)
+      <small>Toriello Guerra, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dra. Griselda Mejía Barrientos (Consultorio Dental) buscando clínicas dentales en Toriello Guerra, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Solo aparece listada en directorios de terceros (Doctoralia). Sin presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dra. Montserrat Cerqueda (Consultorio Dental)
+      <small>Toriello Guerra, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dra. Montserrat Cerqueda (Consultorio Dental) buscando clínicas dentales en Toriello Guerra, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Solo aparece listada en directorios de terceros (Doctoralia). Sin presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dra. Paulina Reynoso Mercado (Consultorio Dental)
+      <small>Toriello Guerra, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dra. Paulina Reynoso Mercado (Consultorio Dental) buscando clínicas dentales en Toriello Guerra, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Solo aparece listada en directorios de terceros (Doctoralia). Sin presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">La Clínica Becerra
+      <small>Toriello Guerra, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi La Clínica Becerra buscando clínicas dentales en Toriello Guerra, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Consultorio dentro del Hospital Médica Sur. Sin sitio web propio, WhatsApp, formulario, reservas, CRM, chat, blog ni redes verificables a nombre del consultorio.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dra. Roxana Y. Vilchis Villa (Consultorio Dental)
+      <small>Villa Coapa, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dra. Roxana Y. Vilchis Villa (Consultorio Dental) buscando clínicas dentales en Villa Coapa, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Solo aparece listada en directorios de terceros (Doctoralia). Sin presencia digital propia detectada.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dental Pedregal
+      <small>Pedregal de San Nicolás, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dental Pedregal buscando clínicas dentales en Pedregal de San Nicolás, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Solo tiene página de Facebook (facebook.com/dentalpedregal). Sin sitio web propio, WhatsApp visible, formulario, reservas online, CRM ni chat en vivo detectados.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Odentica San Andrés Totoltepec
+      <small>San Andrés Totoltepec, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Odentica San Andrés Totoltepec buscando clínicas dentales en San Andrés Totoltepec, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Solo tiene página de Facebook (Odentica San Andrés Totoltepec). Sin sitio web propio, WhatsApp visible, formulario, reservas online, CRM ni chat en vivo detectados.
+
+Con Digital Owner System podrían tener:
+- Sitio web profesional incluido en el plan, sin que tengan que programar nada
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Ortos Tu Estilo (Clínica Dental)
+      <small>Villa Coapa, Tlalpan · Tel: 55 4800 9574</small>
+    </div>
+    <span class="msg-via">WhatsApp</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Ortos Tu Estilo (Clínica Dental) buscando clínicas dentales en Villa Coapa, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Tiene sitio web propio (ortos.mx) pero sin WhatsApp visible, formulario, reservas online, CRM, chat, blog ni redes sociales detectadas.
+
+Con Digital Owner System podrían tener:
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">Dentista de Niños (sucursal Toriello Guerra)
+      <small>Toriello Guerra, Tlalpan · Tel: 55 7045 1608</small>
+    </div>
+    <span class="msg-via">WhatsApp</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi Dentista de Niños (sucursal Toriello Guerra) buscando clínicas dentales en Toriello Guerra, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Cadena de odontopediatría con sitio propio y agenda solo por WhatsApp/teléfono. Sin formulario ni sistema de reservas online real, sin CRM propio, sin chat en vivo, sin blog ni redes sociales verificables para esta sucursal.
+
+Con Digital Owner System podrían tener:
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+- Presencia profesional en redes sociales que atrae pacientes nuevos
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">CAOS Dental (Carlos Ayala Odontologic Service)
+      <small>Héroes de Padierna, Tlalpan · Tel: 55 1705 6344</small>
+    </div>
+    <span class="msg-via">WhatsApp</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi CAOS Dental (Carlos Ayala Odontologic Service) buscando clínicas dentales en Héroes de Padierna, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sitio propio con WhatsApp, Facebook e Instagram activos (@caosdental), pero sin sistema de reservas online, sin CRM, sin chat en vivo y sin blog detectado.
+
+Con Digital Owner System podrían tener:
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">MOA Dental
+      <small>Villa Coapa, Tlalpan · Tel: 55 2652 1484</small>
+    </div>
+    <span class="msg-via">WhatsApp</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi MOA Dental buscando clínicas dentales en Villa Coapa, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Sitio propio con WhatsApp, Facebook e Instagram activos, pero sin sistema de reservas online, sin formulario propio, sin CRM ni chat en vivo, y sin blog detectado.
+
+Con Digital Owner System podrían tener:
+- Formulario conectado directo a WhatsApp y CRM
+- Sistema de citas online real para que el paciente agende solo
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+- Blog y contenido para posicionarse en Google en su colonia
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">dentalia Coapa
+      <small>Villa Coapa, Tlalpan · Tel: </small>
+    </div>
+    <span class="msg-via">Email</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi dentalia Coapa buscando clínicas dentales en Villa Coapa, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Cadena nacional Dentalia — sitio, agenda en línea, blog y redes resueltos a nivel de cadena. Sin WhatsApp propio, CRM local ni chat en vivo detectados para esta sucursal.
+
+Con Digital Owner System podrían tener:
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+- Chat con IA que atiende consultas fuera de horario
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div><div class="msg-card">
+  <div class="msg-header">
+    <div class="msg-for">La Clínica Dental (Coapa)
+      <small>Prado Coapa, Tlalpan · Tel: 55 8993 9339</small>
+    </div>
+    <span class="msg-via">WhatsApp</span>
+  </div>
+  <div class="msg-body">Hola, buenas tardes. Vi La Clínica Dental (Coapa) buscando clínicas dentales en Prado Coapa, Tlalpan, y me llamó la atención su negocio.
+
+Les escribo porque trabajo con clínicas dentales en CDMX ayudándolas a modernizar su atención digital sin complicarse. Red Dental Premium (misma cadena que La Clínica Dental Polanco/Palmas en Miguel Hidalgo). Sitio con agenda en línea (softwaredentalink), chat, blog y redes activas. Sin WhatsApp visible ni CRM propio detectado.
+
+Con Digital Owner System podrían tener:
+- WhatsApp Business con IA que responde y agenda citas 24/7
+- CRM con historial clínico por paciente y recordatorios automáticos de citas y limpieza
+
+¿Les interesa que les muestre en 15 minutos, sin costo ni compromiso, cómo quedaría aplicado a su negocio?</div>
+  <button class="copy-btn" onclick="copyMsg(this)">Copiar mensaje</button>
+</div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Plan de acción — Esta semana</h2>
+    <div class="grid-2">
+    <div class="card">
+  <h3 style="color:var(--blue-light); margin-bottom:15px; font-family:var(--font-head);">Lunes</h3>
+  <div class="analysis oportunidad"><ul><li><strong>Consultorio Dental (Chicoasén)</strong> — ver ficha</li><li><strong>Dra. Perla Leticia Jaimes Plata (Consultorio Dental)</strong> — ver ficha</li><li><strong>Dental Clinic AOZ (Ortodental)</strong> — ver ficha</li><li><strong>Clínica de Periodoncia e Implantes</strong> — ver ficha</li><li><strong>Consultorio de Especialidades Dentales</strong> — ver ficha</li><li><strong>Dra. María del Carmen Nava Jiménez (Consultorio Dental)</strong> — ver ficha</li><li><strong>Dentista Susana Margarita Ahedo Hernández</strong> — ver ficha</li><li><strong>Prima Digestio In Ore Odontología Especializada</strong> — ver ficha</li></ul></div>
+</div><div class="card">
+  <h3 style="color:var(--blue-light); margin-bottom:15px; font-family:var(--font-head);">Martes</h3>
+  <div class="analysis oportunidad"><ul><li><strong>Consultorio Dental (Plaza Espacio Sur)</strong> — ver ficha</li><li><strong>Consultorio Dental Aviladent (Dr. Daniel Ávila)</strong> — 55 2457 6155</li><li><strong>Consultorio Dental (Insurgentes Sur 3656)</strong> — ver ficha</li><li><strong>Hein Lym Dental Clinic</strong> — 55 5679 9416</li><li><strong>Clínica Odontología Integral</strong> — ver ficha</li><li><strong>Clínica de Especialidades Dentales CED</strong> — ver ficha</li><li><strong>Consultorio Dental Alfa y Omega</strong> — ver ficha</li><li><strong>Dental Glass</strong> — ver ficha</li></ul></div>
+</div><div class="card">
+  <h3 style="color:var(--blue-light); margin-bottom:15px; font-family:var(--font-head);">Miércoles</h3>
+  <div class="analysis oportunidad"><ul><li><strong>Dental Happy</strong> — ver ficha</li><li><strong>Dr. Paul Miranda (Consultorio Dental)</strong> — ver ficha</li><li><strong>KAISEN Servicio Dental</strong> — ver ficha</li><li><strong>Smile Dental Center</strong> — ver ficha</li><li><strong>Clínica Dental Ajusco</strong> — 55 7243 1029</li><li><strong>Consultorio Dental DenTalk</strong> — ver ficha</li><li><strong>Dr. Arturo Zamora Espinosa (Consultorio Dental)</strong> — ver ficha</li><li><strong>Dr. Javier Enrique Sánchez Ordaz (Consultorio Dental)</strong> — ver ficha</li></ul></div>
+</div><div class="card">
+  <h3 style="color:var(--blue-light); margin-bottom:15px; font-family:var(--font-head);">Jueves</h3>
+  <div class="analysis oportunidad"><ul><li><strong>Dra. Fernanda González Gamiño (Consultorio Dental)</strong> — ver ficha</li><li><strong>Dra. Griselda Mejía Barrientos (Consultorio Dental)</strong> — ver ficha</li><li><strong>Dra. Montserrat Cerqueda (Consultorio Dental)</strong> — ver ficha</li><li><strong>Dra. Paulina Reynoso Mercado (Consultorio Dental)</strong> — ver ficha</li><li><strong>La Clínica Becerra</strong> — ver ficha</li><li><strong>Dra. Roxana Y. Vilchis Villa (Consultorio Dental)</strong> — ver ficha</li><li><strong>Dental Pedregal</strong> — ver ficha</li><li><strong>Odentica San Andrés Totoltepec</strong> — ver ficha</li></ul></div>
+</div><div class="card">
+  <h3 style="color:var(--blue-light); margin-bottom:15px; font-family:var(--font-head);">Viernes</h3>
+  <div class="analysis oportunidad"><ul><li><strong>Ortos Tu Estilo (Clínica Dental)</strong> — 55 4800 9574</li><li><strong>Dentista de Niños (sucursal Toriello Guerra)</strong> — 55 7045 1608</li><li><strong>CAOS Dental (Carlos Ayala Odontologic Service)</strong> — 55 1705 6344</li><li><strong>MOA Dental</strong> — 55 2652 1484</li><li><strong>dentalia Coapa</strong> — ver ficha</li></ul></div>
+</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <p>Informe generado para <a href="https://digitalownersystem.com">Digital Owner System</a> — Base de prospección, Alcaldía Tlalpan, CDMX</p>
+  <p style="margin-top:5px;">Sector: Dentistas / Clínicas dentales · 38 negocios verificados vía búsqueda web y análisis de sitios oficiales</p>
+</div>
+
+<script>
+function copyMsg(btn) {
+    const body = btn.previousElementSibling;
+    navigator.clipboard.writeText(body.innerText).then(() => {
+        btn.textContent = '¡Copiado!';
+        btn.style.background = '#25D366';
+        setTimeout(() => { btn.textContent = 'Copiar mensaje'; btn.style.background = '#1586f5'; }, 2200);
+    });
+}
+</script>
+
+
+
+</body></html>
