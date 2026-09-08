@@ -11,6 +11,14 @@ Dashboard web interno de seguimiento comercial para Prisma. Autenticación
 obligatoria y persistencia real en Supabase. No es un sitio público ni una
 landing page. No tiene registro abierto: las altas se hacen por invitación.
 
+**La base de Supabase es compartida con `prisma-comercial` (el sitio público,
+`iaprisma.com`) — dos repos, un solo esquema, dos modelos de amenaza
+distintos.** Todo lo que gobierna esa relación (qué puede leer el sitio
+público, dónde viven las migraciones, qué tablas nunca se exponen a `anon`)
+vive en [`CONTRATO_BASE_COMPARTIDA.md`](./CONTRATO_BASE_COMPARTIDA.md), en la
+raíz de este repo — léelo antes de tocar RLS, una función `security definer`,
+o cualquier cosa que `prisma-comercial` pudiera terminar llamando.
+
 Idioma de la interfaz: **español (México)**.
 Idioma del código, nombres de variables y comentarios: **inglés**.
 
