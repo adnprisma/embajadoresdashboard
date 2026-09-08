@@ -180,11 +180,22 @@ Reglas que no se negocian:
   de una migración que en realidad no había corrido) — la disciplina real
   no es leer el mensaje, es verificar el dato con una consulta aparte
   después de cada corrida que escribe algo. **Antes de convertir un `.sql` a una sola
-  línea para pegarlo, quita primero las líneas que empiezan con `--`**
-  (`grep -v '^[[:space:]]*--'`) y **después** une con `tr`/`sed` — nunca al
-  revés. Esto es aparte del bug de auto-duplicado de paréntesis al pegar
-  saltos de línea literales (la razón original de convertir a una sola
-  línea) — son dos problemas distintos del mismo flujo.
+  línea para pegarlo, quita el comentario `--` completo, no solo las líneas
+  que EMPIEZAN con `--`.** `grep -v '^[[:space:]]*--'` (la primera versión
+  de esta regla) solo quita líneas que son comentario puro — un comentario
+  al FINAL de una línea de código (`continue; -- ya es suyo, no hay
+  movimiento que registrar`) sobrevive, y al unir todo en una sola línea
+  ese `--` se come el resto del archivo igual que un comentario de cabecera
+  completo — mismo bug, variante que la primera regla no cubría. Pasó
+  escribiendo `0030_reassign_to_reserve.sql`: "syntax error at end of
+  input" en vez de la falla silenciosa de la vez pasada, pero la causa es
+  la misma línea `--` mal cortada. La forma que sí cubre los dos casos:
+  `sed 's/--.*$//'` (borra desde el primer `--` de cada línea hasta el
+  final, sin importar si hay código antes) y **después** unir con
+  `tr`/`sed` — nunca al revés. Esto es aparte del bug de auto-duplicado de
+  paréntesis al pegar saltos de línea literales (la razón original de
+  convertir a una sola línea) — son dos problemas distintos del mismo
+  flujo.
 - **Un arreglo de cruce (JOIN, matching por texto, lo que sea) se prueba
   PRIMERO contra los datos que ya están cargados, antes de usarlo con datos
   nuevos — nunca al revés.** El caso nuevo es exactamente el que menos
