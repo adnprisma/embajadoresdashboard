@@ -147,6 +147,37 @@ Reglas que no se negocian:
   donde no hay sesión y `auth.uid()` es `null`. Ya pasó dos veces (el trigger
   de cambio de rol en `profiles` y `reassign_contacts()`): sin el respaldo, la
   función simplemente no se puede ejecutar a mano cuando hace falta.
+- **`import_contacts()` tiene dos versiones (overload) por un `create or
+  replace` que no reemplazó nada — bug real, sin arreglar.**
+  `0013_import_contacts.sql` la creó con 4 parámetros;
+  `0021_contact_reserve_and_tags.sql` le agregó `p_in_reserve` con "create or
+  replace function import_contacts(... 5 parámetros ...)" — pero
+  `create or replace` solo reemplaza si la firma (cantidad de parámetros)
+  es idéntica. Al diferir, Postgres creó una SEGUNDA función en vez de
+  reemplazar la primera. Cualquier llamada con exactamente 4 argumentos
+  posicionales es ambigua (`ERROR 42725: function import_contacts(...) is
+  not unique`) — pasó al cargar el lote de dentistas del 7 de septiembre de
+  2026, con la misma forma de llamada que ya había funcionado en
+  `23-importa-veterinarias-cdmx-2sep.sql` (esa corrió antes de que
+  existiera el overload de 5). **Workaround usado, sin tocar el esquema:**
+  pasar el 5º argumento (`p_in_reserve`) explícito como `null` — solo calza
+  con la versión de 5 parámetros, desambigua sin migración. Arreglo de
+  raíz pendiente (no hecho porque no era parte de esa carga): `drop
+  function` del overload de 4 parámetros, en su propia migración.
+- **Pegar un archivo `.sql` con comentarios de cabecera como una sola línea
+  (`tr '\n' ' '`) rompe la carga EN SILENCIO si el comentario queda pegado
+  al código real.** Un comentario de línea (`--`) en SQL comenta todo lo que
+  sigue en esa misma línea — no tiene fin de bloque. Si el header de varias
+  líneas con `--` se une con el `select ...` real en una sola línea, el
+  primer `--` comenta el resto completo: el editor de Supabase regresa
+  "Success. No rows returned" (no un error) y no insertó nada. Pasó con la
+  carga de dentistas del 7 de septiembre: dos intentos silenciosos antes de
+  notar que el conteo seguía en 0. **Antes de convertir un `.sql` a una sola
+  línea para pegarlo, quita primero las líneas que empiezan con `--`**
+  (`grep -v '^[[:space:]]*--'`) y **después** une con `tr`/`sed` — nunca al
+  revés. Esto es aparte del bug de auto-duplicado de paréntesis al pegar
+  saltos de línea literales (la razón original de convertir a una sola
+  línea) — son dos problemas distintos del mismo flujo.
 - **Los 9 links de pago de Stripe (`app_settings`, `stripe_link.<modalidad>.<packageId>`,
   `0027_stripe_link_modalidad.sql`) se verifican a mano, nunca contra la API
   de Stripe — decisión tomada, no pendiente.** Se evaluó: `GET
