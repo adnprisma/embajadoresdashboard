@@ -31,6 +31,7 @@ const MAX_BULLETS = 4;
 // — no hay regla automática de pluralización.
 const GIRO_A_FRASE: Record<string, string> = {
   Veterinaria: "veterinarias en CDMX",
+  Dentista: "dentistas en CDMX",
 };
 
 const GIRO_FRASE_FALLBACK = "negocios locales en CDMX";
@@ -45,7 +46,7 @@ export function generarMensajeContacto(input: MensajeContactoInput): string {
   const { mensaje } = copy.contactos.detail.analysisTab;
   const ownerFirstName = input.ownerFullName?.split(" ")[0] ?? null;
 
-  const bullets = ofertaParaCarencias(input)
+  const bullets = ofertaParaCarencias(input, input.industry)
     .filter((item) => item.alcance === "nucleo")
     .slice(0, MAX_BULLETS)
     .map((item) => `• ${item.propuestaCorta}`)

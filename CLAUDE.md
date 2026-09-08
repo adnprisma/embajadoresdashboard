@@ -216,6 +216,23 @@ Reglas que no se negocian:
   queda sin domicilio — y la etiqueta `visitar` vuelve a no tener a dónde
   apuntar. Si eso empieza a pasar con regularidad, la dirección se mueve a
   `contacts`.
+- **Archivos de trabajo interno (HTML de prospección, imágenes de datos
+  bancarios, recursos de venta) viven en `content/`, NUNCA en `public/`.**
+  `public/` es estático y se sirve sin sesión — cualquier archivo ahí es
+  descargable por cualquiera que adivine la URL, sin login. `content/` no
+  se sirve directo: cada subcarpeta se consume o por una ruta de API que
+  valida sesión primero (`content/recursos/` vía
+  `src/app/api/recursos/assets/[...path]/route.ts`, `content/datos-pago/`
+  vía `src/app/api/datos-pago/header/route.ts`), o por un script que corre
+  en la laptop, nunca en el navegador del cliente (`content/prospeccion/`,
+  vía `scripts/parse-prospect-analysis.mjs`). `content/prospeccion/` se
+  organiza por giro y fecha (`content/prospeccion/dentistas/2026-09/`,
+  `content/prospeccion/veterinarias/2026-09/`, etc.) — el usuario deja ahí
+  los HTML de cada lote y solo indica la carpeta; el parser ya acepta una
+  carpeta como argumento y expande los `.html` que encuentre dentro, sin
+  necesitar cambio de código para esto. No es una regla de sesión como las
+  otras dos — es para no llenar el repo de HTML pegados por chat y para
+  que ese contenido nunca termine en `public/` por accidente.
 
 ---
 
@@ -268,3 +285,32 @@ Reglas que no se negocian:
   la prueba en vivo del bloque 1 dejó `interactions` de status_change en 3
   contactos reales de Valeria, y eso infló "Foto del universo" del bloque 3
   con un "interesado" que no era real.
+- **Lista fija de verificaciones antes de cargar un lote de prospección
+  nuevo — de solo lectura, en este orden.** Existe porque el cruce
+  nombre-contra-nombre-DENTRO-del-propio-lote (el punto 5) se saltó dos
+  veces antes de escribirse aquí (lote de dentistas, 2026-09-07: 19
+  clusters reales — Consultorios Dentales del Sector Privado, MC Dent,
+  Pro-Dental/Dra. Brenda Ruz López, Kids & Teens and More, ShinnyTooth,
+  Dr. Javier Enrique Sánchez Ordaz, entre otros — que ni el cruce contra
+  `contacts` ni el cruce por teléfono compartido detectan, porque son
+  sucursales con teléfonos distintos o sin teléfono):
+  1. Conteos por archivo/categoría del lote — confirmar contra lo que dice
+     quien entrega el lote, nunca forzar un número que no cuadra.
+  2. Teléfonos compartidos DENTRO del lote (mismo número normalizado, dos
+     negocios) — no se borran, se etiquetan (`linea-compartida`).
+  3. Teléfonos mal formados (prefijos viejos, ladas fuera de CDMX, líneas
+     nacionales en vez de líneas de sucursal).
+  4. Duplicados contra TODO `contacts` (no solo el lote nuevo) — por
+     teléfono normalizado Y por nombre exacto normalizado.
+  5. **Duplicados por nombre DENTRO del propio lote nuevo** — mismo negocio
+     con dos fichas por tener sucursales distintas (nombre base antes del
+     primer paréntesis/guion, y también nombre de doctor/a si aparece
+     "Dr./Dra. Nombre" en el texto, porque el mismo doctor puede aparecer
+     como nombre base en una fila y como calificador entre paréntesis en
+     otra). Un nombre puramente genérico y descriptivo (ej. "Consultorio
+     Dental" a secas) que se repite NO cuenta como duplicado por sí solo —
+     es coincidencia de nombre común, no evidencia de mismo negocio.
+  6. Desglose geográfico (alcaldía, colonia, lo que aplique) de ambos
+     grupos.
+  Párate ahí — etiquetas y asignación son un paso aparte, después de que el
+  humano vea los números.

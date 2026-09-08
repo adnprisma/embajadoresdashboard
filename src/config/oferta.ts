@@ -59,8 +59,8 @@ export const OFERTA_POR_CAPACIDAD: Record<Capacidad, OfertaItem> = {
   has_crm: {
     carencia: 'CRM',
     propuesta:
-      'Un CRM donde queda el historial de cada cliente y cada mascota: qué se le hizo, cuándo, y cuándo toca volver. Deja de vivir en la memoria de quien atiende.',
-    propuestaCorta: 'El historial de cada cliente y su mascota, siempre a la mano.',
+      'Un CRM donde queda el historial de cada cliente: qué se le hizo, cuándo, y cuándo toca volver. Deja de vivir en la memoria de quien atiende.',
+    propuestaCorta: 'El historial de cada cliente, siempre a la mano.',
     alcance: 'nucleo',
   },
 
@@ -108,17 +108,75 @@ export const OFERTA_ADICIONAL: OfertaItem[] = [
   {
     carencia: 'Reseñas en Google',
     propuesta:
-      'Gestión de reseñas en Google. Para un negocio local es de donde viene la mayor parte de la confianza previa: quien busca una veterinaria cerca, primero lee.',
+      'Gestión de reseñas en Google. Para un negocio local es de donde viene la mayor parte de la confianza previa: quien busca un negocio como el tuyo cerca, primero lee.',
     propuestaCorta: 'Tus reseñas de Google, atendidas.',
     alcance: 'nucleo',
   },
 ]
 
-/** Devuelve la oferta que corresponde a las carencias detectadas del prospecto. */
+/**
+ * Override por giro (contacts.industry, texto exacto) de los puntos de
+ * oferta que sí cambian según el negocio. El default arriba (has_crm,
+ * OFERTA_ADICIONAL) es NEUTRAL a propósito: un giro sin entrada aquí sale
+ * genérico, nunca con el texto de otro giro puesto en silencio. Decisión
+ * explícita — la alternativa (caer al texto de veterinaria si no hay
+ * entrada) fue la que se descartó, porque el día que se cargue un giro 17
+ * y alguien olvide esta tabla, el error correcto es "genérico", no "el
+ * cliente equivocado".
+ *
+ * Agrega aquí cada giro real conforme se carga, igual que GIRO_A_FRASE en
+ * mensajeContacto.ts — mismo patrón, dos archivos distintos porque son dos
+ * textos distintos (oferta vs. frase de justificación del mensaje).
+ */
+const OFERTA_POR_GIRO: Record<string, { hasCrm: Pick<OfertaItem, 'propuesta' | 'propuestaCorta'>; resenas: Pick<OfertaItem, 'propuesta' | 'propuestaCorta'> }> = {
+  Veterinaria: {
+    hasCrm: {
+      propuesta:
+        'Un CRM donde queda el historial de cada cliente y cada mascota: qué se le hizo, cuándo, y cuándo toca volver. Deja de vivir en la memoria de quien atiende.',
+      propuestaCorta: 'El historial de cada cliente y su mascota, siempre a la mano.',
+    },
+    resenas: {
+      propuesta:
+        'Gestión de reseñas en Google. Para un negocio local es de donde viene la mayor parte de la confianza previa: quien busca una veterinaria cerca, primero lee.',
+      propuestaCorta: 'Tus reseñas de Google, atendidas.',
+    },
+  },
+  Dentista: {
+    hasCrm: {
+      propuesta:
+        'Un CRM donde queda el historial de cada paciente: qué se le hizo, cuándo, y cuándo toca su siguiente cita. Deja de vivir en la memoria de quien atiende.',
+      propuestaCorta: 'El historial de cada paciente, siempre a la mano.',
+    },
+    resenas: {
+      propuesta:
+        'Gestión de reseñas en Google. Para un negocio local es de donde viene la mayor parte de la confianza previa: quien busca un dentista cerca, primero lee.',
+      propuestaCorta: 'Tus reseñas de Google, atendidas.',
+    },
+  },
+}
+
+/** True si el giro no tiene entrada en OFERTA_POR_GIRO — para el aviso solo-admin en la ficha. */
+export function giroSinOfertaConfigurada(industry: string | null): boolean {
+  return industry !== null && !(industry in OFERTA_POR_GIRO)
+}
+
+/** Devuelve la oferta que corresponde a las carencias detectadas del prospecto, con el texto de has_crm ajustado al giro. */
 export function ofertaParaCarencias(
   capacidades: Partial<Record<Capacidad, boolean | null>>,
+  industry: string | null,
 ): OfertaItem[] {
+  const hasCrmOverride = industry ? OFERTA_POR_GIRO[industry]?.hasCrm : undefined
+
   return (Object.keys(OFERTA_POR_CAPACIDAD) as Capacidad[])
     .filter((c) => capacidades[c] === false) // null = parcial, no cuenta como carencia
-    .map((c) => OFERTA_POR_CAPACIDAD[c])
+    .map((c) => {
+      const base = OFERTA_POR_CAPACIDAD[c]
+      return c === 'has_crm' && hasCrmOverride ? { ...base, ...hasCrmOverride } : base
+    })
+}
+
+/** Devuelve OFERTA_ADICIONAL con el texto de reseñas ajustado al giro. Siempre se muestra, sin importar carencias. */
+export function ofertaAdicionalParaGiro(industry: string | null): OfertaItem[] {
+  const resenasOverride = industry ? OFERTA_POR_GIRO[industry]?.resenas : undefined
+  return OFERTA_ADICIONAL.map((item, i) => (i === 0 && resenasOverride ? { ...item, ...resenasOverride } : item))
 }

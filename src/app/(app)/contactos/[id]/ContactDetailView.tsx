@@ -45,7 +45,7 @@ import { CONTACT_STATUSES } from "@/config/contactStatus";
 import { isOperationalTag, OPERATIONAL_TAGS } from "@/config/contactTags";
 import { copy } from "@/config/copy";
 import { generarMensajeContacto } from "@/config/mensajeContacto";
-import { OFERTA_ADICIONAL, ofertaParaCarencias, type OfertaItem } from "@/config/oferta";
+import { giroSinOfertaConfigurada, ofertaAdicionalParaGiro, ofertaParaCarencias, type OfertaItem } from "@/config/oferta";
 import { useContactAssignments } from "@/lib/queries/contactAssignments";
 import { useContactInteractions, type InteractionRow } from "@/lib/queries/interactions";
 import {
@@ -560,19 +560,22 @@ function AnalysisBody({
   ownerFullName,
   contactPhone,
   industry,
+  isAdmin,
 }: {
   analysis: ProspectAnalysisRow;
   ownerFullName: string | null;
   contactPhone: string | null;
   industry: string | null;
+  isAdmin: boolean;
 }) {
   const { analysisTab } = copy.contactos.detail;
 
-  // OFERTA_ADICIONAL siempre aparece — no depende de ninguna carencia
-  // detectada (ver config/oferta.ts). El resto sale de cruzar las
-  // capacidades REALES de este prospecto contra el mapa, así que cambia
-  // de una ficha a otra.
-  const oportunidades = [...ofertaParaCarencias(analysis), ...OFERTA_ADICIONAL];
+  // La oferta adicional (Reseñas en Google) siempre aparece — no depende de
+  // ninguna carencia detectada (ver config/oferta.ts). El resto sale de
+  // cruzar las capacidades REALES de este prospecto contra el mapa, así que
+  // cambia de una ficha a otra. Ambas reciben el giro para ajustar el texto
+  // de los puntos que sí varían (has_crm, reseñas) — ver OFERTA_POR_GIRO.
+  const oportunidades = [...ofertaParaCarencias(analysis, industry), ...ofertaAdicionalParaGiro(industry)];
   const nucleo = oportunidades.filter((item) => item.alcance === "nucleo");
   const complemento = oportunidades.filter((item) => item.alcance === "complemento");
   const gaps = analysis.gaps ?? [];
@@ -625,6 +628,9 @@ function AnalysisBody({
         <h4 className="text-xs font-medium uppercase tracking-[0.06em] text-state-positive">
           {analysisTab.opportunitiesTitle}
         </h4>
+        {isAdmin && giroSinOfertaConfigurada(industry) ? (
+          <p className="text-xs font-medium text-state-negative">{analysisTab.giroSinOfertaWarning}</p>
+        ) : null}
         <OportunidadGroup heading={analysisTab.scopeNucleo} emphasis="nucleo" items={nucleo} />
         <OportunidadGroup heading={analysisTab.scopeComplemento} emphasis="complemento" items={complemento} />
       </div>
@@ -705,7 +711,7 @@ function ContactStatusBlock({ current }: { current: ContactRow }) {
 // pantalla entera en blanco. Las partes 2 a 5 tienen su propio
 // loading/error/vacío, con un solo EmptyState cuando no hay análisis en vez
 // de cinco huecos separados.
-function ContactAnalysisTab({ current }: { current: ContactRow }) {
+function ContactAnalysisTab({ current, isAdmin }: { current: ContactRow; isAdmin: boolean }) {
   const { data, isLoading, isError, refetch } = useProspectAnalysis(current.id, true);
   const { analysisTab } = copy.contactos.detail;
 
@@ -746,7 +752,13 @@ function ContactAnalysisTab({ current }: { current: ContactRow }) {
           />
         </div>
       ) : (
-        <AnalysisBody analysis={data} ownerFullName={current.owner_full_name} contactPhone={current.phone} industry={current.industry} />
+        <AnalysisBody
+          analysis={data}
+          ownerFullName={current.owner_full_name}
+          contactPhone={current.phone}
+          industry={current.industry}
+          isAdmin={isAdmin}
+        />
       )}
     </div>
   );
@@ -1042,7 +1054,7 @@ export function ContactDetailView({
             del mismo Panel que usan las demás pestañas. */}
         <Tabs.Content value="analysis" className="pt-5">
           <Panel title={copy.contactos.detail.tabs.analysis}>
-            <ContactAnalysisTab current={current} />
+            <ContactAnalysisTab current={current} isAdmin={isAdmin} />
           </Panel>
         </Tabs.Content>
 

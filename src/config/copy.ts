@@ -471,6 +471,10 @@ export const copy = {
         gapsTitle: (n: number) => (n === 1 ? "Qué le falta (1 carencia)" : `Qué le falta (${n} carencias)`),
         gapsEmpty: "Sin carencias registradas.",
         opportunitiesTitle: "Qué le ofrece Prisma",
+        // Solo la ve un admin (ver OFERTA_POR_GIRO en config/oferta.ts) — la
+        // vendedora nunca debe ver un aviso técnico sobre configuración
+        // pendiente, y este texto tampoco entra al mensaje de WhatsApp.
+        giroSinOfertaWarning: "Giro sin oferta configurada — se está mostrando el texto genérico.",
         scopeNucleo: "Incluido en el paquete",
         scopeComplemento: "Se cotiza aparte",
         mensaje: {
