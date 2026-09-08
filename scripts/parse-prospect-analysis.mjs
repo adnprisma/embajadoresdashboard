@@ -1,4 +1,12 @@
 // ---------------------------------------------------------------
+// EN DESUSO para cargas nuevas de un lote completo — usa
+// scripts/report-prospection-lot.mjs + scripts/load-prospection-lot.mjs,
+// que crean contacto y análisis en la misma pasada (el contact_id se
+// conoce al insertar, no hace falta cruzar por nombre+alcaldía después).
+// Este script se queda porque sigue sirviendo para RE-ANALIZAR un
+// contacto que ya existe (sin crear nada nuevo) — no lo borres, pero no
+// lo uses para un lote nuevo.
+//
 // Parsea HTML de prospección (tema oscuro, marca "Digital Owner System") y
 // genera el SQL para cargar prospect_analysis con las 7 capacidades
 // booleanas + score + contacto + carencias + nota.

@@ -280,14 +280,62 @@ Reglas que no se negocian:
   `src/app/api/recursos/assets/[...path]/route.ts`, `content/datos-pago/`
   vía `src/app/api/datos-pago/header/route.ts`), o por un script que corre
   en la laptop, nunca en el navegador del cliente (`content/prospeccion/`,
-  vía `scripts/parse-prospect-analysis.mjs`). `content/prospeccion/` se
+  vía `scripts/report-prospection-lot.mjs` + `scripts/load-prospection-lot.mjs`
+  — ver el bullet de "carga de un lote nuevo" más abajo). `content/prospeccion/` se
   organiza por giro y fecha (`content/prospeccion/dentistas/2026-09/`,
   `content/prospeccion/veterinarias/2026-09/`, etc.) — el usuario deja ahí
-  los HTML de cada lote y solo indica la carpeta; el parser ya acepta una
-  carpeta como argumento y expande los `.html` que encuentre dentro, sin
+  los HTML de cada lote y solo indica la carpeta; los scripts ya aceptan una
+  carpeta como argumento y expanden los `.html` que encuentren dentro, sin
   necesitar cambio de código para esto. No es una regla de sesión como las
   otras dos — es para no llenar el repo de HTML pegados por chat y para
   que ese contenido nunca termine en `public/` por accidente.
+- **Carga de un lote de prospección nuevo: contacto y análisis salen de la
+  MISMA pasada sobre el HTML, nunca de un CSV intermedio.** Decisión
+  tomada tras dos omisiones reales (Veterinaria Molinos, Virtuodent
+  Boutique Dental — ambas existían en los HTML, ninguna llegó al CSV que
+  alimentaba la carga vieja): un CSV a medio camino es una derivación con
+  pérdidas de la misma fuente. Flujo, en dos scripts:
+  1. `node scripts/report-prospection-lot.mjs <carpeta-html> --out decisiones.json`
+     — Fase A automática (`scripts/lib/lot-analysis.mjs`): teléfonos
+     compartidos, nombres/doctores repetidos, teléfonos mal formados,
+     candidatos de marca por primer token. No escribe nada en la base.
+     Genera un reporte legible y una plantilla de decisiones con cada
+     cluster/teléfono en `"decision": null`.
+  2. Un humano llena esa plantilla — es el juicio de negocio que no es
+     derivable del HTML (¿cadena real o nombre genérico coincidente?
+     ¿se carga el teléfono raro con etiqueta o se descarta?). Los
+     "candidatos de marca" del reporte son solo sugerencias — una cadena
+     real cuyo nombre va pegado a la ubicación sin paréntesis, o con
+     variante de ortografía, no se agrupa sola (pasó con Dentalia, La
+     Clínica Dental y Dentis+a en el lote de dentistas: el cruce
+     automático por paréntesis/guion encontró 6, 7 y 4 sucursales de 10,
+     10 y 6 reales) — toca revisarlos a mano y agregarlos al archivo si
+     corresponde.
+  3. `node scripts/load-prospection-lot.mjs --decisions decisiones.json <carpeta-html>`
+     — genera el SQL real. **Aborta sin generar una sola línea si algún
+     `"decision"` sigue en `null`, si falta `loteTagConTelefono`, o si el
+     HTML de hoy tiene un cluster/teléfono que el archivo de decisiones no
+     cubre** (decisiones desactualizado respecto al HTML actual) — el
+     juicio de Fase A nunca es un paso opcional ni algo que se pueda
+     saltar "por ahora".
+  - **Giro y alcaldía: mapas explícitos, nunca se adivinan** —
+    `GIRO_PLURAL_A_SINGULAR` y `ALCALDIA_TAGS` en
+    `scripts/lib/prospection-html.mjs`. Un H1 con un giro plural que no
+    está en el mapa (o una alcaldía cuyo texto no contiene ninguna de las
+    16 etiquetas conocidas) hace que el script ABORTE de inmediato, sin
+    parsear una sola ficha — mismo criterio que `OFERTA_POR_GIRO`
+    (`src/config/oferta.ts`): nunca cae a un default ni intenta
+    singularizar/adivinar solo.
+  - **Idempotente de verdad, no solo del lado del análisis.** El paso 1
+    (creación de contactos, vía `import_contacts()`) solo incluye en el
+    lote a los negocios que NO tengan ya un match por nombre+alcaldía —
+    correr el mismo HTML dos veces no duplica contactos ni análisis.
+    Verificado en vivo contra los 690 dentistas y las 539 fichas de
+    veterinaria ya cargados: `import_contacts` devolvió 0 (nada nuevo que
+    crear) y los conteos de ambos lados quedaron exactamente iguales.
+  - `scripts/parse-prospect-analysis.mjs` (el parser viejo) se queda —
+    sigue sirviendo para re-analizar un contacto que ya existe sin crear
+    nada nuevo — pero no se usa para cargar un lote completo nuevo.
 
 ---
 
