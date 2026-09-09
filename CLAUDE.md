@@ -105,6 +105,33 @@ Reglas que no se negocian:
   `src/lib/queries/`.
 - **El cliente nunca calcula ni escribe dinero, puntos ni permisos.** Eso vive
   en funciones RPC `security definer` y en políticas RLS.
+- **Ganar una oportunidad exige `closed_value`, por CUALQUIER ruta — no solo
+  desde el kanban.** `update_opportunity_stage()` (0016) ya lo exigía, pero
+  solo cubría su propio camino: el `<select>` de `OpportunityDialog.tsx` no
+  filtraba etapas terminales, así que crear una oportunidad directo en
+  "Cerrado" hacía un INSERT (`useCreateOpportunity`) que se saltaba la RPC
+  entera — sin `closed_value`, sin `closed_at`. Así nacieron las dos
+  oportunidades duplicadas de Vital Titanium el 8 de septiembre de 2026, en
+  el mismo segundo, ambas con `closed_value` null a pesar de estar en etapa
+  ganada. Dos capas, mismo criterio que `enforce_owner_reserve_consistency`
+  (`0030_reassign_to_reserve.sql`): el `<select>` ya no ofrece etapas
+  `is_won`/`is_lost` al crear (ganar es algo que se hace moviendo la
+  tarjeta, no algo con lo que nace), pero el candado real es el trigger
+  `enforce_won_requires_closed_value()` (`0035`) — cubre cualquier camino,
+  conocido o no: el diálogo, un script de `supabase/test-data/`, una
+  importación, o una pantalla que se construya después. Un check constraint
+  plano no alcanza porque la regla depende de `pipeline_stages.is_won`
+  (otra tabla).
+- **`supabase/test-data/seed-opportunities.sql` está roto desde
+  `0016_opportunity_value_split.sql` — deuda anotada, no arreglada.** Inserta
+  una columna `value` que ya no existe (se renombró a `value_legacy`, y se
+  agregaron `estimated_value`/`closed_value` aparte). Es un seed de
+  desarrollo para probar el Kanban a mano — nadie lo ha vuelto a correr desde
+  antes de esa migración. Se notó al revisar todas las rutas que escriben
+  `opportunities` antes de escribir `0035_enforce_won_requires_closed_value.sql`
+  (arriba); no se arregló ahí porque no era parte de ese cambio. Si algún
+  día alguien lo necesita, va a fallar en el primer `insert`; esta nota
+  existe para que no pierda el rato adivinando por qué.
 - **`src/config/pricing.ts` es la única fuente de precios que se edita a mano.**
   La tabla `catalog_items` es su espejo en Postgres — la necesitan las
   funciones RPC (`generate_quote()`), que no pueden leer un archivo de

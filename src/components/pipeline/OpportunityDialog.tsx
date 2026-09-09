@@ -26,13 +26,26 @@ type FormValues = z.infer<typeof formSchema>;
 
 type LockedContact = { id: string; business_name: string };
 
+// Ganar (o perder) una oportunidad es algo que se hace moviéndola por el
+// kanban — nunca algo con lo que nace. Antes de este filtro, el <select>
+// ofrecía cualquier etapa, incluida "Cerrado": elegirla ahí hacía un
+// INSERT directo (useCreateOpportunity) sin pasar por
+// update_opportunity_stage(), así que no exigía closed_value — así
+// nacieron las dos oportunidades duplicadas de Vital Titanium el 8 de
+// septiembre de 2026. Esto cierra el único camino que la UI conocía; el
+// trigger enforce_won_requires_closed_value() (0035) cierra la puerta de
+// verdad para cualquier otro camino, conocido o no.
+function openStages(stages: PipelineStage[]): PipelineStage[] {
+  return stages.filter((stage) => !stage.is_won && !stage.is_lost);
+}
+
 function defaultValues(stages: PipelineStage[], lockedContact?: LockedContact): FormValues {
   return {
     business_name: lockedContact?.business_name ?? "",
     contact_id: lockedContact?.id ?? null,
     estimated_value: "",
     mrr: "",
-    stage_id: stages[0]?.id ?? "",
+    stage_id: openStages(stages)[0]?.id ?? "",
     notes: "",
   };
 }
@@ -195,7 +208,7 @@ export function OpportunityDialog({
                 {copy.pipeline.dialog.stageLabel}
               </label>
               <select id="stage_id" className={INPUT_CLASSES} {...register("stage_id")}>
-                {stages.map((stage) => (
+                {openStages(stages).map((stage) => (
                   <option key={stage.id} value={stage.id}>
                     {stage.name}
                   </option>
