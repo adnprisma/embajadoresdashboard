@@ -2,4 +2,4 @@
 # ver CLAUDE.md, nota sobre quoteMath.ts. El candado duro de verdad es C
 # (paso del build en Vercel, package.json "build"): este hook se puede
 # saltar con --no-verify, ese no.
-npm run check:catalog-sync && npm run check:quote-math
+npm run check:catalog-sync && npm run check:quote-math && npm run check:no-public-exposure
