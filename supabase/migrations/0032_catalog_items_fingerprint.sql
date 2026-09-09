@@ -50,9 +50,22 @@
 -- 6. Salida en hexadecimal, minúsculas, sin prefijo — encode(..., 'hex')
 --    en Postgres ya es minúsculas por default; crypto.createHash en
 --    Node con .digest('hex') también.
+--
+-- Nota de implementación (Postgres): sha256() nativo, NO pgcrypto. En
+-- Supabase, pgcrypto vive instalada en el esquema `extensions`, no en
+-- `public` — una función con `search_path = public` (obligatorio para
+-- toda función security definer que dependa de auth.uid()/tablas de este
+-- esquema, ver CLAUDE.md) no la encuentra sin calificarla, y calificarla
+-- (`extensions.digest`) suma una dependencia que no hace falta. Postgres
+-- trae sha256() en el core desde la versión 11; Supabase corre 15 — no
+-- se necesita ninguna extensión. encode(sha256(convert_to(texto,
+-- 'UTF8')), 'hex') da exactamente el mismo hex minúsculas que
+-- digest(texto, 'sha256') habría dado — mismo algoritmo estándar sobre
+-- los mismos bytes UTF-8, la especificación del determinismo no cambia,
+-- solo la función que la calcula.
 -- ---------------------------------------------------------------
 
-create function catalog_items_fingerprint()
+create or replace function catalog_items_fingerprint()
 returns text
 language sql
 stable
@@ -60,13 +73,15 @@ security definer
 set search_path = public
 as $$
   select encode(
-    digest(
-      string_agg(
-        item_type || '|' || item_id || '|' || price::text || '|' || includes_whatsapp::text,
-        chr(10)
-        order by item_id collate "C"
-      ),
-      'sha256'
+    sha256(
+      convert_to(
+        string_agg(
+          item_type || '|' || item_id || '|' || price::text || '|' || includes_whatsapp::text,
+          chr(10)
+          order by item_id collate "C"
+        ),
+        'UTF8'
+      )
     ),
     'hex'
   )

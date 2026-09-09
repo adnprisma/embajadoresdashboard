@@ -155,6 +155,18 @@ Reglas que no se negocian:
   donde no hay sesión y `auth.uid()` es `null`. Ya pasó dos veces (el trigger
   de cambio de rol en `profiles` y `reassign_contacts()`): sin el respaldo, la
   función simplemente no se puede ejecutar a mano cuando hace falta.
+- **`pgcrypto` vive en el esquema `extensions` en Supabase, no en `public`
+  — una función `security definer` con `search_path = public` (la regla de
+  arriba) no encuentra `digest()` sin calificarlo, y truena con "function
+  digest(text, unknown) does not exist".** Pasó al escribir
+  `catalog_items_fingerprint()` (`0032_catalog_items_fingerprint.sql`).
+  Para hashear dentro de una función así, usa el `sha256()` nativo de
+  Postgres (core desde la versión 11, Supabase corre 15 — no hace falta
+  ninguna extensión): `encode(sha256(convert_to(texto, 'UTF8')), 'hex')`
+  da exactamente el mismo hex en minúsculas que `digest(texto, 'sha256')`
+  habría dado — confirmado igual, byte por byte, contra los datos reales
+  antes de aplicarlo. Preferido sobre calificar `extensions.digest()`: una
+  dependencia menos, y `search_path` se queda en `public` a secas.
 - **`import_contacts()` tiene dos versiones (overload) por un `create or
   replace` que no reemplazó nada — bug real, sin arreglar.**
   `0013_import_contacts.sql` la creó con 4 parámetros;
