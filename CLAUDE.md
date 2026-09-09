@@ -167,6 +167,26 @@ Reglas que no se negocian:
   habría dado — confirmado igual, byte por byte, contra los datos reales
   antes de aplicarlo. Preferido sobre calificar `extensions.digest()`: una
   dependencia menos, y `search_path` se queda en `public` a secas.
+- **`clients.onboarding_access_code` se genera con `generate_onboarding_code()`
+  (`0033_onboarding_code_generator.sql`) — nunca se escribe a mano.** Código
+  aleatorio de verdad (alfabeto de 31 caracteres sin `0/O/1/I/L`, 10
+  caracteres en dos grupos de 5, `gen_random_uuid()` como fuente — nunca
+  `pgcrypto`, mismo motivo que el punto de arriba) vía default de columna
+  en altas nuevas y llamable a mano para rotar un código filtrado. Nació de
+  la revisión de seguridad del 8 de septiembre de 2026 sobre
+  `verify_onboarding_access()` (ver `CONTRATO_BASE_COMPARTIDA.md`): el
+  patrón viejo (`NOMBRE-PRISMA-NNN`, escrito a mano) reducía la fuerza
+  bruta real a solo adivinar un sufijo de 3 dígitos si alguien conocía o
+  suponía el nombre del cliente.
+  **Pendiente, a propósito — la caducidad por tiempo se decidió NO agregar
+  todavía:** con un código genuinamente aleatorio, expirar aporta poco (solo
+  protege si el código se reenvía o queda expuesto en algún lado) y agrega
+  un modo de falla real — un cliente que vuelve el día 35 se queda fuera sin
+  aviso. **Antes de decidir una duración hay que responder algo que hoy no
+  sabemos: ¿el cliente entra a la pantalla de onboarding una sola vez, o
+  puede volver a ella después de activarse?** Si vuelve, caducar rompe un
+  uso legítimo, no solo cierra una ventana de ataque — no se decide sin
+  saber esto primero.
 - **`import_contacts()` tiene dos versiones (overload) por un `create or
   replace` que no reemplazó nada — bug real, sin arreglar.**
   `0013_import_contacts.sql` la creó con 4 parámetros;
