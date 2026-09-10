@@ -1,20 +1,39 @@
 # ---------------------------------------------------------------
-# Vigilante del último deploy de producción en Vercel.
+# Vigilante del último deploy de producción en Vercel — ahora de DOS
+# proyectos (embajadoresdashboard y prisma-web-comercial), no uno. El
+# segundo se agregó el 10 de septiembre de 2026, cuando se confirmó que
+# iaprisma.com ya estaba sirviéndose desde Vercel (no GitHub Pages, que
+# nunca llegó a habilitarse) — ver CLAUDE.md de prisma-comercial.
 #
 # No bloquea nada — a diferencia de los candados de pricing.ts/quoteMath.ts
 # (esos SÍ gatean el build), esto es puro aviso. Corre cada hora y pregunta
-# a la API de Vercel cómo quedó el último deploy de producción; si está en
-# ERROR (o CANCELED), el step falla a propósito. Lo que de verdad resuelve
-# el problema de fondo no es el mecanismo de aviso (el correo default de
-# GitHub por workflow programado que falla) — es que ESTO SE REPITE: un
-# build roto sigue fallando en cada corrida de esta hoja, no solo la
-# primera vez que se detecta. El incidente real (build roto dos días sin
-# que nadie lo viera) fue una alerta única que se perdió, no la ausencia de
-# alerta — 48 correos en dos días no se pierden igual.
+# a la API de Vercel cómo quedó el último deploy de producción de cada
+# proyecto; si alguno está en ERROR (o CANCELED), ese job falla a
+# propósito. Lo que de verdad resuelve el problema de fondo no es el
+# mecanismo de aviso (el correo default de GitHub por workflow programado
+# que falla) — es que ESTO SE REPITE: un build roto sigue fallando en cada
+# corrida de esta hoja, no solo la primera vez que se detecta. El
+# incidente real (build roto dos días sin que nadie lo viera) fue una
+# alerta única que se perdió, no la ausencia de alerta — 48 correos en dos
+# días no se pierden igual.
 #
-# Tres categorías de salida, mismo criterio que check-quote-math.ts — nunca
-# el mismo mensaje opaco para "el deploy falló" y "no pude preguntarle a
-# Vercel":
+# ---------- fail-fast: false — el punto central de este cambio, no un
+# detalle de sintaxis ----------
+# El default de GitHub Actions para strategy.fail-fast es true: si UN job
+# de la matriz falla, GitHub CANCELA los demás jobs de esa matriz que
+# sigan en progreso o en cola (verificado contra la documentación oficial
+# de GitHub Actions antes de escribir esto, no asumido). Con dos proyectos
+# en la misma matriz y el default, un deploy roto en un proyecto cancelaría
+# la revisión del OTRO — te quedarías sin saber su estado justo en el
+# momento en que más importa saberlo (¿el otro también está mal, o solo
+# uno?). fail-fast: false dice lo contrario: cada entrada de la matriz
+# corre hasta el final sin importar qué le pasó a las demás. Sin esto, el
+# vigilante de dos proyectos sería peor que dos vigilantes separados, no
+# mejor.
+#
+# Tres categorías de salida por proyecto, mismo criterio que
+# check-quote-math.ts — nunca el mismo mensaje opaco para "el deploy
+# falló" y "no pude preguntarle a Vercel":
 #   [DEPLOY]   el deploy de producción está en ERROR/CANCELED -> es lo que
 #              este workflow existe para detectar.
 #   [RED]      no se pudo hablar con la API de Vercel (curl no conectó, o
@@ -29,35 +48,55 @@
 # Ya pasó una vez (ver historial): sin esta distinción, un 401 por token
 # vencido se ve IDÉNTICO a un deploy roto — el día que el token expire,
 # esto tiene que decir "el vigilante está roto", no "producción está mal".
+# Con dos jobs en paralelo, un token vencido produce [RED] en LOS DOS a la
+# vez — es información útil (dice "es el token, no un proyecto en
+# particular"), no ruido duplicado.
 #
 # ADVERTENCIA — modo de falla silencioso conocido, no resuelto por este
 # archivo: GitHub apaga automáticamente los workflows programados
-# (schedule) en un repo sin commits en 60 días. Si este repo se queda
-# quieto ese tiempo, el vigilante se apaga solo, sin avisar — exactamente
-# el tipo de falla silenciosa que este workflow existe para evitar en el
-# otro sentido. No hay manera de que un workflow se reactive solo; si algún
-# día el repo entra en una racha larga sin commits, hay que entrar a
-# Settings → Actions y reactivarlo a mano.
+# (schedule) en un repo sin commits en 60 días. Este workflow vive en
+# prisma-dashboard a propósito, no en prisma-comercial — este repo commitea
+# seguido, prisma-comercial casi no se toca (es un sitio de ventas, no algo
+# en desarrollo activo), así que anclar el vigilante aquí reduce el riesgo
+# real de que se apague solo. No lo elimina: si ALGÚN día prisma-dashboard
+# se queda 60 días sin commits, los dos proyectos pierden vigilancia a la
+# vez. No hay manera de que un workflow se reactive solo; si pasa, hay que
+# entrar a Settings → Actions y reactivarlo a mano.
 #
 # Secrets requeridos (Settings → Secrets and variables → Actions):
-#   VERCEL_TOKEN       — token de Vercel. Ver CLAUDE.md para su fecha de
-#                        expiración real y el recordatorio de rotación: un
-#                        token vencido cae en [RED], no en silencio — pero
-#                        sigue siendo trabajo evitable si se rota a tiempo.
-#   VERCEL_PROJECT_ID  — id del proyecto en Vercel (Project Settings →
-#                        General).
-#   VERCEL_TEAM_ID     — SOLO si el proyecto vive bajo un Team, no una
-#                        cuenta personal. Si no aplica, no la agregues y
-#                        deja el parámetro teamId fuera de la URL de abajo.
+#   VERCEL_TOKEN               — token de Vercel, compartido por los dos
+#                                 proyectos porque los dos viven bajo la
+#                                 misma cuenta/team (CONFIRMAR esto antes
+#                                 de aplicar — si algún día viven en cuentas
+#                                 distintas, este token deja de alcanzar
+#                                 para el segundo y hace falta uno nuevo).
+#                                 Ver CLAUDE.md para su fecha de expiración
+#                                 real y el recordatorio de rotación: un
+#                                 token vencido cae en [RED] en los dos
+#                                 jobs, no en silencio.
+#   VERCEL_TEAM_ID              — SOLO si los proyectos viven bajo un Team,
+#                                 no una cuenta personal. Si no aplica, no
+#                                 la agregues y deja el parámetro teamId
+#                                 fuera de la URL de abajo.
+#   VERCEL_PROJECT_ID           — id del proyecto de embajadoresdashboard
+#                                 (Project Settings → General).
+#   VERCEL_PROJECT_ID_COMERCIAL — id del proyecto de prisma-web-comercial
+#                                 (mismo lugar, en el otro proyecto de
+#                                 Vercel). Nuevo — no existía antes de este
+#                                 cambio.
 # ---------------------------------------------------------------
 
 name: Vercel production deploy watch
 
 on:
-  # Probado con workflow_dispatch antes de activar esto: detecta un deploy
-  # en ERROR (dpl_7qu1RL33vrmUZrZAqtJcfUNaTfJZ, commit e2fa15a) y deja
-  # pasar uno sano, ambos con las tres categorías [RED]/[ESQUEMA]/[DEPLOY]
-  # funcionando — no solo "no estorba", sino confirmado que sí detecta.
+  # Probado con workflow_dispatch antes de activar la versión original de
+  # un solo proyecto: detecta un deploy en ERROR
+  # (dpl_7qu1RL33vrmUZrZAqtJcfUNaTfJZ, commit e2fa15a) y deja pasar uno
+  # sano, ambos con las tres categorías [RED]/[ESQUEMA]/[DEPLOY]
+  # funcionando. Pendiente: repetir esa misma prueba negativa sobre el job
+  # de prisma-comercial antes de dar esta versión por buena — ningún
+  # deploy en ERROR conocido de ese proyecto contra el cual probarlo
+  # todavía.
   schedule:
     - cron: "0 * * * *" # cada hora
   workflow_dispatch:
@@ -66,17 +105,28 @@ on:
         description: >
           Prueba negativa: id de un deployment específico (ej. uno de los
           que ya falló) en vez del último de producción. Deja vacío para
-          el chequeo real.
+          el chequeo real. Nota: no es consciente de la matriz — si lo
+          llenas, los DOS jobs (dashboard y comercial) consultan ese mismo
+          id, lo cual solo tiene sentido si estás probando el mecanismo en
+          sí, no un proyecto en particular.
         required: false
 
 jobs:
   check:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: dashboard
+            project_id_secret: VERCEL_PROJECT_ID
+          - name: comercial
+            project_id_secret: VERCEL_PROJECT_ID_COMERCIAL
     runs-on: ubuntu-latest
     steps:
-      - name: Revisa el estado del deploy de producción
+      - name: Revisa el estado del deploy de producción (${{ matrix.name }})
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets[matrix.project_id_secret] }}
           VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
           TEST_DEPLOYMENT_ID: ${{ github.event.inputs.test_deployment_id }}
         run: |
@@ -87,6 +137,11 @@ jobs:
           # diagnóstico — así se vieron los dos "exit code 22" sin más
           # información la vez pasada.
           set -uo pipefail
+
+          if [ -z "${VERCEL_PROJECT_ID:-}" ]; then
+            echo "::error::[RED] El secret ${{ matrix.project_id_secret }} no existe o está vacío — el vigilante de '${{ matrix.name }}' está mal configurado, esto NO es veredicto sobre ningún deploy."
+            exit 1
+          fi
 
           TEAM_QS=""
           if [ -n "${VERCEL_TEAM_ID:-}" ]; then
@@ -110,7 +165,7 @@ jobs:
           CURL_EXIT=$?
 
           if [ $CURL_EXIT -ne 0 ]; then
-            echo "::error::[RED] No se pudo conectar con la API de Vercel (curl exit ${CURL_EXIT}) — el vigilante está roto, esto NO es un veredicto sobre el deploy. Revisa conectividad del runner o si api.vercel.com está caído."
+            echo "::error::[RED] (${{ matrix.name }}) No se pudo conectar con la API de Vercel (curl exit ${CURL_EXIT}) — el vigilante está roto, esto NO es un veredicto sobre el deploy. Revisa conectividad del runner o si api.vercel.com está caído."
             exit 1
           fi
 
@@ -118,12 +173,12 @@ jobs:
           HTTP_BODY=$(echo "$RAW" | sed '$d')
 
           if ! [[ "$HTTP_STATUS" =~ ^[0-9]{3}$ ]]; then
-            echo "::error::[RED] No se pudo leer un código HTTP válido de la respuesta (obtuve: '${HTTP_STATUS}') — el vigilante está roto, no es veredicto sobre el deploy. Cuerpo: ${HTTP_BODY}"
+            echo "::error::[RED] (${{ matrix.name }}) No se pudo leer un código HTTP válido de la respuesta (obtuve: '${HTTP_STATUS}') — el vigilante está roto, no es veredicto sobre el deploy. Cuerpo: ${HTTP_BODY}"
             exit 1
           fi
 
           if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
-            echo "::error::[RED] La API de Vercel respondió HTTP ${HTTP_STATUS} — el vigilante no pudo autenticarse o alcanzar el recurso (token vencido, secret mal puesto, o VERCEL_PROJECT_ID/VERCEL_TEAM_ID incorrectos son las causas típicas de 401/403/404). Esto NO es un veredicto sobre el deploy. Cuerpo: ${HTTP_BODY}"
+            echo "::error::[RED] (${{ matrix.name }}) La API de Vercel respondió HTTP ${HTTP_STATUS} — el vigilante no pudo autenticarse o alcanzar el recurso (token vencido, secret mal puesto, o VERCEL_PROJECT_ID/VERCEL_TEAM_ID incorrectos son las causas típicas de 401/403/404). Esto NO es un veredicto sobre el deploy. Cuerpo: ${HTTP_BODY}"
             exit 1
           fi
 
@@ -136,15 +191,15 @@ jobs:
           fi
 
           if [ -z "$STATE" ]; then
-            echo "::error::[ESQUEMA] HTTP ${HTTP_STATUS} pero la respuesta no trae el campo readyState esperado — el contrato de la API de Vercel pudo cambiar, o el cuerpo no es el JSON esperado. Cuerpo: ${HTTP_BODY}"
+            echo "::error::[ESQUEMA] (${{ matrix.name }}) HTTP ${HTTP_STATUS} pero la respuesta no trae el campo readyState esperado — el contrato de la API de Vercel pudo cambiar, o el cuerpo no es el JSON esperado. Cuerpo: ${HTTP_BODY}"
             exit 1
           fi
 
-          echo "Deploy revisado: ${DEPLOY_URL} — estado: ${STATE}"
+          echo "[${{ matrix.name }}] Deploy revisado: ${DEPLOY_URL} — estado: ${STATE}"
 
           if [ "$STATE" = "ERROR" ] || [ "$STATE" = "CANCELED" ]; then
-            echo "::error::[DEPLOY] El deploy de producción está en estado ${STATE} (${DEPLOY_URL}). Esta sí es una alarma real — revisa Vercel."
+            echo "::error::[DEPLOY] (${{ matrix.name }}) El deploy de producción está en estado ${STATE} (${DEPLOY_URL}). Esta sí es una alarma real — revisa Vercel."
             exit 1
           fi
 
-          echo "[OK] Deploy sano."
+          echo "[OK] (${{ matrix.name }}) Deploy sano."
