@@ -68,7 +68,8 @@ Agregar algo a esta lista es una decisión consciente, con su razón anotada
 
 | Función | Devuelve | Por qué existe |
 |---|---|---|
-| `verify_onboarding_access(p_access_code text)` | `client_id, client_name` | Onboarding de clientes nuevos por código — el formulario de arranque necesita confirmar el código y mostrar el nombre del cliente, nada más. Efecto secundario: actualiza `onboarding_last_accessed_at` en la fila que coincide (audit trail mínimo, no expone nada). |
+| `verify_onboarding_access(p_access_code text)` | `client_id, client_name` | Onboarding de clientes nuevos por código — el gate de acceso necesita confirmar el código y mostrar el nombre del cliente, nada más. Efecto secundario: actualiza `onboarding_last_accessed_at` en la fila que coincide (audit trail mínimo, no expone nada). |
+| `get_onboarding_landing(p_access_code text)` | Cotización vigente (solo precio cotizado, nunca el de vendedora ni el de catálogo), líneas compradas, resumen de plataforma, link de pago de Stripe según modalidad, link de pago de plataforma, datos de transferencia | La landing de 3 secciones que aparece después del código (`onboarding/index.html`, sustituye al formulario de arranque como lo primero que se ve). Separada de `verify_onboarding_access()` a propósito — no amplía el gate de acceso, así ese se queda angosto para siempre. Recibe el código de nuevo (nunca un `client_id`, para que el código siga siendo la única credencial en cada llamada) y NO vuelve a tocar `onboarding_last_accessed_at` (esa escritura se queda solo en `verify_onboarding_access()`). Nunca devuelve `quote_line_items`/`quotes` completas — campo por campo, ver `0036_onboarding_landing.sql`. |
 
 ### Resultado de la revisión de exposición (8 de septiembre de 2026)
 
@@ -89,8 +90,12 @@ de `prisma-comercial` (búsqueda de `.from(`, `.rpc(`, cualquier uso de
   `search_path = public` fijo, columnas mínimas de retorno, filtra por
   `onboarding_enabled` + `status <> 'cancelled'` + código exacto.
 
-**Encontrado, sin corregir todavía (pendiente de decisión — ver el mensaje
-de esta sesión, no se tocó nada sin autorización):**
+**Encontrado el 8 de septiembre de 2026, corregido el mismo día
+(`0031_restrict_public_policies.sql`) — verificado en vivo después de
+aplicarla, no solo asumido: `anon` dejó de poder leer `catalog_items` por
+curl directo, y las 5 políticas de abajo quedaron en `{authenticated}`
+exacto.** Se deja el detalle de lo que estaba mal, con fecha, porque el
+qué-encontramos importa tanto como el qué-corregimos:
 - `catalog_items`: política `catalog_items_select` con `roles = {public}` y
   `qual = true` — **sin restricción real**. Combinado con que `anon` tiene
   privilegios GRANT completos en la tabla (ver más abajo), esto significa
@@ -118,10 +123,21 @@ de esta sesión, no se tocó nada sin autorización):**
   migración desactiva RLS en una tabla por error, ese error no tiene una
   segunda barrera que lo detenga.
 
-**Recomendación (no ejecutada, pendiente de tu decisión):** cambiar los 5
-`roles = {public}` de arriba a `{authenticated}` explícito — no cambia el
-comportamiento de nadie que ya usa el sistema con sesión, y cierra la puerta
-de `catalog_items` que sí está abierta hoy.
+**Ejecutado:** los 5 `roles = {public}` de arriba, cambiados a
+`{authenticated}` explícito vía `ALTER POLICY` (conserva `qual`, no
+recreó las políticas). Verificado que ninguna sesión autenticada perdió
+acceso (simulación de rol contra admin y una vendedora real, antes/después
+idénticos) y que `anon` quedó bloqueado (curl directo a
+`/rest/v1/catalog_items` pasó de 42 filas a `[]`). El punto de GRANT de
+Postgres (línea de abajo) sigue como estaba — es información de contexto,
+no algo pendiente de corregir por sí solo.
+
+Candado permanente agregado después, para no volver a descubrir esto por
+curl: `audit_public_role_policies()` (`0034_audit_public_role_policies.sql`)
+corre en cada `npm run build` y en `.husky/pre-push` — confirma que ninguna
+tabla de `public` tiene una política PERMISSIVE en `{public}` ni RLS
+desactivado, con la única excepción documentada de
+`opportunities_no_delete_won` (RESTRICTIVE, correcta a propósito).
 
 ---
 
@@ -144,7 +160,7 @@ nueva en la lista de la sección 3, nunca por RLS abierto a `anon`.
 | `contact_assignments` | Historial de quién tuvo cada contacto — reconstruye el trabajo interno de reasignación. |
 | `app_settings` | Links de pago de Stripe y datos bancarios — el error más caro posible si se expone. |
 | `clients` | Datos de contrato de cada cliente — lo único que se toca de aquí es a través de `verify_onboarding_access()`, nunca directo. |
-| `catalog_items` | Precios internos por concepto — hoy expuesta por error (ver sección 3), no por diseño. |
+| `catalog_items` | Precios internos por concepto — estuvo expuesta por error hasta el 8 de septiembre de 2026 (ver sección 3), corregida desde entonces. |
 | `seller_prices`, `seller_price_changes` | Precio que cotiza cada vendedora y su historial — dato de negociación interna. |
 
 ---

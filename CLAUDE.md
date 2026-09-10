@@ -177,6 +177,20 @@ Reglas que no se negocian:
   protection es una alerta que alguien puede ignorar, no un candado; el
   paso en el build de Vercel ya da el candado duro sin depender de que
   cambie el flujo de trabajo.
+- **`quotes` no congela el NOMBRE de paquete/plan de plataforma/consumo
+  como sí lo hace `quote_line_items.item_name` — deuda anotada, sin
+  arreglar.** Solo guarda el id (`package_id`, `platform_plan_id`,
+  `platform_consumo_id`) y el precio; el nombre se resuelve en vivo contra
+  `catalog_items` cada vez que se lee. Encontrado al diseñar
+  `get_onboarding_landing()` (`0036_onboarding_landing.sql`): mientras esto
+  solo se leía internamente (pantallas de equipo), un renombre futuro era
+  una inconsistencia estética. **Ya no lo es** — esa función le muestra la
+  cotización a un CLIENTE real, así que un renombre de catálogo le
+  cambiaría retroactivamente, sin que nadie lo edite a propósito, lo que la
+  pantalla dice que compró. Arreglo de raíz (agregar columnas de nombre
+  congelado a `quotes`, mismo criterio que `item_name`) queda fuera de
+  alcance de este cambio — se anota aquí para que no se repita el patrón de
+  "se sabía y no se escribió" de otras entradas de este archivo.
 - **Toda función RPC `security definer` que dependa de `auth.uid()` necesita un
   parámetro de respaldo** para poder correrse desde el editor SQL de Supabase,
   donde no hay sesión y `auth.uid()` es `null`. Ya pasó dos veces (el trigger
