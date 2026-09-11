@@ -1116,6 +1116,7 @@ export const copy = {
   recursos: {
     emptyTitle: "Todavía no hay recursos",
     emptyDescription: "Se irán agregando conforme estén listos.",
+    newBadge: "Nuevo",
     viewer: {
       back: "Volver a Recursos",
       fullscreen: "Pantalla completa",
