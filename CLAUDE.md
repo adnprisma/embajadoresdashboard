@@ -19,6 +19,15 @@ vive en [`CONTRATO_BASE_COMPARTIDA.md`](./CONTRATO_BASE_COMPARTIDA.md), en la
 raíz de este repo — léelo antes de tocar RLS, una función `security definer`,
 o cualquier cosa que `prisma-comercial` pudiera terminar llamando.
 
+**Borrar la cuenta de una vendedora no es trivial: arrastra en cascada su
+historial de comisiones y puntos, y hoy no hay ningún mecanismo real de baja
+suave** (`profiles.status` existe pero no lo aplica ninguna política ni
+middleware). El mapa completo — qué tablas cascadean, cuáles bloquean el
+borrado, qué cubre `reassign_contacts()` y qué preguntas de negocio siguen
+abiertas — vive en [`BAJA_VENDEDORAS.md`](./BAJA_VENDEDORAS.md), en la raíz
+de este repo — léelo antes de construir cualquier flujo de baja u
+offboarding.
+
 Idioma de la interfaz: **español (México)**.
 Idioma del código, nombres de variables y comentarios: **inglés**.
 
@@ -191,6 +200,16 @@ Reglas que no se negocian:
   congelado a `quotes`, mismo criterio que `item_name`) queda fuera de
   alcance de este cambio — se anota aquí para que no se repita el patrón de
   "se sabía y no se escribió" de otras entradas de este archivo.
+- **Si se renombra o se cambia la firma de `get_onboarding_landing()` o de
+  `verify_onboarding_access()`, el sitio comercial se rompe EN SILENCIO —
+  no hay ningún candado automático que lo detecte hoy.** Se evaluó un
+  candado (huella de firmas por introspección de `pg_proc`, mismo patrón
+  que `catalog_items_fingerprint()`) y se archivó, sin descartarlo: no es
+  urgente porque hoy las funciones de este contrato solo las cambia una
+  persona, leyendo `CONTRATO_BASE_COMPARTIDA.md` antes de tocarlas. Mientras
+  no se construya, la verificación es manual: **abrir
+  `iaprisma.com/onboarding` con un código de acceso real después de
+  cualquier cambio a cualquiera de las dos.**
 - **Toda función RPC `security definer` que dependa de `auth.uid()` necesita un
   parámetro de respaldo** para poder correrse desde el editor SQL de Supabase,
   donde no hay sesión y `auth.uid()` es `null`. Ya pasó dos veces (el trigger
