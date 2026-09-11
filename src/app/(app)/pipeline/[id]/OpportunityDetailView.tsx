@@ -24,6 +24,7 @@ import {
   type PipelineStage,
 } from "@/lib/queries/pipeline";
 import { useQuoteHistory } from "@/lib/queries/quotes";
+import { canGenerateQuote } from "@/lib/quoteEligibility";
 import { cn } from "@/lib/utils/cn";
 
 const SECONDARY_BUTTON_CLASSES =
@@ -185,11 +186,15 @@ export function OpportunityDetailView({
               </Link>
             ) : null}
             {/* Sin esto, "generar cotización" sería alcanzable en una
-            oportunidad ganada o perdida — el candado real vive en
-            generate_quote() (0023_quotes.sql) y en el propio
+            oportunidad que la base va a rechazar — el candado real vive en
+            generate_quote() (0023_quotes.sql, relajada en
+            0037_allow_first_quote_on_won_opportunity.sql) y en el propio
             /cotizaciones/nueva/page.tsx (URL directa), pero el botón no
-            debe ofrecerlo ni para el caso normal de navegación. */}
-            {!isWon && !isLost ? (
+            debe ofrecerlo ni para el caso normal de navegación.
+            canGenerateQuote() (src/lib/quoteEligibility.ts) es la MISMA
+            función que usa esa página — una sola regla, no dos escritas a
+            mano. */}
+            {canGenerateQuote({ isWon, isLost, hasQuotes }) ? (
               <Link href={`/pipeline/${current.id}/cotizaciones/nueva`} className={PRIMARY_BUTTON_CLASSES}>
                 <Plus aria-hidden="true" className="h-4 w-4" strokeWidth={1.75} />
                 {copy.pipeline.detail.actions.newQuote}

@@ -777,7 +777,14 @@ export const copy = {
         "La cotización se generó, pero el total no coincidió exactamente con la vista previa — revisa el desglose antes de mandarla.",
       blocked: {
         title: "Esta oportunidad no admite una cotización nueva",
-        won: "Ya está ganada — el valor cerrado real es el que cuenta. Si hace falta cotizar de nuevo (una ampliación, un segundo proyecto), créale una oportunidad nueva.",
+        // Este mensaje ahora solo aparece cuando YA hay una cotización
+        // registrada (ganada + sin cotizar todavía deja pasar, ver
+        // canGenerateQuote() en src/lib/quoteEligibility.ts) — "créale una
+        // oportunidad nueva" sigue siendo el consejo correcto para ese
+        // caso, pero el texto tiene que decir explícitamente que ya existe
+        // una cotización, para no confundir a quien vio pasar a otra
+        // oportunidad ganada sin ninguna.
+        won: "Ya está ganada y ya tiene una cotización registrada — el valor cerrado real es el que cuenta para esa venta. Si hace falta cotizar de nuevo a este cliente (una ampliación, un segundo proyecto), créale una oportunidad nueva.",
         lost: "Está perdida — muévela a una etapa abierta antes de generar una cotización.",
         backButton: "Volver a la oportunidad",
       },
