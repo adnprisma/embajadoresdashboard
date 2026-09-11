@@ -10,7 +10,8 @@
     "prepare": "husky",
     "check:catalog-sync": "tsx scripts/check-catalog-sync.ts",
     "check:quote-math": "tsx scripts/check-quote-math.ts",
-    "check:no-public-exposure": "tsx scripts/check-no-public-exposure.ts"
+    "check:no-public-exposure": "tsx scripts/check-no-public-exposure.ts",
+    "check:edge-functions": "tsx scripts/check-edge-functions.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -52,6 +53,7 @@
     "eslint-config-next": "15.5.24",
     "husky": "^9.1.7",
     "sharp": "^0.35.4",
+    "supabase": "^2.117.0",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.13",
     "typescript": "^5.9.3"

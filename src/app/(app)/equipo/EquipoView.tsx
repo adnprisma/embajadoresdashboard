@@ -12,6 +12,7 @@ import { copy } from "@/config/copy";
 import { useContacts } from "@/lib/queries/contacts";
 import { useTeamProfiles, useUpdateDailyLeadTarget, type TeamProfileRow } from "@/lib/queries/profile";
 import { useWeeklyStatusFunnel, type WeeklyStatusFunnelRow } from "@/lib/queries/weeklyStatusFunnel";
+import { CreateSellerDialog } from "./CreateSellerDialog";
 
 const DAILY_LEAD_TARGET_MIN = 1;
 const DAILY_LEAD_TARGET_MAX = 50;
@@ -128,7 +129,21 @@ export function EquipoView() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title={copy.equipo.title} />
+      <PageHeader
+        title={copy.equipo.title}
+        action={
+          <CreateSellerDialog
+            trigger={
+              <button
+                type="button"
+                className="flex items-center gap-2 rounded-[var(--radius-control)] bg-accent px-3 py-2 text-sm font-medium text-text-on-coral transition-colors hover:opacity-90"
+              >
+                {copy.equipo.createSeller.trigger}
+              </button>
+            }
+          />
+        }
+      />
 
       <Panel title={copy.equipo.funnel.title} subtitle={copy.equipo.funnel.subtitle}>
         {funnelError ? (

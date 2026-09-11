@@ -119,6 +119,47 @@ export function useUpdateDailyLeadTarget() {
   });
 }
 
+export type CreateSellerInput = {
+  full_name: string;
+  email: string;
+  password: string;
+};
+
+// Único punto del dashboard que llama a la Edge Function create-seller —
+// es la única forma de crear una cuenta de auth nueva; ver CLAUDE.md
+// (service_role nunca en este repo) y create-seller/index.ts (contraseña
+// temporal, un solo paso, is_admin() verificado del lado del servidor).
+// functions.invoke() ya adjunta el JWT de la sesión actual como
+// Authorization — no hay nada que armar a mano aquí.
+export function useCreateSeller() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: CreateSellerInput) => {
+      const supabase = createClient();
+      const { data, error } = await supabase.functions.invoke<{ id: string; email: string }>(
+        "create-seller",
+        { body: input },
+      );
+
+      if (error) {
+        // FunctionsHttpError trae la respuesta real en `context` — ahí
+        // vive el { error: "mensaje en español" } que sí queremos mostrar
+        // (correo duplicado, contraseña corta, etc.), no el mensaje
+        // genérico de fetch que trae `error.message`.
+        const context = (error as { context?: Response }).context;
+        const parsed = await context?.json().catch(() => null);
+        throw new Error(parsed?.error || "No pudimos crear la cuenta. Intenta de nuevo.");
+      }
+
+      return data;
+    },
+    onError: (error: Error) => toast.error(error.message),
+    onSuccess: () => toast.success(copy.equipo.createSeller.successToast),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: [...profileKeys.all, "team"] }),
+  });
+}
+
 // Solo para la vista previa dentro de esta misma página — TTL corto, no se
 // guarda ni se reutiliza en otro lado (ver alcance documentado en
 // PersonalDataTab: el avatar no se propaga al UserMenu en este bloque).

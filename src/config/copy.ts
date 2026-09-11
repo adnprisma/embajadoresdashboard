@@ -591,6 +591,30 @@ export const copy = {
       successToast: "Meta diaria actualizada.",
       errorToast: "No pudimos actualizar la meta diaria. Intenta de nuevo.",
     },
+    createSeller: {
+      trigger: "Dar de alta vendedora",
+      title: "Dar de alta vendedora",
+      // Contraseña temporal a propósito — ver CLAUDE.md sección 3 y el
+      // comentario en supabase/functions/create-seller/index.ts. Se lo
+      // decimos al admin aquí mismo para que no la trate como si fuera a
+      // llegar por correo.
+      description:
+        "Tú fijas la contraseña y se la das a la vendedora por fuera del dashboard (no se manda ningún correo). Es temporal — pídele que la cambie en cuanto entre.",
+      nameLabel: "Nombre completo",
+      emailLabel: "Correo",
+      passwordLabel: "Contraseña temporal",
+      confirmPasswordLabel: "Confirma la contraseña",
+      submit: "Crear cuenta",
+      submitLoading: "Creando…",
+      successToast: "Cuenta creada. Comparte la contraseña con la vendedora por fuera del dashboard.",
+      errors: {
+        nameRequired: "El nombre es obligatorio.",
+        emailInvalid: "Correo inválido.",
+        passwordMin: "La contraseña debe tener al menos 8 caracteres.",
+        confirmRequired: "Confirma la contraseña.",
+        passwordsDontMatch: "Las contraseñas no coinciden.",
+      },
+    },
   },
 
   pipeline: {

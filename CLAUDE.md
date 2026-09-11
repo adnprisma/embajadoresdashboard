@@ -247,6 +247,47 @@ Reglas que no se negocian:
   puede volver a ella después de activarse?** Si vuelve, caducar rompe un
   uso legítimo, no solo cierra una ventana de ataque — no se decide sin
   saber esto primero.
+- **Alta de vendedoras (`/equipo`, botón "Dar de alta vendedora") crea la
+  cuenta con contraseña fijada por el admin, NO por invitación — decisión
+  del 11 de septiembre de 2026, temporal a propósito.** La Edge Function
+  `create-seller` (única del proyecto con privilegio de `service_role` —
+  la llave nunca vive en este repo, ni en Vercel, ni en `.env.local`, solo
+  en el runtime de la función, inyectada por Supabase) verifica
+  `is_admin()` del lado del servidor contra el JWT de quien llama, y hace
+  un solo paso: `auth.admin.createUser({ email, password, email_confirm:
+  true })`. Se descartó `inviteUserByEmail()` por ahora porque este
+  proyecto no tiene SMTP propio confirmado — el envío por defecto de
+  Supabase no es confiable para algo que bloquea el primer acceso de
+  alguien. Sin UPDATE de seguimiento a propósito: `handle_new_user()`
+  (`0001_schema.sql`) ya deja `role='seller'` y `daily_lead_target=10`
+  correctos por default, y agregar un segundo paso abriría una ventana de
+  fallo a medias que hoy no existe.
+  **Condición de salida, explícita:** el día que haya SMTP confirmado, este
+  flujo migra a `inviteUserByEmail()` — se borra el campo de contraseña del
+  formulario, el parámetro `password` de la función, y este párrafo.
+  **Pendiente, evaluado y NO construido en esta pasada:** forzar el cambio
+  de esa contraseña en el primer ingreso (columna `must_change_password` +
+  rama en `middleware.ts` + apagar la bandera al final de
+  `RestablecerForm.tsx`) — tamaño chico, reutiliza la pantalla `/restablecer`
+  que ya existe, sin RPC ni política RLS nueva. Mientras no se construya,
+  nada impide que una vendedora se quede con la contraseña que el admin le
+  escribió.
+- **`create-seller` (y cualquier Edge Function futura) se despliega SOLO por
+  CLI — nunca pegando el código en el editor del panel de Supabase.** El
+  editor del panel corrompió el archivo tres veces seguidas el 11 de
+  septiembre de 2026 (errores de sintaxis en líneas que en el repo estaban
+  sanas, confirmado con `npm run check:edge-functions` cada vez) y una
+  cuarta vez de forma silenciosa — bundle "exitoso" pero la función se
+  colgaba 150 segundos en cada invocación hasta morir con `546
+  WORKER_RESOURCE_LIMIT`, sin ningún error de sintaxis que lo delatara. El
+  deploy por CLI, desde el mismo archivo del repo sin tocar una letra,
+  resolvió las dos cosas de un jalón. Comando:
+  `npx supabase functions deploy create-seller --project-ref
+  iueosbkvgxtfethhntcq` — sin `supabase login`/`init` corridos ya no hace
+  falta nada más (no pide contraseña de la base; ver el comentario de
+  `supabase link` si algún día hace falta esa vía). Que nadie reintente el
+  editor del panel pensando que es más rápido — ya se probó tres veces y
+  las tres salió mal, la cuarta sin ni siquiera avisar.
 - **`import_contacts()` tiene dos versiones (overload) por un `create or
   replace` que no reemplazó nada — bug real, sin arreglar.**
   `0013_import_contacts.sql` la creó con 4 parámetros;

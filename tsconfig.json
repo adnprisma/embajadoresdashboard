@@ -21,5 +21,9 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  // supabase/functions/: Deno, no Node — `Deno.serve`, imports `npm:...`,
+  // sin tipos de Node. Corre y se despliega aparte (runtime de Supabase),
+  // nunca lo compila Next — incluirlo aquí tumbaba `next build` con
+  // errores que no son de este proyecto.
+  "exclude": ["node_modules", "supabase/functions"]
 }
