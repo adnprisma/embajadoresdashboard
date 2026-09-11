@@ -204,8 +204,9 @@ guardado en `prisma-comercial`.
   tiene acceso a la base de datos, solo hay anon key en este entorno") —
   queda escrita aquí también porque ahora hay dos repos donde alguien podría
   meterla por error, y `prisma-comercial` en particular se despliega a
-  GitHub Pages, un hosting 100% estático donde un secret en el repo queda
-  público en el bundle servido, no solo en el código fuente.
+  Vercel, un hosting 100% estático (sin build de servidor) donde un secret
+  en el repo queda público en el bundle servido, no solo en el código
+  fuente.
 
 ---
 
