@@ -21,11 +21,20 @@
 // no una: describen hechos distintos y un contacto puede tener las dos.
 // "linea-compartida" SOLO cuando el teléfono normalizado es idéntico al de
 // otro contacto (misma línea física — la vendedora ya marcó ese número).
-// "misma-marca" cuando se repite nombre de cadena o de doctor/a pero con
-// líneas distintas (otra sucursal real, no la misma llamada). Ponerle
-// "linea-compartida" a una sucursal con teléfono propio le dice a la
-// vendedora algo falso ("ya marcaste esto") y una etiqueta que miente se
-// deja de leer — de ahí la separación (lote de dentistas, 2026-09-07).
+// "misma-marca" cuando se repite nombre de cadena o de doctor/a — puede ser
+// con líneas distintas (otra sucursal real, no la misma llamada) O con la
+// misma línea compartida entre sucursales; las dos etiquetas no son
+// excluyentes. Caso real: las tres sucursales de "Dr. Dentista" en
+// Iztacalco (Coruña, Ramos Tlacotal, Recreo) comparten el teléfono
+// +52 55 6333 6308 y llevan las DOS etiquetas a propósito —
+// "misma-marca" porque es cadena y puede haber más sucursales en otro
+// lado, "linea-compartida" porque ese número específico ya se marcó
+// (verificado el 12 de septiembre de 2026, reparto a Filiberto). La
+// advertencia que sigue vigente: nunca poner "linea-compartida" a una
+// sucursal con línea PROPIA solo por pertenecer a una cadena — eso sí le
+// dice a la vendedora algo falso ("ya marcaste esto") y una etiqueta que
+// miente se deja de leer — de ahí la separación original (lote de
+// dentistas, 2026-09-07).
 export const OPERATIONAL_TAGS = [
   "visitar",
   "lote-sep-2026",

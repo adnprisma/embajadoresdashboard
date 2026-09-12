@@ -337,6 +337,25 @@ Reglas que no se negocian:
   paréntesis al pegar saltos de línea literales (la razón original de
   convertir a una sola línea) — son dos problemas distintos del mismo
   flujo.
+- **Un `0` de vuelta en `bulk_add_tag()` (o cualquier función que devuelva
+  filas afectadas) no significa "falló el filtro" — puede significar
+  "no había nada que modificar", y las dos se ven idénticas desde afuera.**
+  `bulk_add_tag()` es idempotente a propósito (`not (p_tag = any(tags))`
+  en su `where`): si las filas ya traían la etiqueta, el `update` afecta
+  cero filas y el `0` es la respuesta CORRECTA, no un bug. Pasó el 12 de
+  septiembre de 2026 con el trío "Dr. Dentista" (mismo teléfono, reparto a
+  Filiberto): `bulk_add_tag('linea-compartida', ...)` devolvió `0`, y antes
+  de asumir que la función estaba rota se verificó directo contra la fila
+  (`'linea-compartida' = any(tags)`) — ya la traían desde el lote original
+  del 7 de septiembre (`load-prospection-lot.mjs` ya la había aplicado en
+  ese momento, vía `findPhoneClusters()`). Iguala a la lección de
+  "Success. No rows returned" de arriba, pero en la dirección contraria:
+  ahí un mensaje de éxito podía mentir; aquí un `0` que parece fallo podía
+  ser la verdad. Misma disciplina en las dos: **verificar con una consulta
+  aparte antes de investigar, nunca asumir en ningún sentido.** Es la
+  tercera vez que un `0` de `bulk_add_tag()` genera duda en esta misma
+  sesión, cada vez por una causa distinta — antes de la próxima, correr la
+  consulta de verificación primero, no después de sospechar de la función.
 - **Un arreglo de cruce (JOIN, matching por texto, lo que sea) se prueba
   PRIMERO contra los datos que ya están cargados, antes de usarlo con datos
   nuevos — nunca al revés.** El caso nuevo es exactamente el que menos
