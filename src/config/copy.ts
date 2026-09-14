@@ -1168,6 +1168,7 @@ export const copy = {
         contado: "Pago de contado",
         "plan-3": "Plan a 3 meses",
         "plan-6": "Plan a 6 meses",
+        "plan-12": "Plan a 12 meses",
       },
       // La modalidad va siempre en el texto del botón, nunca solo el
       // paquete — un botón fuera de contexto (lector de pantalla, captura
@@ -1176,6 +1177,7 @@ export const copy = {
         contado: "pago único",
         "plan-3": "plan a 3 meses",
         "plan-6": "plan a 6 meses",
+        "plan-12": "plan a 12 meses",
       },
       copyButtonLabel: (packageName: string, modalityLabel: string) => `Copiar link — ${packageName}, ${modalityLabel}`,
       copySuccessToast: "Link copiado.",

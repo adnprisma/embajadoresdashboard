@@ -35,6 +35,15 @@ export function computePagoInicial(total: number): number {
   return Math.min(5000, total);
 }
 
+// IMPORTANTE — mesesDiferimiento es un eje INDEPENDIENTE de
+// clients.payment_modality (contado/plan-3/plan-6/plan-12, ver
+// src/config/appSettings.ts): comparten los números 3 y 6 por coincidencia,
+// no por relación. Este número es cuántas mensualidades tiene ESTA
+// cotización después del pago inicial — no tiene enum, no tiene tope
+// (quotes.meses_diferimiento solo exige > 0), y el wizard ya deja
+// capturar cualquier valor, 12 incluido. payment_modality, en cambio, solo
+// decide qué Payment Link de Stripe mostrar en la landing de onboarding.
+// Tocar uno no mueve el otro.
 export function computePagoDiferidoMensual(total: number, pagoInicial: number, mesesDiferimiento: number): number {
   return mesesDiferimiento > 0 ? (total - pagoInicial) / mesesDiferimiento : 0;
 }

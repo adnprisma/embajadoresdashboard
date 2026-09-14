@@ -39,14 +39,16 @@ async function copyToClipboard(value: string, successMessage: string, errorMessa
   }
 }
 
-// Ícono por modalidad — pago único se distingue de las dos recurrentes;
-// plan-3 y plan-6 comparten ícono porque su título de panel ("Plan a 3
-// meses" / "Plan a 6 meses") ya los distingue, y no hay un ícono de lucide
-// que signifique "3" o "6" repeticiones sin inventar algo fuera del set.
+// Ícono por modalidad — pago único se distingue de las tres recurrentes;
+// plan-3, plan-6 y plan-12 comparten ícono porque su título de panel ("Plan
+// a 3 meses" / "Plan a 6 meses" / "Plan a 12 meses") ya los distingue, y no
+// hay un ícono de lucide que signifique "3"/"6"/"12" repeticiones sin
+// inventar algo fuera del set.
 const MODALITY_ICON: Record<PaymentModality, LucideIcon> = {
   contado: Banknote,
   "plan-3": Repeat,
   "plan-6": Repeat,
+  "plan-12": Repeat,
 };
 
 // Esta pantalla la ve la vendedora, nunca el cliente (está detrás de
