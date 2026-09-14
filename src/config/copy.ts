@@ -1022,7 +1022,35 @@ export const copy = {
       columnStatus: "Estado",
       columnRenewal: "Próxima renovación",
       columnActions: "Acciones",
+      columnPaymentModality: "Modalidad de pago",
+      columnPlatformReferralOwner: "Link de plataforma",
       noValue: "—",
+    },
+    // Confirmación nativa (no un diálogo propio) antes de escribir — mismo
+    // patrón ya aprobado para estos dos campos: son metadatos que decide un
+    // admin, no dinero calculado, así que no necesitan RPC ni un modal a la
+    // medida, pero sí una pausa antes de guardar.
+    paymentModality: {
+      unsetOption: "Sin elegir",
+      pendingSuffix: " (disponible pronto)",
+      confirmMessage: (clientName: string, modalityLabel: string) =>
+        `¿Cambiar la modalidad de pago de ${clientName} a "${modalityLabel}"?`,
+      successToast: "Modalidad de pago actualizada.",
+      errorToast: "No pudimos actualizar la modalidad de pago. Intenta de nuevo.",
+    },
+    platformReferralOwner: {
+      ownerLabel: {
+        nestor: "Néstor",
+        david: "David",
+      },
+      unsetOption: "Por confirmarse",
+      pendingSuffix: " (disponible pronto)",
+      confirmMessage: (clientName: string, ownerLabel: string) =>
+        `¿Asignar el link de plataforma de ${ownerLabel} a ${clientName}? La comisión de esa contratación se acredita a ese link.`,
+      confirmMessageUnset: (clientName: string) =>
+        `¿Quitar la elección de link de plataforma de ${clientName}? Volverá a mostrar "por confirmarse" en su landing.`,
+      successToast: "Link de plataforma actualizado.",
+      errorToast: "No pudimos actualizar el link de plataforma. Intenta de nuevo.",
     },
     status: {
       active: "Activo",

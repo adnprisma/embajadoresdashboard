@@ -14,7 +14,7 @@ import {
   XCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ChangeEvent } from "react";
 import { Badge, type BadgeTone } from "@/components/common/Badge";
 import { CardList } from "@/components/common/CardList";
 import { DataTable, type DataTableColumn } from "@/components/common/DataTable";
@@ -24,11 +24,22 @@ import { MoneyValue } from "@/components/common/MoneyValue";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Skeleton } from "@/components/common/Skeleton";
 import { StatCard } from "@/components/common/StatCard";
+import {
+  PAYMENT_MODALITIES,
+  PLATFORM_REFERRAL_OWNERS,
+  platformLinkKey,
+  stripeLinkKey,
+  type PaymentModality,
+  type PlatformReferralOwner,
+} from "@/config/appSettings";
 import { copy } from "@/config/copy";
+import { useAppSettings, type AppSettingsMap } from "@/lib/queries/appSettings";
 import {
   useClientRelatedCounts,
   useClients,
   useDeleteClient,
+  useUpdatePaymentModality,
+  useUpdatePlatformReferralOwner,
   type ClientRow,
 } from "@/lib/queries/clients";
 
@@ -147,10 +158,104 @@ function ClientActionsMenu({ client }: { client: ClientRow }) {
   );
 }
 
+const SELECT_CLASSES =
+  "rounded-[var(--radius-control)] border border-border-subtle bg-bg-surface px-2 py-1.5 text-sm text-text-primary disabled:opacity-60";
+
+// Metadato que fija un admin por cliente — mutación directa (no RPC, no es
+// dinero calculado) con window.confirm() nativo antes de escribir, mismo
+// criterio que useUpdateDailyLeadTarget (profile.ts). "Disponible pronto"
+// depende SOLO de que exista una cotización real: sin `latest_quote_package_id`
+// no hay llave de Stripe que resolver (stripe_link.<modalidad>.<packageId>
+// necesita el id del paquete cotizado), así que no hay nada que anunciar
+// como pendiente — ninguna opción lleva sufijo hasta que haya cotización.
+function PaymentModalitySelect({ client, settings }: { client: ClientRow; settings: AppSettingsMap }) {
+  const updateModality = useUpdatePaymentModality();
+
+  const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    const next = (value === "" ? null : (value as PaymentModality)) satisfies PaymentModality | null;
+    const label = next ? copy.datosPago.stripe.panelTitle[next] : copy.clientes.paymentModality.unsetOption;
+    if (!window.confirm(copy.clientes.paymentModality.confirmMessage(client.name, label))) {
+      event.target.value = client.payment_modality ?? "";
+      return;
+    }
+    updateModality.mutate({ clientId: client.id, paymentModality: next });
+  };
+
+  return (
+    <select
+      value={client.payment_modality ?? ""}
+      onChange={handleChange}
+      disabled={updateModality.isPending}
+      aria-label={copy.clientes.table.columnPaymentModality}
+      className={SELECT_CLASSES}
+    >
+      <option value="">{copy.clientes.paymentModality.unsetOption}</option>
+      {PAYMENT_MODALITIES.map((modality) => {
+        const pending =
+          client.latest_quote_package_id !== null &&
+          !settings[stripeLinkKey(modality, client.latest_quote_package_id)];
+        return (
+          <option key={modality} value={modality}>
+            {copy.datosPago.stripe.panelTitle[modality]}
+            {pending ? copy.clientes.paymentModality.pendingSuffix : ""}
+          </option>
+        );
+      })}
+    </select>
+  );
+}
+
+// Mismo patrón que PaymentModalitySelect, pero la disponibilidad NUNCA
+// depende de una cotización — el link de referido de plataforma no está
+// atado a ningún paquete cotizado, solo a si app_settings ya tiene el link
+// de ESE dueño cargado (platform_link.<owner>). Por eso "disponible pronto"
+// se evalúa siempre, con o sin cotización — a diferencia del de arriba.
+function PlatformReferralOwnerSelect({ client, settings }: { client: ClientRow; settings: AppSettingsMap }) {
+  const updateOwner = useUpdatePlatformReferralOwner();
+
+  const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    const next = (value === "" ? null : (value as PlatformReferralOwner)) satisfies PlatformReferralOwner | null;
+    const message = next
+      ? copy.clientes.platformReferralOwner.confirmMessage(
+          client.name,
+          copy.clientes.platformReferralOwner.ownerLabel[next],
+        )
+      : copy.clientes.platformReferralOwner.confirmMessageUnset(client.name);
+    if (!window.confirm(message)) {
+      event.target.value = client.platform_referral_owner ?? "";
+      return;
+    }
+    updateOwner.mutate({ clientId: client.id, owner: next });
+  };
+
+  return (
+    <select
+      value={client.platform_referral_owner ?? ""}
+      onChange={handleChange}
+      disabled={updateOwner.isPending}
+      aria-label={copy.clientes.table.columnPlatformReferralOwner}
+      className={SELECT_CLASSES}
+    >
+      <option value="">{copy.clientes.platformReferralOwner.unsetOption}</option>
+      {PLATFORM_REFERRAL_OWNERS.map((owner) => {
+        const pending = !settings[platformLinkKey(owner)];
+        return (
+          <option key={owner} value={owner}>
+            {copy.clientes.platformReferralOwner.ownerLabel[owner]}
+            {pending ? copy.clientes.platformReferralOwner.pendingSuffix : ""}
+          </option>
+        );
+      })}
+    </select>
+  );
+}
+
 // Tarjeta de cliente para <640px. Mismo dato que la fila de la tabla,
 // jerarquía distinta — el enlace principal (al contacto vinculado) con
 // min-h-11 (44px) de área táctil.
-function ClientCard({ client }: { client: ClientRow }) {
+function ClientCard({ client, settings }: { client: ClientRow; settings: AppSettingsMap }) {
   return (
     <div className="rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface p-4">
       <div className="flex items-start justify-between gap-2">
@@ -178,6 +283,16 @@ function ClientCard({ client }: { client: ClientRow }) {
           {copy.clientes.table.columnRenewal}: {formatDate(client.next_renewal)}
         </p>
       ) : null}
+      <div className="mt-3 flex flex-col gap-2">
+        <label className="flex flex-col gap-1 text-xs font-medium text-text-muted">
+          {copy.clientes.table.columnPaymentModality}
+          <PaymentModalitySelect client={client} settings={settings} />
+        </label>
+        <label className="flex flex-col gap-1 text-xs font-medium text-text-muted">
+          {copy.clientes.table.columnPlatformReferralOwner}
+          <PlatformReferralOwnerSelect client={client} settings={settings} />
+        </label>
+      </div>
     </div>
   );
 }
@@ -185,6 +300,10 @@ function ClientCard({ client }: { client: ClientRow }) {
 export function ClientesView() {
   const { data, isLoading, isError, refetch } = useClients();
   const clients = useMemo(() => data ?? [], [data]);
+  // Vacío mientras carga: los <select> igual funcionan (todo se ve
+  // "disponible pronto" un instante), se corrige solo en cuanto resuelve.
+  const settingsQuery = useAppSettings();
+  const settings = settingsQuery.data ?? {};
 
   const stats = useMemo(() => {
     const activeClients = clients.filter((client) => client.status === "active");
@@ -221,6 +340,16 @@ export function ClientesView() {
       header: copy.clientes.table.columnRenewal,
       sortable: true,
       render: (row) => (row.next_renewal ? formatDate(row.next_renewal) : copy.clientes.table.noValue),
+    },
+    {
+      key: "payment_modality",
+      header: copy.clientes.table.columnPaymentModality,
+      render: (row) => <PaymentModalitySelect client={row} settings={settings} />,
+    },
+    {
+      key: "platform_referral_owner",
+      header: copy.clientes.table.columnPlatformReferralOwner,
+      render: (row) => <PlatformReferralOwnerSelect client={row} settings={settings} />,
     },
     {
       key: "id",
@@ -319,7 +448,7 @@ export function ClientesView() {
                 />
               </div>
               <div className="sm:hidden">
-                <CardList rows={clients} renderCard={(client) => <ClientCard client={client} />} />
+                <CardList rows={clients} renderCard={(client) => <ClientCard client={client} settings={settings} />} />
               </div>
             </>
           )}

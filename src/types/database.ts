@@ -415,6 +415,8 @@ export type Database = {
           status: string;
           started_at: string;
           next_renewal: string | null;
+          payment_modality: string | null;
+          platform_referral_owner: string | null;
         };
         Insert: {
           id?: string;
@@ -426,6 +428,8 @@ export type Database = {
           status?: string;
           started_at?: string;
           next_renewal?: string | null;
+          payment_modality?: string | null;
+          platform_referral_owner?: string | null;
         };
         Update: {
           id?: string;
@@ -437,6 +441,8 @@ export type Database = {
           status?: string;
           started_at?: string;
           next_renewal?: string | null;
+          payment_modality?: string | null;
+          platform_referral_owner?: string | null;
         };
         Relationships: [
           {

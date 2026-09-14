@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import type { PaymentModality, PlatformReferralOwner } from "@/config/appSettings";
 import { copy } from "@/config/copy";
 import { createClient } from "@/lib/supabase/client";
 
@@ -14,6 +15,13 @@ export type ClientRow = {
   started_at: string;
   next_renewal: string | null;
   contact_id: string | null;
+  payment_modality: PaymentModality | null;
+  platform_referral_owner: PlatformReferralOwner | null;
+  // El paquete de la cotización VIGENTE (la más reciente), o null si el
+  // cliente todavía no tiene ninguna — nunca se infiere de `plan` (texto
+  // libre). Sirve solo para decidir si el link de Stripe de la modalidad
+  // elegida ya existe (ver ClientesView.tsx) — no se muestra en la tabla.
+  latest_quote_package_id: string | null;
 };
 
 export const clientsKeys = {
@@ -22,12 +30,16 @@ export const clientsKeys = {
   detail: (id: string) => [...clientsKeys.all, "detail", id] as const,
 };
 
-// `opportunities(contact_id)` es un embed de PostgREST vía clients.opportunity_id
-// -> opportunities.id — así la fila puede enlazar a /contactos/[id] cuando el
-// cliente viene de una oportunidad con contacto (ambos son nullable en cadena,
-// así que no siempre hay a dónde enlazar — la tabla lo maneja con getRowHref
-// devolviendo "").
-const CLIENTS_SELECT = "id, name, plan, mrr, status, started_at, next_renewal, opportunities(contact_id)";
+// `opportunities(contact_id, quotes(package_id, created_at))` es un doble
+// embed de PostgREST: clients.opportunity_id -> opportunities.id, y desde
+// ahí quotes.opportunity_id -> opportunities.id — una sola query para toda
+// la lista, en vez de una consulta de cotización por fila (N+1). Se pide
+// el arreglo completo de quotes (puede haber más de una en teoría) y se
+// toma la más reciente en toClientRow — PostgREST no deja ordenar/limitar
+// un embed anidado dos niveles desde el cliente de JS de forma simple, así
+// que el "más reciente primero" se resuelve aquí, no en la query.
+const CLIENTS_SELECT =
+  "id, name, plan, mrr, status, started_at, next_renewal, payment_modality, platform_referral_owner, opportunities(contact_id, quotes(package_id, created_at))";
 
 type ClientQueryRow = {
   id: string;
@@ -37,11 +49,21 @@ type ClientQueryRow = {
   status: string;
   started_at: string;
   next_renewal: string | null;
-  opportunities: { contact_id: string | null } | { contact_id: string | null }[] | null;
+  payment_modality: PaymentModality | null;
+  platform_referral_owner: PlatformReferralOwner | null;
+  opportunities:
+    | { contact_id: string | null; quotes: { package_id: string | null; created_at: string }[] | null }
+    | { contact_id: string | null; quotes: { package_id: string | null; created_at: string }[] | null }[]
+    | null;
 };
 
 function toClientRow(row: ClientQueryRow): ClientRow {
   const opportunity = Array.isArray(row.opportunities) ? row.opportunities[0] : row.opportunities;
+  const quotes = opportunity?.quotes ?? [];
+  const latestQuote = [...quotes].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  )[0];
+
   return {
     id: row.id,
     name: row.name,
@@ -51,6 +73,9 @@ function toClientRow(row: ClientQueryRow): ClientRow {
     started_at: row.started_at,
     next_renewal: row.next_renewal,
     contact_id: opportunity?.contact_id ?? null,
+    payment_modality: row.payment_modality,
+    platform_referral_owner: row.platform_referral_owner,
+    latest_quote_package_id: latestQuote?.package_id ?? null,
   };
 }
 
@@ -120,5 +145,48 @@ export function useDeleteClient() {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: clientsKeys.list() });
     },
+  });
+}
+
+// Metadato que decide un admin, no dinero calculado — mutación directa,
+// sin RPC (mismo criterio que useUpdateDailyLeadTarget en profile.ts). La
+// confirmación nativa (window.confirm) vive en ClientesView.tsx, antes de
+// llamar a este mutate.
+export function useUpdatePaymentModality() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: { clientId: string; paymentModality: PaymentModality | null }) => {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("clients")
+        .update({ payment_modality: input.paymentModality })
+        .eq("id", input.clientId);
+      if (error) throw error;
+    },
+    onError: () => toast.error(copy.clientes.paymentModality.errorToast),
+    onSuccess: () => toast.success(copy.clientes.paymentModality.successToast),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: clientsKeys.list() }),
+  });
+}
+
+// Mismo patrón que useUpdatePaymentModality — ver el comentario ahí. La
+// comisión de la contratación de plataforma se acredita a quien sea dueño
+// del link elegido aquí, pero elegirlo en sí no mueve dinero por sí solo.
+export function useUpdatePlatformReferralOwner() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: { clientId: string; owner: PlatformReferralOwner | null }) => {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("clients")
+        .update({ platform_referral_owner: input.owner })
+        .eq("id", input.clientId);
+      if (error) throw error;
+    },
+    onError: () => toast.error(copy.clientes.platformReferralOwner.errorToast),
+    onSuccess: () => toast.success(copy.clientes.platformReferralOwner.successToast),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: clientsKeys.list() }),
   });
 }
