@@ -158,8 +158,11 @@ function ClientActionsMenu({ client }: { client: ClientRow }) {
   );
 }
 
+// truncate: red de seguridad — si la opción seleccionada incluye el sufijo
+// "(disponible pronto)" y queda larga, se corta con elipsis en vez de
+// desbordar la celda, incluso con el ancho de columna ya corregido.
 const SELECT_CLASSES =
-  "rounded-[var(--radius-control)] border border-border-subtle bg-bg-surface px-2 py-1.5 text-sm text-text-primary disabled:opacity-60";
+  "w-full truncate rounded-[var(--radius-control)] border border-border-subtle bg-bg-surface px-2 py-1.5 text-sm text-text-primary disabled:opacity-60";
 
 // Metadato que fija un admin por cliente — mutación directa (no RPC, no es
 // dinero calculado) con window.confirm() nativo antes de escribir, mismo
@@ -316,45 +319,57 @@ export function ClientesView() {
     return { active: activeClients.length, mrr, atRisk, cancelled };
   }, [clients]);
 
+  // Ancho explícito en CADA columna, a propósito — DataTable usa
+  // table-fixed + min-w-full: sin un ancho declarado en cada una, el
+  // navegador reparte el espacio sobrante de forma impredecible y termina
+  // achicando justo las que no lo tienen (pasó con las 8 columnas de esta
+  // pantalla, ninguna traía ancho, antes de este cambio). La suma puede
+  // superar el contenedor sin problema — el wrapper de DataTable hace
+  // scroll horizontal en vez de aplastar el contenido.
   const columns: DataTableColumn<ClientRow>[] = [
-    { key: "name", header: copy.clientes.table.columnName },
+    { key: "name", header: copy.clientes.table.columnName, className: "w-48" },
     {
       key: "plan",
       header: copy.clientes.table.columnPlan,
+      className: "w-32",
       render: (row) => row.plan || copy.clientes.table.noValue,
     },
     {
       key: "mrr",
       header: copy.clientes.table.columnMrr,
       sortable: true,
-      className: "text-right",
+      className: "w-28 text-right",
       render: (row) => <MoneyValue amount={row.mrr} />,
     },
     {
       key: "status",
       header: copy.clientes.table.columnStatus,
+      className: "w-28",
       render: (row) => <Badge tone={STATUS_BADGE_TONE[row.status] ?? "neutral"}>{statusLabel(row.status)}</Badge>,
     },
     {
       key: "next_renewal",
       header: copy.clientes.table.columnRenewal,
       sortable: true,
+      className: "w-36",
       render: (row) => (row.next_renewal ? formatDate(row.next_renewal) : copy.clientes.table.noValue),
     },
     {
       key: "payment_modality",
       header: copy.clientes.table.columnPaymentModality,
+      className: "w-52",
       render: (row) => <PaymentModalitySelect client={row} settings={settings} />,
     },
     {
       key: "platform_referral_owner",
       header: copy.clientes.table.columnPlatformReferralOwner,
+      className: "w-40",
       render: (row) => <PlatformReferralOwnerSelect client={row} settings={settings} />,
     },
     {
       key: "id",
       header: copy.clientes.table.columnActions,
-      className: "text-right",
+      className: "w-16 text-right",
       render: (row) => (
         <div className="flex justify-end">
           <ClientActionsMenu client={row} />

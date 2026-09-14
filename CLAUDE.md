@@ -19,12 +19,12 @@ vive en [`CONTRATO_BASE_COMPARTIDA.md`](./CONTRATO_BASE_COMPARTIDA.md), en la
 raíz de este repo — léelo antes de tocar RLS, una función `security definer`,
 o cualquier cosa que `prisma-comercial` pudiera terminar llamando.
 
-**Borrar la cuenta de una vendedora no es trivial: arrastra en cascada su
+**Borrar la cuenta de un vendedor no es trivial: arrastra en cascada su
 historial de comisiones y puntos, y hoy no hay ningún mecanismo real de baja
 suave** (`profiles.status` existe pero no lo aplica ninguna política ni
 middleware). El mapa completo — qué tablas cascadean, cuáles bloquean el
 borrado, qué cubre `reassign_contacts()` y qué preguntas de negocio siguen
-abiertas — vive en [`BAJA_VENDEDORAS.md`](./BAJA_VENDEDORAS.md), en la raíz
+abiertas — vive en [`BAJA_VENDEDORES.md`](./BAJA_VENDEDORES.md), en la raíz
 de este repo — léelo antes de construir cualquier flujo de baja u
 offboarding.
 
@@ -165,7 +165,7 @@ Reglas que no se negocian:
   día que la aritmética crezca (descuentos, comparación de precios del
   bloque 6, cualquier regla nueva de negocio que dificulte mantener las dos
   copias iguales a mano). **Se descartó por ahora, no "para siempre":** las
-  vendedoras cotizan en sitio con datos móviles, y el preview instantáneo es
+  vendedores cotizan en sitio con datos móviles, y el preview instantáneo es
   lo que sostiene la conversación con el cliente — cambiarlo por una
   llamada de red degradaría la herramienta en el peor momento, para
   resolver un riesgo de desincronización que hoy es teórico. Los candados
@@ -247,7 +247,7 @@ Reglas que no se negocian:
   puede volver a ella después de activarse?** Si vuelve, caducar rompe un
   uso legítimo, no solo cierra una ventana de ataque — no se decide sin
   saber esto primero.
-- **Alta de vendedoras (`/equipo`, botón "Dar de alta vendedora") crea la
+- **Alta de vendedores (`/equipo`, botón "Dar de alta vendedor") crea la
   cuenta con contraseña fijada por el admin, NO por invitación — decisión
   del 11 de septiembre de 2026, temporal a propósito.** La Edge Function
   `create-seller` (única del proyecto con privilegio de `service_role` —
@@ -270,7 +270,7 @@ Reglas que no se negocian:
   rama en `middleware.ts` + apagar la bandera al final de
   `RestablecerForm.tsx`) — tamaño chico, reutiliza la pantalla `/restablecer`
   que ya existe, sin RPC ni política RLS nueva. Mientras no se construya,
-  nada impide que una vendedora se quede con la contraseña que el admin le
+  nada impide que un vendedor se quede con la contraseña que el admin le
   escribió.
 - **`create-seller` (y cualquier Edge Function futura) se despliega SOLO por
   CLI — nunca pegando el código en el editor del panel de Supabase.** El
@@ -396,7 +396,7 @@ Reglas que no se negocian:
   filtro explícito de `owner_id` le muestra a admin la fila de cualquiera.
   La regla:
   - `/contactos`, `/pipeline` y vistas de seguimiento → el admin ve TODO el
-    equipo, con columna de vendedora. Correcto hoy vía el bypass de RLS, sin
+    equipo, con columna de vendedor. Correcto hoy vía el bypass de RLS, sin
     filtro adicional — así deben quedarse.
   - Mi dinero, Mis tareas, plan semanal → solo del usuario en sesión, **sin
     excepción de admin**. Filtro explícito por `owner_id`, nunca confiado a
@@ -548,7 +548,10 @@ Reglas que no se negocian:
   posible, avísalo en la PRIMERA línea del reporte del push, no al final
   entre otras confirmaciones: de eso depende que alguien corra a arreglarlo.
   Ya pasó: un `SELECT` pidió una columna que la migración todavía no había
-  creado y tumbó `/contactos` para las dos vendedoras.
+  creado y tumbó `/contactos` para las dos vendedoras. (Femenino a
+  propósito, no un descuido del cambio a "vendedor" genérico del 13 de
+  septiembre de 2026 — son dos personas reales, mujeres, no una referencia
+  genérica al rol.)
 - **Verificar en vivo sobre un contacto real dentro de una función que mide
   FLUJO histórico (no solo estado actual) ensucia el reporte, no solo la
   pantalla.** Revertir el estado visible a como estaba antes NO limpia el

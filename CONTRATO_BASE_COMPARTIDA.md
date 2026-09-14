@@ -69,7 +69,7 @@ Agregar algo a esta lista es una decisión consciente, con su razón anotada
 | Función | Devuelve | Por qué existe |
 |---|---|---|
 | `verify_onboarding_access(p_access_code text)` | `client_id, client_name` | Onboarding de clientes nuevos por código — el gate de acceso necesita confirmar el código y mostrar el nombre del cliente, nada más. Efecto secundario: actualiza `onboarding_last_accessed_at` en la fila que coincide (audit trail mínimo, no expone nada). |
-| `get_onboarding_landing(p_access_code text)` | Cotización vigente (solo precio cotizado, nunca el de vendedora ni el de catálogo), líneas compradas, resumen de plataforma, link de pago de Stripe según modalidad, link de pago de plataforma, datos de transferencia | La landing de 3 secciones que aparece después del código (`onboarding/index.html`, sustituye al formulario de arranque como lo primero que se ve). Separada de `verify_onboarding_access()` a propósito — no amplía el gate de acceso, así ese se queda angosto para siempre. Recibe el código de nuevo (nunca un `client_id`, para que el código siga siendo la única credencial en cada llamada) y NO vuelve a tocar `onboarding_last_accessed_at` (esa escritura se queda solo en `verify_onboarding_access()`). Nunca devuelve `quote_line_items`/`quotes` completas — campo por campo, ver `0036_onboarding_landing.sql`. |
+| `get_onboarding_landing(p_access_code text)` | Cotización vigente (solo precio cotizado, nunca el de vendedor ni el de catálogo), líneas compradas, resumen de plataforma, link de pago de Stripe según modalidad, link de pago de plataforma, datos de transferencia | La landing de 3 secciones que aparece después del código (`onboarding/index.html`, sustituye al formulario de arranque como lo primero que se ve). Separada de `verify_onboarding_access()` a propósito — no amplía el gate de acceso, así ese se queda angosto para siempre. Recibe el código de nuevo (nunca un `client_id`, para que el código siga siendo la única credencial en cada llamada) y NO vuelve a tocar `onboarding_last_accessed_at` (esa escritura se queda solo en `verify_onboarding_access()`). Nunca devuelve `quote_line_items`/`quotes` completas — campo por campo, ver `0036_onboarding_landing.sql`. |
 
 ### Resultado de la revisión de exposición (8 de septiembre de 2026)
 
@@ -126,7 +126,7 @@ qué-encontramos importa tanto como el qué-corregimos:
 **Ejecutado:** los 5 `roles = {public}` de arriba, cambiados a
 `{authenticated}` explícito vía `ALTER POLICY` (conserva `qual`, no
 recreó las políticas). Verificado que ninguna sesión autenticada perdió
-acceso (simulación de rol contra admin y una vendedora real, antes/después
+acceso (simulación de rol contra admin y un vendedor real, antes/después
 idénticos) y que `anon` quedó bloqueado (curl directo a
 `/rest/v1/catalog_items` pasó de 42 filas a `[]`). El punto de GRANT de
 Postgres (línea de abajo) sigue como estaba — es información de contexto,
@@ -149,11 +149,11 @@ nueva en la lista de la sección 3, nunca por RLS abierto a `anon`.
 
 | Tabla | Por qué nunca |
 |---|---|
-| `contacts` | Datos de prospectos y clientes reales de las vendedoras — nombre, teléfono, dirección. |
+| `contacts` | Datos de prospectos y clientes reales de los vendedores — nombre, teléfono, dirección. |
 | `opportunities` | Pipeline de ventas y su valor — información comercial interna. |
 | `quotes` | Cotizaciones reales mandadas a clientes, con montos. |
 | `quote_line_items` | Detalle de producto/precio de cada cotización real. |
-| `commissions` | Comisiones de cada vendedora — dato de nómina. |
+| `commissions` | Comisiones de cada vendedor — dato de nómina. |
 | `points_ledger` | Puntos/gamificación interna del equipo de ventas. |
 | `prospect_analysis` | Análisis de prospección con datos de negocios reales, algunos sin relación comercial todavía. |
 | `profiles` | Identidad y rol de cada persona del equipo. |
@@ -161,7 +161,7 @@ nueva en la lista de la sección 3, nunca por RLS abierto a `anon`.
 | `app_settings` | Links de pago de Stripe y datos bancarios — el error más caro posible si se expone. |
 | `clients` | Datos de contrato de cada cliente — lo único que se toca de aquí es a través de `verify_onboarding_access()`, nunca directo. |
 | `catalog_items` | Precios internos por concepto — estuvo expuesta por error hasta el 8 de septiembre de 2026 (ver sección 3), corregida desde entonces. |
-| `seller_prices`, `seller_price_changes` | Precio que cotiza cada vendedora y su historial — dato de negociación interna. |
+| `seller_prices`, `seller_price_changes` | Precio que cotiza cada vendedor y su historial — dato de negociación interna. |
 
 ---
 

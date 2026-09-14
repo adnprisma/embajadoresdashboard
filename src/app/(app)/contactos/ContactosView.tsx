@@ -507,6 +507,11 @@ export function ContactosView({ isAdmin = false }: { isAdmin?: boolean }) {
     {
       key: "tags",
       header: copy.contactos.fields.tags,
+      // Ancho explícito, a propósito — era la única columna sin él en
+      // esta tabla, y con table-fixed + min-w-full eso es justo lo que
+      // hacía que "Vendedor" (la última) quedara exprimida contra el
+      // borde. Ver DataTable.tsx.
+      className: "w-48",
       render: (row) => (
         <div className="flex flex-nowrap items-center gap-1 overflow-hidden">
           {row.tags.map((tag) => (

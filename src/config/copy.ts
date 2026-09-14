@@ -232,7 +232,7 @@ export const copy = {
       industry: "Giro",
       tags: "Etiquetas",
       notes: "Notas",
-      owner: "Vendedora",
+      owner: "Vendedor",
       status: "Estado",
     },
     actions: {
@@ -247,8 +247,8 @@ export const copy = {
       industryAll: "Todos los giros",
       tagLabel: "Etiqueta",
       tagAll: "Todas las etiquetas",
-      ownerLabel: "Vendedora",
-      ownerAll: "Todas",
+      ownerLabel: "Vendedor",
+      ownerAll: "Todos",
       statusLabel: "Estado",
       statusAll: "Todos los estados",
       noPhoneEmailLabel: "Sin teléfono ni correo",
@@ -338,9 +338,9 @@ export const copy = {
       title: "Reasignar contactos",
       description: (n: number) => (n === 1 ? "Vas a mover 1 contacto:" : `Vas a mover ${n} contactos:`),
       currentOwner: (name: string) => `de ${name}`,
-      currentOwnerNone: "sin vendedora asignada",
-      toLabel: "Nueva vendedora",
-      toPlaceholder: "Elige una vendedora",
+      currentOwnerNone: "sin vendedor asignado",
+      toLabel: "Nuevo vendedor",
+      toPlaceholder: "Elige un vendedor",
       reasonLabel: "Motivo",
       reasonPlaceholder: "Por qué se reasignan estos contactos",
       reasonRequired: "El motivo es obligatorio.",
@@ -382,7 +382,7 @@ export const copy = {
     },
 
     detail: {
-      ownerLabel: (name: string) => `Vendedora: ${name}`,
+      ownerLabel: (name: string) => `Vendedor: ${name}`,
       // Etiquetas operativas (ver src/config/contactTags.ts) — se ponen y
       // quitan con un clic desde la ficha, nunca a mano. Las de alcaldía
       // (texto libre) siguen mostrándose tal cual, sin este control.
@@ -504,9 +504,9 @@ export const copy = {
       },
       assignmentsTab: {
         emptyTitle: "Este contacto nunca se ha reasignado",
-        emptyDescription: "Los cambios de vendedora aparecerán aquí, con fecha, motivo y quién los autorizó.",
+        emptyDescription: "Los cambios de vendedor aparecerán aquí, con fecha, motivo y quién los autorizó.",
         from: (name: string) => `De ${name}`,
-        fromNone: "Sin vendedora anterior",
+        fromNone: "Sin vendedor anterior",
         to: (name: string) => `a ${name}`,
         authorizedBy: (name: string) => `Autorizó: ${name}`,
         noReason: "Sin motivo registrado",
@@ -543,7 +543,7 @@ export const copy = {
       },
       reserve: {
         label: "Guardar en banco de reserva",
-        hint: "No aparecerán en el plan semanal ni en el embudo hasta que se repartan a una vendedora.",
+        hint: "No aparecerán en el plan semanal ni en el embudo hasta que se repartan a un vendedor.",
       },
       assignmentReason: "Importación de contactos",
       step3: {
@@ -569,21 +569,21 @@ export const copy = {
     funnel: {
       title: "Embudo semanal",
       subtitle: "Contactos distintos que llegaron a cada estado esta semana. Semana de lunes a domingo.",
-      columnSeller: "Vendedora",
+      columnSeller: "Vendedor",
       previousWeekLabel: "Semana pasada",
       emptyTitle: "Todavía no hay cambios de estado esta semana",
-      emptyDescription: "En cuanto una vendedora cambie el estado de un contacto, aparecerá aquí.",
+      emptyDescription: "En cuanto un vendedor cambie el estado de un contacto, aparecerá aquí.",
     },
     snapshot: {
       title: "Foto del universo",
-      subtitle: "Cómo están repartidos hoy los contactos de cada vendedora entre los seis estados.",
+      subtitle: "Cómo están repartidos hoy los contactos de cada vendedor entre los seis estados.",
       columnTotal: "Total",
       emptyTitle: "Todavía no hay contactos asignados",
-      emptyDescription: "En cuanto se asignen contactos a una vendedora, aparecerán aquí.",
+      emptyDescription: "En cuanto se asignen contactos a un vendedor, aparecerán aquí.",
       // Aparte de la tabla por vendedora a propósito: no es desempeño de
       // nadie, es inventario del negocio por repartir.
       reserveStat: (n: number) => (n === 1 ? "En reserva: 1" : `En reserva: ${n}`),
-      reserveStatDescription: "Contactos cargados para repartir después, todavía sin vendedora.",
+      reserveStatDescription: "Contactos cargados para repartir después, todavía sin vendedor.",
     },
     dailyTarget: {
       columnLabel: "Meta diaria",
@@ -592,21 +592,21 @@ export const copy = {
       errorToast: "No pudimos actualizar la meta diaria. Intenta de nuevo.",
     },
     createSeller: {
-      trigger: "Dar de alta vendedora",
-      title: "Dar de alta vendedora",
+      trigger: "Dar de alta vendedor",
+      title: "Dar de alta vendedor",
       // Contraseña temporal a propósito — ver CLAUDE.md sección 3 y el
       // comentario en supabase/functions/create-seller/index.ts. Se lo
       // decimos al admin aquí mismo para que no la trate como si fuera a
       // llegar por correo.
       description:
-        "Tú fijas la contraseña y se la das a la vendedora por fuera del dashboard (no se manda ningún correo). Es temporal — pídele que la cambie en cuanto entre.",
+        "Tú fijas la contraseña y se la das al vendedor por fuera del dashboard (no se manda ningún correo). Es temporal — pídele que la cambie en cuanto entre.",
       nameLabel: "Nombre completo",
       emailLabel: "Correo",
       passwordLabel: "Contraseña temporal",
       confirmPasswordLabel: "Confirma la contraseña",
       submit: "Crear cuenta",
       submitLoading: "Creando…",
-      successToast: "Cuenta creada. Comparte la contraseña con la vendedora por fuera del dashboard.",
+      successToast: "Cuenta creada. Comparte la contraseña con el vendedor por fuera del dashboard.",
       errors: {
         nameRequired: "El nombre es obligatorio.",
         emailInvalid: "Correo inválido.",
@@ -695,7 +695,7 @@ export const copy = {
       header: {
         viewContact: "Ver contacto",
         noContact: "Sin contacto vinculado",
-        ownerLabel: (name: string) => `Vendedora: ${name}`,
+        ownerLabel: (name: string) => `Vendedor: ${name}`,
       },
       estimatedValue: {
         label: "Valor estimado",

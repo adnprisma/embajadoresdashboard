@@ -171,8 +171,8 @@ export function DataTable<T extends { id: string | number }>({
 
   if (loading) {
     return (
-      <div className="overflow-hidden rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface">
-        <table className="w-full table-fixed border-collapse">
+      <div className="overflow-x-auto overflow-y-hidden rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface">
+        <table className="min-w-full table-fixed border-collapse">
           <thead className="bg-bg-sunken">
             <tr>
               {selection ? <th className="w-10 px-4 py-2.5" /> : null}
@@ -219,7 +219,7 @@ export function DataTable<T extends { id: string | number }>({
       ref={scrollRef}
       className="max-h-[480px] overflow-auto rounded-[var(--radius-card)] border border-border-subtle bg-bg-surface"
     >
-      <table className="w-full table-fixed border-collapse">
+      <table className="min-w-full table-fixed border-collapse">
         <thead className="sticky top-0 z-10 bg-bg-sunken">
           <tr>
             {selection ? (
