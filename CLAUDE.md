@@ -373,23 +373,39 @@ Reglas que no se negocian:
   quedado con el cruce viejo (roto) el día que alguien tocara ese código
   de nuevo, sin que nada lo hubiera detectado — el arreglo se habría dado
   por bueno con evidencia que nunca lo puso a prueba de verdad.
-- **Los 9 links de pago de Stripe (`app_settings`, `stripe_link.<modalidad>.<packageId>`,
+- **Los 10 links de pago de Stripe (`app_settings`, `stripe_link.<modalidad>.<packageId>`,
   `0027_stripe_link_modalidad.sql`) se verifican a mano, nunca contra la API
   de Stripe — decisión tomada, no pendiente.** Se evaluó: `GET
   /v1/payment_links` sí expone si un link es de cobro único o recurrente
-  (`line_items[].price.type`). Se descartó porque con tres modalidades
-  (contado, plan a 3 meses, plan a 6 meses) el error más probable no es
-  "suscripción donde iba pago único" — es pegar el link de 6 meses en la
-  ranura de 3 meses. Para Stripe, plan-3 y plan-6 son `recurring`
-  idénticos: un script que solo revisara el tipo de precio diría
-  "correcto" en los dos casos, dando confianza falsa justo donde está el
-  riesgo. Abrir el link sí lo detecta (la pantalla de pago muestra monto y
-  periodicidad). **Procedimiento obligatorio antes de guardar cualquiera
-  de los 9:** abrir el link y confirmar paquete, monto, y si es cobro
-  único o mensual con cuántos cobros. Ni el trigger de `app_settings`
-  (valida dominio y descarta links de modo prueba, nada más) ni ninguna
-  pantalla lo hacen por ti — es el único punto donde un error le cuesta
-  dinero real a un cliente, y no tiene atajo automático.
+  (`line_items[].price.type`). Se descartó porque con cuatro modalidades
+  (contado, plan a 3/6/12 meses) el error más probable no es "suscripción
+  donde iba pago único" — es pegar el link de 6 meses en la ranura de 3
+  meses. Para Stripe, plan-3/plan-6/plan-12 son `recurring` idénticos: un
+  script que solo revisara el tipo de precio diría "correcto" en los tres
+  casos, dando confianza falsa justo donde está el riesgo. Abrir el link
+  sí lo detecta (la pantalla de pago muestra monto y periodicidad).
+  **Procedimiento obligatorio antes de guardar cualquiera de los 10:**
+  abrir el link y confirmar paquete, monto, y si es cobro único o mensual
+  con cuántos cobros. Ni el trigger de `app_settings` (valida dominio y
+  descarta links de modo prueba, nada más) ni ninguna pantalla lo hacen
+  por ti — es el único punto donde un error le cuesta dinero real a un
+  cliente, y no tiene atajo automático.
+  **No son 4×3 = 12: plan-12 SOLO aplica al paquete Completo** (regla de
+  negocio confirmada el 14 de septiembre de 2026 — Inicia y Esencial nunca
+  tuvieron versión a 12 meses; `0038` las había generado igual por no
+  tener esta excepción, corregido y las dos filas borradas en `0041`, no
+  dejadas en `null` — `null` aquí significa "pendiente de cargar", y estas
+  dos nunca lo estarán). La regla vive en una sola función,
+  `isModalityAvailableForPackage()` (`src/config/appSettings.ts`),
+  consumida por `STRIPE_LINK_KEYS`, el panel de `/datos-de-pago` y el
+  `<select>` de `payment_modality` en `ClientesView.tsx` — nunca repetida
+  a mano en los tres. Sin candado de base para esta excepción, a
+  propósito: si alguien fuerza `plan-12` en un cliente sin Completo (la UI
+  ya no lo ofrece), `get_onboarding_landing()` no encuentra la llave y
+  muestra "por confirmarse" — falla cerrado, sin cobrar de más ni de
+  menos, a diferencia del riesgo real de arriba (link de la modalidad
+  equivocada, que sí cobra mal). Un trigger para este caso se evaluó y se
+  descartó por desproporcionado frente al riesgo real.
 - **Alcance de datos para admin, por tipo de pantalla — RLS por sí sola no lo
   resuelve.** Desde `0010_rls_admin.sql` casi todas las políticas le dan a
   admin `owner_id = auth.uid() or is_admin()`, así que cualquier query sin

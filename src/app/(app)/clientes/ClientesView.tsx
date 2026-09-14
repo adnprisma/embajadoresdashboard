@@ -25,6 +25,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Skeleton } from "@/components/common/Skeleton";
 import { StatCard } from "@/components/common/StatCard";
 import {
+  isModalityAvailableForPackage,
   PAYMENT_MODALITIES,
   PLATFORM_REFERRAL_OWNERS,
   platformLinkKey,
@@ -185,6 +186,23 @@ function PaymentModalitySelect({ client, settings }: { client: ClientRow; settin
     updateModality.mutate({ clientId: client.id, paymentModality: next });
   };
 
+  // plan-12 solo aplica a Completo (isModalityAvailableForPackage,
+  // appSettings.ts) — sin cotización, latest_quote_package_id es null y la
+  // función excluye plan-12 sola, sin caso especial aquí.
+  const availableModalities = PAYMENT_MODALITIES.filter((modality) =>
+    isModalityAvailableForPackage(modality, client.latest_quote_package_id),
+  );
+  // El valor YA guardado siempre se ofrece, aunque el filtro de arriba lo
+  // hubiera excluido para una selección nueva — un <select> cuyo `value`
+  // no está entre sus <option> se ve vacío o salta solo a otra opción. No
+  // pasa hoy (nada asigna una combinación inválida), pero es la garantía
+  // correcta si el paquete cotizado de un cliente cambia después de que ya
+  // tenía plan-12 asignado.
+  const selectableModalities =
+    client.payment_modality && !availableModalities.includes(client.payment_modality)
+      ? [...availableModalities, client.payment_modality]
+      : availableModalities;
+
   return (
     <select
       value={client.payment_modality ?? ""}
@@ -194,7 +212,7 @@ function PaymentModalitySelect({ client, settings }: { client: ClientRow; settin
       className={SELECT_CLASSES}
     >
       <option value="">{copy.clientes.paymentModality.unsetOption}</option>
-      {PAYMENT_MODALITIES.map((modality) => {
+      {selectableModalities.map((modality) => {
         const pending =
           client.latest_quote_package_id !== null &&
           !settings[stripeLinkKey(modality, client.latest_quote_package_id)];

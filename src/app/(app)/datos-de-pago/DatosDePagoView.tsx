@@ -6,7 +6,12 @@ import { toast } from "sonner";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Panel } from "@/components/common/Panel";
 import { Skeleton } from "@/components/common/Skeleton";
-import { PAYMENT_MODALITIES, stripeLinkKey, type PaymentModality } from "@/config/appSettings";
+import {
+  isModalityAvailableForPackage,
+  PAYMENT_MODALITIES,
+  stripeLinkKey,
+  type PaymentModality,
+} from "@/config/appSettings";
 import { copy } from "@/config/copy";
 import { PACKAGES } from "@/config/pricing";
 import { useAppSettings } from "@/lib/queries/appSettings";
@@ -170,7 +175,7 @@ export function DatosDePagoView() {
           {PAYMENT_MODALITIES.map((modality) => (
             <Panel key={modality} title={copy.datosPago.stripe.panelTitle[modality]} icon={MODALITY_ICON[modality]}>
               <div className="flex flex-col gap-3">
-                {PACKAGES.map((pkg) => (
+                {PACKAGES.filter((pkg) => isModalityAvailableForPackage(modality, pkg.id)).map((pkg) => (
                   <StripeLinkRow
                     key={pkg.id}
                     packageName={pkg.name}

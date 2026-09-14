@@ -6,16 +6,19 @@
  * ningún lado (seed, trigger, hook, componente): una clave que se calcula no
  * se puede desincronizar del catálogo si un id de paquete cambia.
  *
- * Cuatro modalidades por paquete, no una: contado (pago único), plan-3, plan-6
- * y plan-12 (planes a 3/6/12 meses) — 12 links en total (0038 agregó
- * plan-12 a las 9 originales de 0026/0027). El trigger (0026/0027/0038)
- * valida por prefijo 'stripe_link.%', así que agregar o quitar una
- * modalidad aquí nunca requiere tocarlo.
+ * Cuatro modalidades, no todas aplican a los tres paquetes por igual:
+ * contado, plan-3 y plan-6 sí; plan-12 SOLO aplica a Completo — Inicia y
+ * Esencial no tienen versión a 12 meses (regla de negocio confirmada el
+ * 14 de septiembre de 2026, ver isModalityAvailableForPackage() abajo y
+ * CLAUDE.md). 10 links reales en total, no 12 — el trigger de
+ * validate_app_settings() (0026/0027/0038) valida por prefijo
+ * 'stripe_link.%', así que agregar/quitar una modalidad o una excepción
+ * como esta nunca requiere tocarlo.
  *
  * El <select> de payment_modality por cliente vive en ClientesView.tsx
  * (0039_platform_referral_owner.sql + este commit) — itera
- * PAYMENT_MODALITIES, nunca una lista escrita a mano, así que agregar una
- * quinta modalidad algún día no exige tocar ese componente.
+ * PAYMENT_MODALITIES filtrado por isModalityAvailableForPackage(), nunca
+ * una lista escrita a mano.
  *
  * IMPORTANTE — esto NO es lo mismo que `quotes.meses_diferimiento` (cuántas
  * mensualidades tiene UNA cotización después del pago inicial, ver
@@ -36,8 +39,24 @@ export function stripeLinkKey(modality: PaymentModality, packageId: string): str
   return `stripe_link.${modality}.${packageId}`;
 }
 
+// Única fuente de la regla "plan-12 solo aplica a Completo" — consumida
+// por STRIPE_LINK_KEYS (abajo), el panel de /datos-de-pago y el <select>
+// de payment_modality en ClientesView.tsx. Nunca se repite la condición
+// en ninguno de los tres — si el día de mañana Inicia o Esencial ganan
+// una versión a 12 meses, o aparece una quinta modalidad con su propia
+// excepción, este es el único lugar que cambia.
+//
+// packageId puede ser null (cliente sin cotización todavía, ver
+// ClientRow.latest_quote_package_id): null !== "paquete-completo" es
+// false para cualquier chequeo de igualdad, así que un cliente sin
+// cotización nunca ve plan-12 como opción — no se ofrece de más antes de
+// saber qué paquete se cotizó.
+export function isModalityAvailableForPackage(modality: PaymentModality, packageId: string | null): boolean {
+  return modality !== "plan-12" || packageId === "paquete-completo";
+}
+
 export const STRIPE_LINK_KEYS: string[] = PAYMENT_MODALITIES.flatMap((modality) =>
-  PACKAGES.map((pkg) => stripeLinkKey(modality, pkg.id)),
+  PACKAGES.filter((pkg) => isModalityAvailableForPackage(modality, pkg.id)).map((pkg) => stripeLinkKey(modality, pkg.id)),
 );
 
 /**
